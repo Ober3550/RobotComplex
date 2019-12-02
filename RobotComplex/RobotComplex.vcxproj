@@ -69,7 +69,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -150,6 +152,7 @@
     <ClCompile Include="Robot.cpp" />
     <ClCompile Include="TestWorld.cpp" />
     <ClCompile Include="WorldSave.cpp" />
+    <ClCompile Include="WorldSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Active.h" />
@@ -167,6 +170,7 @@
     <ClInclude Include="LogicTypes.h" />
     <ClInclude Include="MyMap.h" />
     <ClInclude Include="MyMod.h" />
+    <ClInclude Include="MySet.h" />
     <ClInclude Include="Pos.h" />
     <ClInclude Include="ProgramData.h" />
     <ClInclude Include="PrototypeLoader.h" />
@@ -177,6 +181,7 @@
     <ClInclude Include="SpriteGenerator.h" />
     <ClInclude Include="TestWorld.h" />
     <ClInclude Include="Tile.h" />
+    <ClInclude Include="WidgetCreator.h" />
     <ClInclude Include="WorldChunk.h" />
     <ClInclude Include="WorldSave.h" />
   </ItemGroup>

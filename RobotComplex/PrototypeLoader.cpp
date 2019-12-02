@@ -42,7 +42,7 @@ void LoadAllTextures()
 	program.font = LoadTexture("font.png");
 
 	std::string fontIndex = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
-	for (int i = 0; i < fontIndex.length(); i++)
+	for (int i = 0; i < (int)fontIndex.length(); i++)
 	{
 		sf::IntRect fontRect = sf::IntRect(i * 3, 0, 3, 5);
 		program.fontMap.insert({ fontIndex[i], fontRect });

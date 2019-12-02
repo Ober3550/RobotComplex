@@ -1,17 +1,12 @@
 #pragma once
-#include <unordered_map>
+#include <unordered_set>
 #include <fstream>
 #include <iostream>
 
-template <typename keyType, typename valueType>
-class MyMap : public std::unordered_map<keyType, valueType>
+template <typename keyType>
+class MySet : public std::unordered_set<keyType>
 {
 public:
-	valueType* GetValue(keyType key)
-	{
-		auto find = this->find(key);
-		return find != this->end() ? &(find->second) : nullptr;
-	}
 	void Serialize(std::string filename)
 	{
 		std::ofstream myfile;
@@ -20,7 +15,7 @@ public:
 		{
 			for (auto &kv : *this)
 			{
-				myfile.write((char*)&kv, sizeof(keyType) + sizeof(valueType));
+				myfile.write((char*)&kv, sizeof(this[0]));
 			}
 			myfile.close();
 		}
@@ -32,10 +27,10 @@ public:
 		if (myfile.is_open())
 		{
 			myfile.seekg(0, std::ios::beg);
-			std::pair<keyType,valueType>* readMem = new std::pair<keyType,valueType>();
-			do{
-				myfile.read((char*)readMem, sizeof(keyType)+sizeof(valueType));
-				this->insert({ readMem->first,readMem->second });
+			keyType* readMem = new keyType;
+			do {
+				myfile.read((char*)readMem, sizeof(this[0]));
+				this->insert(*readMem);
 			} while (!myfile.eof());
 			myfile.close();
 		}

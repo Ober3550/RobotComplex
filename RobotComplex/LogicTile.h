@@ -23,11 +23,21 @@ public:
 	virtual void DrawTile(int x, int y) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
+	virtual bool IsConnected(Pos pos);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
 	void DrawSprite(int x, int y, sf::Texture& texture);
 	void DrawSprite(int x, int y, sf::Texture& texture, sf::IntRect subRect);
 	void DrawSpriteFromProperties(int x, int y, sf::Texture texture, sf::IntRect subRect, int rotation, bool inverse);
 	void DrawSignalStrength(int x, int y, int signal);
+};
+class DirectionalLogicTile : public LogicTile {
+	virtual void DoWireLogic() {};
+	virtual void DoItemLogic() {};
+	virtual void DoRobotLogic(Robot* robotRef) {};
+	virtual void DrawTile(int x, int y) {};
+	virtual std::string GetTooltip() { return "base class"; };
+	virtual LogicTile* Copy() = 0;
+	virtual bool IsConnected(Pos pos);
 };
 
 class Wire : public LogicTile {
@@ -93,7 +103,7 @@ public:
 	}
 };
 
-class Inverter : public LogicTile {
+class Inverter : public DirectionalLogicTile {
 public:
 	static sf::Texture texture;								// A textures for drawing
 	sf::Texture GetTexture() { return this->texture; };
@@ -108,7 +118,7 @@ public:
 	}
 };
 
-class Booster : public LogicTile {
+class Booster : public DirectionalLogicTile {
 public:
 	static sf::Texture texture;								// A textures for drawing
 	sf::Texture GetTexture() { return this->texture; };
@@ -123,7 +133,7 @@ public:
 	}
 };
 
-class Repeater : public LogicTile {
+class Repeater : public DirectionalLogicTile {
 public:
 	static sf::Texture texture;								// A textures for drawing
 	sf::Texture GetTexture() { return this->texture; };
@@ -154,7 +164,7 @@ public:
 	}
 };
 
-class Memory : public LogicTile {
+class Memory : public DirectionalLogicTile {
 public:
 	static sf::Texture texture;									// A texture for drawing
 	sf::Texture GetTexture() { return this->texture; };
@@ -187,7 +197,7 @@ public:
 	}
 };
 
-class Counter : public LogicTile {
+class Counter : public DirectionalLogicTile {
 public:
 	static sf::Texture texture;
 	sf::Texture GetTexture() { return this->texture; };

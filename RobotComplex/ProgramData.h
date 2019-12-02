@@ -2,9 +2,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <mutex>
+#include <SFML/Graphics.hpp>
+
 #include "Robot.h"
 #include "CraftingClass.h"
-#include <SFML/Graphics.hpp>
 #include "MyMap.h"
 #include "Animation.h"
 #include "LogicTile.h"
@@ -18,17 +20,15 @@ public:
 	// Textures
 	std::vector<sf::Texture> groundTextures;
 	std::vector<sf::Texture> itemTextures;
+	std::vector<sf::Texture> animationTextures;
+
 	std::vector<std::string> itemTooltips;
 	std::vector<std::vector<std::string>> logicTooltips;
 	sf::Texture robotTexture;
 	sf::Texture font;
 	MyMap<char, sf::IntRect> fontMap;	// Map that relates characters to sections of the font texture
-	std::vector<sf::Texture> animationTextures;
 	sf::Font guiFont;
 	sf::Texture buttonTexture;
-
-	// Variable for testing number of updates for 'redstone' system
-	int updateCounter = 0;
 
 	std::vector<Animation> animations;
 
@@ -56,16 +56,15 @@ public:
 	Robot* selectedRobot;
 	Facing placeRotation;
 
-	bool onTitleScreen = true;
-	bool showOptions = true;
 	bool gamePaused = true;
+	std::mutex rendermutex;
+	std::mutex worldmutex;
 
 	// Clock timing variables
 	clock_t deltaTime = 0;
 	uint32_t frames = 0;
 	double frameRate = 30;
 
-	ProgramData();
 	void RecreateGroundSprites(Pos tilePos, int x, int y);
 	void RecreateItemSprites(uint64_t encodedPos, int x, int y);
 	void RecreateLogicSprites(uint64_t encodedPos, int x, int y);

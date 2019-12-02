@@ -24,7 +24,6 @@ bool Robot::Move()
 	// For logic tile that stops robot untill it receives a signal
 	if (!stopped)
 	{
-		program.updateCounter = 0;
 		Pos newPos = pos.FacingPosition(facing);
 		// If there is no robot in the stationary map ie. No collision between moving -> stationary
 		if (auto robot = world.robots.GetValue(newPos.CoordToEncoded()) == nullptr)

@@ -74,7 +74,7 @@ void LogicTile::DrawSignalStrength(int x, int y, int signal)
 	std::string displayValue = std::to_string(signal);
 	signalStrength.setTexture(program.font);
 	signalStrength.setOrigin(1, 2);
-	for (int i = 0; i < displayValue.length(); i++)
+	for (int i = 0; i < (int)displayValue.length(); i++)
 	{
 		signalStrength.setTextureRect(program.fontMap[displayValue[i]]);
 		float adjustLeft = (float(displayValue.length() / 2)) * 3;
@@ -109,10 +109,9 @@ void Wire::DrawTile(int x, int y)
 	for (uint8_t i = 0; i < 4; i++)
 	{
 		Pos lookingAt = this->pos.FacingPosition(Facing(i));
-		if (auto temp = world.logictiles.GetValue(lookingAt.CoordToEncoded()))
+		if (LogicTile* neighbour = world.GetLogicTile(lookingAt.CoordToEncoded()))
 		{
-			LogicTile* neighbour = *temp;
-			if (typeid(*neighbour) != typeid(Wire) || neighbour->colorClass == this->colorClass)
+			if (neighbour->IsConnected(this->pos))
 			{
 				sprite.setTexture(texture);
 				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
@@ -330,7 +329,7 @@ void Memory::DrawTile(int x, int y)
 		program.logicSprites.emplace_back(sprite);
 
 		std::string displayValue = std::to_string(this->memory[i]);
-		for (int j = 0; j < displayValue.length(); j++)
+		for (int j = 0; j < (int)displayValue.length(); j++)
 		{
 			signalStrength.setTextureRect(program.fontMap[displayValue[j]]);
 			float adjustLeft = (float(displayValue.length() / 2)) * 3;
@@ -363,6 +362,6 @@ void Counter::DrawTile(int x,int y)
 	counterValue.setFillColor(sf::Color::Black);
 	sf::FloatRect textRect = counterValue.getLocalBounds();
 	counterValue.setOrigin(textRect.width / 2, textRect.height / 2);
-	counterValue.setPosition(x + Gconstants::halfTileSize, y + Gconstants::halfTileSize);
+	counterValue.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
 	program.textOverlay.emplace_back(counterValue);
 }

@@ -11,62 +11,6 @@
 #include "RedirectorColors.h"
 #include "SpriteGenerator.h"
 
-ProgramData::ProgramData()
-{
-	MyMap<uint64_t, Robot> nextRobotPos;					// Storage for next robot position that gets swapped at end of update
-	MyMap<uint16_t, std::vector<uint16_t>> itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
-	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
-	
-	// Textures
-	std::vector<sf::Texture> groundTextures;
-	std::vector<sf::Texture> itemTextures;
-	std::vector<std::string> itemTooltips;
-	std::vector<std::vector<std::string>> logicTooltips;
-	sf::Texture robotTexture;
-	sf::Texture font;
-	MyMap<char, sf::IntRect> fontMap;	// Map that relates characters to sections of the font texture
-	std::vector<sf::Texture> animationTextures;
-	sf::Font guiFont;
-	sf::Texture buttonTexture;
-
-	// Variable for testing number of updates for 'redstone' system
-	int updateCounter = 0;
-
-	std::vector<Animation> animations;
-
-	//Stores sprite layers
-	bool redrawStatic = true;
-	bool redrawDynamic = true;				// Redraws items, logic, robots, animations
-	std::vector<sf::Sprite> groundSprites;	// Ground sprites are only repopulated when the camera moves
-	std::vector<sf::Sprite> itemSprites;
-	std::vector<sf::Sprite> logicSprites;
-	std::vector<sf::Sprite> robotSprites;
-	std::vector<sf::Sprite> animationSprites;
-	std::vector<sf::RectangleShape> hotbarSlots;
-	std::vector<sf::RectangleShape> textBoxes;
-	std::vector<sf::Text> textOverlay;
-
-	windowWidth = 1920;
-	windowHeight = 1080 - 30 - 40;
-
-	mousePos = { 0,0 };
-	cameraPos = { 0, 300 };
-	hotbarIndex = 0;
-	hotbarSize = 10;
-	std::vector<LogicTile*> hotbar;
-	selectedLogicTile = nullptr;
-	selectedRobot = nullptr;
-	placeRotation = north;
-
-	bool onTitleScreen = true;
-	bool showOptions = true;
-	bool gamePaused = true;
-
-	// Clock timing variables
-	clock_t deltaTime = 0;
-	uint32_t frames = 0;
-	double frameRate = 30;
-}
 void ProgramData::RecreateGroundSprites(Pos tilePos, int x, int y)
 {
 	if (GroundTile * tile = world.GetGroundTile(tilePos))
@@ -120,7 +64,7 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
 			{
 				animationPosition = -animationPosition + craftingRef.animationFrames;
 			}
-			sf::IntRect subRect(animationPosition * craftingRef.animationJump, 0, craftingRef.animationJump, spriteRect.height);
+			sf::IntRect subRect(int(animationPosition * craftingRef.animationJump), 0, int(craftingRef.animationJump), int(spriteRect.height));
 			sprite.setTextureRect(subRect);
 			sprite.setPosition(float(x + craftingRef.animationOffset.x), float(y + craftingRef.animationOffset.y));
 			program.animationSprites.emplace_back(sprite);
@@ -130,32 +74,23 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
 void ProgramData::RecreateSprites() {
 	if (program.redrawStatic)
 		program.groundSprites.clear();
-	if (program.redrawDynamic)
+	program.itemSprites.clear();
+	program.logicSprites.clear();
+	program.robotSprites.clear();
+	program.animationSprites.clear();
+	program.animations.clear();
+	for (int y = -(program.windowHeight >> 1) - (program.cameraPos.y & Gconstants::tileMask); y < (program.windowHeight >> 1); y += Gconstants::tileSize)
 	{
-		program.itemSprites.clear();
-		program.logicSprites.clear();
-		program.robotSprites.clear();
-		program.animationSprites.clear();
-		program.animations.clear();
-	}
-	if (program.redrawDynamic || program.redrawStatic)
-	{
-		for (int y = -(program.windowHeight >> 1) - (program.cameraPos.y & Gconstants::tileMask); y < (program.windowHeight >> 1); y += Gconstants::tileSize)
+		for (int x = -(program.windowWidth >> 1) - (program.cameraPos.x & Gconstants::tileMask); x < (program.windowWidth >> 1); x += Gconstants::tileSize)
 		{
-			for (int x = -(program.windowWidth >> 1) - (program.cameraPos.x & Gconstants::tileMask); x < (program.windowWidth >> 1); x += Gconstants::tileSize)
-			{
-				Pos tilePos = (Pos{ x,y } +program.cameraPos) >> Gconstants::tileShift;
-				uint64_t encodedPos = tilePos.CoordToEncoded();
-				if (program.redrawStatic)
-					RecreateGroundSprites(tilePos, x, y);
-				if (program.redrawDynamic)
-				{
-					RecreateItemSprites(encodedPos, x, y);
-					RecreateLogicSprites(encodedPos, x, y);
-					RecreateRobotSprites(encodedPos, x, y);
-					RecreateAnimationSprites(encodedPos, x, y);
-				}
-			}
+			Pos tilePos = (Pos{ x,y } +program.cameraPos) >> Gconstants::tileShift;
+			uint64_t encodedPos = tilePos.CoordToEncoded();
+			if (program.redrawStatic)
+				RecreateGroundSprites(tilePos, x, y);
+			RecreateItemSprites(encodedPos, x, y);
+			RecreateLogicSprites(encodedPos, x, y);
+			RecreateRobotSprites(encodedPos, x, y);
+			RecreateAnimationSprites(encodedPos, x, y);
 		}
 	}
 }
@@ -257,8 +192,8 @@ void ProgramData::DrawHotbar()
 	program.hotbarSlots.clear();
 	for (uint8_t i = 0; i < program.hotbarSize && i < program.hotbar.size(); ++i)
 	{
-		int x = (i - program.hotbarSize / 2.f) * (Gconstants::hotbarSlotSize + Gconstants::hotbarPadding);
-		int y = (program.windowHeight / 2.f) - Gconstants::hotbarSlotSize;
+		int x = int(i - program.hotbarSize / 2.f) * (Gconstants::hotbarSlotSize + Gconstants::hotbarPadding);
+		int y = int(program.windowHeight / 2.f) - Gconstants::hotbarSlotSize;
 		sf::RectangleShape hotbarSlot;
 		if(i == program.hotbarIndex)
 			hotbarSlot.setFillColor(sf::Color(200, 200, 200, 100));
@@ -276,50 +211,47 @@ void ProgramData::DrawHotbar()
 	}
 }
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
-	if (!program.onTitleScreen)
+	program.redrawDynamic = true;
+	program.textOverlay.clear();
+	program.textBoxes.clear();
+	RecreateSprites();
+	DrawUpdateCounter();
+	DrawTooltips();
+	DrawHotbar();
+	DrawSelectedBox();
+	program.redrawDynamic = false;
+	program.redrawStatic = false;
+	for (sf::Sprite sprite : program.groundSprites)
 	{
-		program.redrawDynamic = true;
-		program.textOverlay.clear();
-		program.textBoxes.clear();
-		RecreateSprites();
-		DrawUpdateCounter();
-		DrawTooltips();
-		DrawHotbar();
-		DrawSelectedBox();
-		program.redrawDynamic = false;
-		program.redrawStatic = false;
-		for (sf::Sprite sprite : program.groundSprites)
-		{
-			window.draw(sprite);
-		}
-		for (sf::Sprite sprite : program.logicSprites)
-		{
-			window.draw(sprite);
-		}
-		for (sf::Sprite sprite : program.itemSprites)
-		{
-			window.draw(sprite);
-		}
-		for (sf::Sprite sprite : program.robotSprites)
-		{
-			window.draw(sprite);
-		}
-		for (sf::Sprite sprite : program.animationSprites)
-		{
-			window.draw(sprite);
-		}
-		for (sf::RectangleShape sprite : program.hotbarSlots)
-		{
-			window.draw(sprite);
-		}
-		for (sf::RectangleShape sprite : program.textBoxes)
-		{
-			window.draw(sprite);
-		}
-		for (sf::Text sprite : program.textOverlay)
-		{
-			window.draw(sprite);
-		}
+		window.draw(sprite);
+	}
+	for (sf::Sprite sprite : program.logicSprites)
+	{
+		window.draw(sprite);
+	}
+	for (sf::Sprite sprite : program.itemSprites)
+	{
+		window.draw(sprite);
+	}
+	for (sf::Sprite sprite : program.robotSprites)
+	{
+		window.draw(sprite);
+	}
+	for (sf::Sprite sprite : program.animationSprites)
+	{
+		window.draw(sprite);
+	}
+	for (sf::RectangleShape sprite : program.hotbarSlots)
+	{
+		window.draw(sprite);
+	}
+	for (sf::RectangleShape sprite : program.textBoxes)
+	{
+		window.draw(sprite);
+	}
+	for (sf::Text sprite : program.textOverlay)
+	{
+		window.draw(sprite);
 	}
 }
 

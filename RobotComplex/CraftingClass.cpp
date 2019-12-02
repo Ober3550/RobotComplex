@@ -9,7 +9,7 @@
 int CraftingClass::CheckCrafting(Pos pos)
 {
 	int successReturn = craftagain;
-	for (int l = 0; l < recipe.size() / width; l++)
+	for (int l = 0; l < (int)recipe.size() / width; l++)
 	{
 		int row2 = l * width;
 		for (int k = 0; k < width; k++)
@@ -43,7 +43,7 @@ int CraftingClass::CheckCrafting(Pos pos)
 void CraftingClass::DoCrafting(Pos pos)
 {
 	auto tile = world.GetItemTile(pos);
-	for (int j = 0; j < recipe.size() / width; j++)
+	for (int j = 0; j < (int)recipe.size() / width; j++)
 	{
 		int row = j * width;
 		for (int i = 0; i < width; i++)
@@ -78,7 +78,7 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 	if (success)
 	{
 		program.redrawDynamic = true;
-		for (int l = 0; l < recipe.size() / width; l++)
+		for (int l = 0; l < (int)recipe.size() / width; l++)
 		{
 			int row2 = l * width;
 			for (int k = 0; k < width; k++)

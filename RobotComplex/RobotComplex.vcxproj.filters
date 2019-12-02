@@ -60,6 +60,9 @@
     <ClCompile Include="Pos.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="WorldSerialization.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Active.h">
@@ -141,6 +144,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorldSave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WidgetCreator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MySet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

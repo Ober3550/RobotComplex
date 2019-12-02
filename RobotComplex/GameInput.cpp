@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "ProgramData.h"
 #include "WorldSave.h"
+#include "WidgetCreator.h"
 
 void SwapBots()
 {
@@ -37,9 +38,9 @@ void MoveRobots()
 void UpdateMap()
 {
 	// Update all the logic tiles that were queued last tick
-	std::unordered_set<uint64_t> updateQueue(world.updateQueue);
+	world.currentUpdateQueue = MySet<uint64_t>(world.updateQueue);
 	world.updateQueue.clear();
-	for (auto& kv : updateQueue)
+	for (auto& kv : world.currentUpdateQueue)
 	{
 		if (LogicTile* logic = world.GetLogicTile(kv))
 		{
@@ -88,7 +89,7 @@ void MouseMoved()
 			{
 				sf::RectangleShape rect = program.hotbarSlots[i];
 				sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
-				if (rectBox.contains(sf::Vector2f(program.mousePos.x, program.mousePos.y)))
+				if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
 				{
 					program.selectedLogicTile = program.hotbar[i];
 					if(program.selectedLogicTile)
@@ -125,7 +126,7 @@ void LeftMousePressed()
 		}
 		if (GroundTile * withinMap = world.GetGroundTile(mouseHovering))
 		{
-			if (program.hotbarIndex < program.hotbar.size())
+			if (program.hotbarIndex < (int)program.hotbar.size())
 			{
 				if (program.hotbar[program.hotbarIndex])
 				{
@@ -311,8 +312,7 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 		}break;
 		case sf::Keyboard::Escape:
 		{
-			program.showOptions = !program.showOptions;
-			program.gamePaused = program.showOptions;
+			program.gamePaused = !program.gamePaused;
 		}break;
 		}
 	}

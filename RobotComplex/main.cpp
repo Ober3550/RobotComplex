@@ -1,20 +1,4 @@
 #include <SFML/Graphics.hpp>
-#include <Agui/Agui.hpp>
-#include <Agui/Backends/SFML2/SFML2.hpp>
-#include <Agui/Widgets/Button/Button.hpp>
-#include <Agui/Widgets/CheckBox/CheckBox.hpp>
-#include <Agui/Widgets/DropDown/DropDown.hpp>
-#include <Agui/Widgets/TextField/TextField.hpp>
-#include <Agui/Widgets/Frame/Frame.hpp>
-#include <Agui/Widgets/RadioButton/RadioButton.hpp>
-#include <Agui/Widgets/RadioButton/RadioButtonGroup.hpp>
-#include <Agui/Widgets/Slider/Slider.hpp>
-#include <Agui/Widgets/TextBox/ExtendedTextBox.hpp>
-#include <Agui/Widgets/Tab/TabbedPane.hpp>
-#include <Agui/Widgets/ListBox/ListBox.hpp>
-#include <Agui/Widgets/ScrollPane/ScrollPane.hpp>
-#include <Agui/FlowLayout.hpp>
-
 #include <iostream>
 #include <functional>
 #include <string>
@@ -33,61 +17,83 @@
 #include "PrototypeLoader.h"
 #include "GameInput.h"
 #include "TitleScreen.h"
+#include "WidgetCreator.h"
 
 agui::Gui *gui = NULL;
 agui::SFML2Input* inputHandler = NULL;
 agui::SFML2Graphics* graphicsHandler = NULL;
 agui::Font *defaultFont = NULL;
-bool running = true;
+std::thread worldUpdate;
+bool running;
 
 ProgramData program;
 WorldSave world;
-int desiredMs = 16;
+WorldSave test;
+WidgetCreator* creator;
+constexpr uint8_t FRAMERATE = 60;
 
-class SimpleButtonListener : public agui::ActionListener
+class SimpleButtonListener : public agui::ButtonListener
 {
 private:
 	std::function<void()> buttonAction;
 public:
-	SimpleButtonListener(std::function<void()> buttonAction)
-	{
+	SimpleButtonListener(std::function<void()> buttonAction) {
 		this->buttonAction = buttonAction;
+	};
+	void buttonStateChanged(agui::Button *, agui::Button::ButtonStateEnum state) {
+		if (state == agui::Button::ButtonStateEnum::CLICKED)
+		{
+			buttonAction();
+		}
 	}
-	virtual void actionPerformed(const agui::ActionEvent &evt)
-	{
-		buttonAction();
-	}
+	void toggleStateChanged(agui::Button *, bool) {}
+	void death(agui::Button *) {}
+	void isToggleButtonChanged(agui::Button *, bool) {}
+	void textAlignmentChanged(agui::Button *, agui::AreaAlignmentEnum) {}
+	~SimpleButtonListener(void) {};
 };
 
-class WidgetCreator {
-private:
-	agui::Button button;
-	agui::CheckBox checkBox;
-	agui::Frame frame;
-	agui::Gui* mGui;
+WidgetCreator::WidgetCreator(agui::Gui *guiInstance)
+{
+	mGui = guiInstance;
 
-public:
-	WidgetCreator(agui::Gui *guiInstance)
-	{
-		mGui = guiInstance;
+	gui->add(&frame);
+	// Options frame
+	int frameWidth = 220;
+	int frameHeight = 200;
+	frame.setSize(frameWidth, frameHeight);
+	frame.setLocation((program.windowWidth / 2) - (frameWidth / 2), (program.windowHeight / 2) - (frameHeight / 2));
+	frame.setText("Main Menu");
+	// Load Button
+	loadButton.setSize(frameWidth - 10, 50);
+	loadButton.setText("Load Game");
+	loadButton.addButtonListener(new SimpleButtonListener([&] {
+		program.worldmutex.lock();
+		world.Deserialize("TestWorld");
+		program.worldmutex.unlock();
+	}));
+	frame.add(&loadButton);
+	loadButton.setLocation(0, 0);
+	// Save Button
+	saveButton.setSize(frameWidth - 10, 50);
+	saveButton.setText("Save Game");
+	saveButton.addButtonListener(new SimpleButtonListener([&] {
+		program.worldmutex.lock();
+		world.Serialize("TestWorld");
+		program.worldmutex.unlock();
+	}));
+	frame.add(&saveButton);
+	saveButton.setLocation(0, 50);
+	// Exit Button
+	exitButton.setSize(frameWidth - 10, 50);
+	exitButton.setText("Exit Game");
+	exitButton.addButtonListener(new SimpleButtonListener([&] {
+		running = false;
+	}));
+	frame.add(&exitButton);
+	exitButton.setLocation(0, 100);
+}
 
-		gui->add(&frame);
-		frame.setSize(220, 120);
-		frame.setLocation(320, 240);
-		frame.setText("Example Frame");
-		button.setSize(100, 100);
-		button.setText("Load Game");
-		button.addActionListener(&SimpleButtonListener([&] {
-			world = WorldSave();
-			program.onTitleScreen = false;
-			program.showOptions = false;
-			program.gamePaused = false;
-			CreateTestWorld();
-		}));
-		frame.add(&button);
-	}
-};
-WidgetCreator* creator;
 void initializeAgui(sf::RenderTarget& target)
 {
 	//Set the image loader
@@ -130,52 +136,75 @@ void cleanUp()
 	delete defaultFont;
 	defaultFont = NULL;
 }
+void UpdateWorld()
+{
+	while (running) {
+		if (!program.gamePaused)
+		{
+			creator->frame.setVisibility(false);
+			clock_t beginUpdate = clock();
+			program.worldmutex.lock();
+			UpdateMap();
+			program.worldmutex.unlock();
+			clock_t updateTime = clock();
+			int padTime = int(CLOCKS_PER_SEC / float(FRAMERATE)) + beginUpdate - updateTime;
+			if (padTime > 0)
+				Sleep(padTime);
+		}
+		else
+		{
+			creator->frame.setVisibility(true);
+		}
+	}
+}
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(1920, 1010), "Agui - SFML2 Example");
+	sf::Thread MapUpdate(&UpdateWorld);
+
+	// Generate the window
+	program.windowHeight = 1010;
+	program.windowWidth = 1920;
+	sf::RenderWindow window(sf::VideoMode(program.windowWidth, program.windowHeight), "Agui - SFML2 Example");
 	sf::View view = window.getView();
 	view.setCenter(0, 0);
 	window.setView(view);
-	initializeAgui(window);
-	addWidgets();
-	running = true;
+	window.setFramerateLimit(FRAMERATE);
+
+	// Load program
 	LoadPrototypes();
 	LoadLogicToHotbar();
 	world = WorldSave();
 	CreateTestWorld();
-	program.onTitleScreen = false;
-	program.gamePaused = false;
-	std::thread worldUpdate([]{
-		while (running) { 
-			if(!program.gamePaused)
-				UpdateMap(); 
-			Sleep(10); 
-		}
-	});
+	program.gamePaused = true;
+
+	// Load Gui
+	initializeAgui(window);
+	addWidgets();
+	MapUpdate.launch();
+	running = true;
 	while (window.isOpen() && running)
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
+			{
 				window.close();
+			}
 			else if (event.type == sf::Event::Resized)
 			{
 				// adjust the viewport when the window is resized
 				gui->resizeToDisplay();
 			}
-
 			inputHandler->processEvent(event);
 			GameInput(window, event);
 		}
+		
 		window.clear();
 		clock_t beginUpdate = clock();
 		program.DrawGameState(window);
-		clock_t updateTime = clock();
-		int padTime = desiredMs + beginUpdate - updateTime;
-		if (padTime > 0)
-			Sleep(padTime);
+		
 		clock_t endUpdate = clock();
 		program.deltaTime += endUpdate - beginUpdate;
 		program.frames++;
@@ -185,10 +214,12 @@ int main()
 			program.frames = 0;
 			program.deltaTime -= CLOCKS_PER_SEC;
 		}
-		//gui->logic();
-		//gui->render();
+		gui->logic();
+		gui->render();
 		window.display();
 	}
+	running = false;
+	MapUpdate.wait();
 	cleanUp();
 	return 0;
 }
