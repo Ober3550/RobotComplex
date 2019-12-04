@@ -4,19 +4,21 @@
 #include "LogicTypes.h"
 #include <cstdint>
 #include <SFML/Graphics.hpp>
+#include <array>
 #include "ReservedItems.h"
 #include "Constants.h"
-#include <array>
+#include <iostream>
 
 class LogicTile {
 public:
+	LogicTypes logictype;					// 1 byte
 	Pos pos;								// 8 bytes
 	Facing facing = north;					// 1 byte
 	uint8_t prevSignal = -1;				// 1 byte
 	uint8_t signal = 0;						// 1 byte
 	uint8_t colorClass = 1;					// xxxxxBGR 8 color byte
-	static sf::Texture texture;				// Empty texture
-	virtual sf::Texture GetTexture() { return this->texture; };
+	static sf::Texture* texture;				// Empty texture
+	virtual sf::Texture* GetTexture() { return this->texture; };
 	virtual void DoWireLogic();
 	virtual void DoItemLogic() {};
 	virtual void DoRobotLogic(Robot* robotRef) {};
@@ -24,11 +26,16 @@ public:
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
 	virtual bool IsConnected(Pos pos);
+	virtual bool ReceivesSignal(Pos pos);
+	virtual bool IsSource() { return false; };
+	virtual void Serialize(std::ofstream*);
+	virtual void Deserialize(std::ifstream*);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
-	void DrawSprite(int x, int y, sf::Texture& texture);
-	void DrawSprite(int x, int y, sf::Texture& texture, sf::IntRect subRect);
-	void DrawSpriteFromProperties(int x, int y, sf::Texture texture, sf::IntRect subRect, int rotation, bool inverse);
+	void DrawSprite(int x, int y, sf::Texture* texture);
+	void DrawSprite(int x, int y, sf::Texture* texture, sf::IntRect subRect);
+	void DrawSpriteFromProperties(int x, int y, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse);
 	void DrawSignalStrength(int x, int y, int signal);
+	static LogicTile* Factory(uint16_t classType);
 };
 class DirectionalLogicTile : public LogicTile {
 	virtual void DoWireLogic() {};
@@ -38,12 +45,15 @@ class DirectionalLogicTile : public LogicTile {
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
 	virtual bool IsConnected(Pos pos);
+	virtual bool ReceivesSignal(Pos pos);
+	virtual bool IsSource() { return true; };
 };
 
 class Wire : public LogicTile {
 public:
-	static sf::Texture texture;								// A textures for drawing
-	sf::Texture GetTexture() { return this->texture; };
+	Wire() { logictype = wire; };
+	static sf::Texture* texture;								// A textures for drawing
+	sf::Texture* GetTexture() { return this->texture; };
 	void DrawTile(int x, int y);
 	std::string GetTooltip();
 	Wire* Copy()
@@ -56,17 +66,25 @@ public:
 
 class Redirector : public LogicTile {
 public:
-	static sf::Texture texture;					// A texture for drawing
-	sf::Texture GetTexture() { return this->texture; };
+	static sf::Texture* texture;					// A texture for drawing
+	sf::Texture* GetTexture() { return this->texture; };
 	uint16_t itemFilter;						// 2 bytes
 	bool dropItem;								// 1 bit
-	Redirector() { this->itemFilter = 0; this->dropItem = false; }
+	virtual void Serialize(std::ofstream*);
+	virtual void Deserialize(std::ifstream*);
+	Redirector() { 
+		this->logictype = redirector;
+		this->itemFilter = 0; 
+		this->dropItem = false; 
+	}
 	Redirector(uint16_t itemFilter, bool dropItem)
 	{
+		this->logictype = redirector;
 		this->itemFilter = itemFilter;
 		this->dropItem = dropItem;
 	};
 	Redirector(const Redirector* other) {
+		this->logictype = redirector;
 		this->itemFilter = other->itemFilter;
 		this->dropItem = other->dropItem;
 	}
@@ -85,8 +103,9 @@ public:
 
 class PressurePlate : public LogicTile {
 public:
-	static sf::Texture texture;								// A textures for drawing
-	sf::Texture GetTexture() { return this->texture; };
+	PressurePlate() { logictype = pressureplate; };
+	static sf::Texture* texture;								// A textures for drawing
+	sf::Texture* GetTexture() { return this->texture; };
 	void DoWireLogic() {}									// Overwrite base method to not transfer signals
 	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
 	void DoRobotLogic(Robot* robotRef);						// Activates when a robot holding the correct item filter steps onto it
@@ -101,14 +120,17 @@ public:
 		this->BaseCopy(logicTile);
 		return logicTile;
 	}
+	virtual bool IsSource() { return true; };
 };
 
 class Inverter : public DirectionalLogicTile {
 public:
-	static sf::Texture texture;								// A textures for drawing
-	sf::Texture GetTexture() { return this->texture; };
+	Inverter() { logictype = inverter; };
+	static sf::Texture* texture;								// A textures for drawing
+	sf::Texture* GetTexture() { return this->texture; };
 	void DoWireLogic();								// Overrides wire logic transfer
 	void DrawTile(int x, int y);
+	virtual bool IsConnected(Pos pos) { return true; };
 	std::string GetTooltip();
 	Inverter* Copy()
 	{
@@ -120,8 +142,9 @@ public:
 
 class Booster : public DirectionalLogicTile {
 public:
-	static sf::Texture texture;								// A textures for drawing
-	sf::Texture GetTexture() { return this->texture; };
+	Booster() { logictype = booster; };
+	static sf::Texture* texture;								// A textures for drawing
+	sf::Texture* GetTexture() { return this->texture; };
 	void DoWireLogic();										// Overrides wire logic transfer
 	void DrawTile(int x, int y);
 	std::string GetTooltip();
@@ -135,8 +158,9 @@ public:
 
 class Repeater : public DirectionalLogicTile {
 public:
-	static sf::Texture texture;								// A textures for drawing
-	sf::Texture GetTexture() { return this->texture; };
+	Repeater() { logictype = repeater; };
+	static sf::Texture* texture;								// A textures for drawing
+	sf::Texture* GetTexture() { return this->texture; };
 	void DoWireLogic();										// Overrides wire logic transfer
 	void DrawTile(int x, int y);
 	std::string GetTooltip();
@@ -150,7 +174,8 @@ public:
 
 class Holder : public LogicTile {
 public:
-	static sf::Texture texture;
+	Holder() { logictype = holder; };
+	static sf::Texture* texture;
 	Robot* robotRef;
 	void DrawTile(int x, int y) { LogicTile::DrawSprite(x, y, this->texture); }
 	void DoWireLogic();
@@ -164,43 +189,11 @@ public:
 	}
 };
 
-class Memory : public DirectionalLogicTile {
-public:
-	static sf::Texture texture;									// A texture for drawing
-	sf::Texture GetTexture() { return this->texture; };
-	uint8_t inputSignal = 0;
-	uint8_t memIndex = -1;										// The current index accessed for the memory
-	uint8_t standByIndex = 0;									// The 'row' index for when transfering control between memory tiles for expandability
-	std::array<uint8_t, Gconstants::memoryLimit> memory;
-	Memory() {};
-	Memory(bool reversed)
-	{
-		memory = std::array<uint8_t, Gconstants::memoryLimit>();
-		for (uint8_t i = 0; i < Gconstants::memoryLimit; i++)
-		{
-			if (reversed)
-				memory[i] = Gconstants::memoryLimit - i - 1;
-			else
-				memory[i] = i;
-		}
-	}
-	void DoWireLogic();											// Overrides wire logic transfer
-	void DrawTile(int x, int y);
-	void SetMemIndex(int i);
-	std::string GetTooltip();
-	Memory* Copy()
-	{
-		Memory* logicTile = new Memory();
-		this->BaseCopy(logicTile);
-		logicTile->memory = this->memory;
-		return logicTile;
-	}
-};
-
 class Counter : public DirectionalLogicTile {
 public:
-	static sf::Texture texture;
-	sf::Texture GetTexture() { return this->texture; };
+	Counter() { logictype = counter; };
+	static sf::Texture* texture;
+	sf::Texture* GetTexture() { return this->texture; };
 	uint8_t inputSignal = 0;
 	uint8_t maxSignal = Gconstants::maxSignalStrength;
 	void DoWireLogic();

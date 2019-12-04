@@ -1,5 +1,4 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <functional>
 #include <string>
 #include "Windows.h"
@@ -18,6 +17,7 @@
 #include "GameInput.h"
 #include "TitleScreen.h"
 #include "WidgetCreator.h"
+#include "Textures.h"
 
 agui::Gui *gui = NULL;
 agui::SFML2Input* inputHandler = NULL;
@@ -25,6 +25,23 @@ agui::SFML2Graphics* graphicsHandler = NULL;
 agui::Font *defaultFont = NULL;
 std::thread worldUpdate;
 bool running;
+
+std::vector<sf::Texture*> groundTextures;
+std::vector<sf::Texture*> itemTextures;
+std::vector<sf::Texture*> animationTextures;
+sf::Texture* robotTexture = LoadTexture("robotNew.png");
+sf::Texture* font = LoadTexture("font.png");
+sf::Texture* buttonTexture = LoadTexture("button.png");
+
+sf::Texture* LogicTile::texture = LoadTexture("blank.png");
+sf::Texture* Wire::texture = LoadTexture("logic/wire.png");
+sf::Texture* PressurePlate::texture = LoadTexture("logic/pressureplate.png");
+sf::Texture* Redirector::texture = LoadTexture("logic/redirector.png");
+sf::Texture* Inverter::texture = LoadTexture("logic/inverter.png");
+sf::Texture* Booster::texture = LoadTexture("logic/inverter.png");
+sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
+sf::Texture* Holder::texture = LoadTexture("logic/holder.png");
+sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
 
 ProgramData program;
 WorldSave world;
@@ -204,7 +221,9 @@ int main()
 		window.clear();
 		clock_t beginUpdate = clock();
 		program.DrawGameState(window);
-		
+		gui->logic();
+		gui->render();
+		window.display();
 		clock_t endUpdate = clock();
 		program.deltaTime += endUpdate - beginUpdate;
 		program.frames++;
@@ -214,9 +233,6 @@ int main()
 			program.frames = 0;
 			program.deltaTime -= CLOCKS_PER_SEC;
 		}
-		gui->logic();
-		gui->render();
-		window.display();
 	}
 	running = false;
 	MapUpdate.wait();

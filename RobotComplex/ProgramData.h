@@ -17,19 +17,10 @@ public:
 	MyMap<uint16_t, std::vector<uint16_t>> itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
 	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
 	
-	// Textures
-	std::vector<sf::Texture> groundTextures;
-	std::vector<sf::Texture> itemTextures;
-	std::vector<sf::Texture> animationTextures;
-
 	std::vector<std::string> itemTooltips;
 	std::vector<std::vector<std::string>> logicTooltips;
-	sf::Texture robotTexture;
-	sf::Texture font;
 	MyMap<char, sf::IntRect> fontMap;	// Map that relates characters to sections of the font texture
 	sf::Font guiFont;
-	sf::Texture buttonTexture;
-
 	std::vector<Animation> animations;
 
 	//Stores sprite layers

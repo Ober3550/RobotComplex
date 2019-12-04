@@ -7,6 +7,7 @@
 #include "Constants.h"
 #include "Facing.h"
 #include "ReservedItems.h"
+#include "Textures.h"
 
 void Robot::SetFacing(Facing direction)
 {
@@ -135,14 +136,14 @@ void Robot::DrawTile(int x, int y)
 	if (facing)
 	{
 		sf::Sprite sprite;
-		sprite.setTexture(program.robotTexture);
+		sprite.setTexture(*robotTexture);
 		sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
 		sprite.setPosition(float(x), float(y - Gconstants::halfTileSize));
 		program.robotSprites.emplace_back(sprite);
 		if (itemCarying > 2)
 		{
 			sf::Sprite sprite;
-			sprite.setTexture(program.itemTextures[itemCarying]);
+			sprite.setTexture(*itemTextures[itemCarying]);
 			sprite.setOrigin(Gconstants::halfItemSprite, Gconstants::halfTileSize + 10);
 			float rotation = float(facing) * float(90);
 			sprite.setRotation(rotation);
@@ -155,7 +156,7 @@ void Robot::DrawTile(int x, int y)
 		if (itemCarying > 2)
 		{
 			sf::Sprite sprite;
-			sprite.setTexture(program.itemTextures[itemCarying]);
+			sprite.setTexture(*itemTextures[itemCarying]);
 			sprite.setOrigin(Gconstants::halfItemSprite, Gconstants::halfTileSize + 10);
 			float rotation = float(facing) * float(90);
 			sprite.setRotation(rotation);
@@ -163,7 +164,7 @@ void Robot::DrawTile(int x, int y)
 			program.robotSprites.emplace_back(sprite);
 		}
 		sf::Sprite sprite;
-		sprite.setTexture(program.robotTexture);
+		sprite.setTexture(*robotTexture);
 		sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
 		sprite.setPosition(float(x), float(y - Gconstants::halfTileSize));
 		program.robotSprites.emplace_back(sprite);

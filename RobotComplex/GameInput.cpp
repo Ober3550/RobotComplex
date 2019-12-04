@@ -38,16 +38,19 @@ void MoveRobots()
 void UpdateMap()
 {
 	// Update all the logic tiles that were queued last tick
-	world.currentUpdateQueue = MySet<uint64_t>(world.updateQueue);
-	world.updateQueue.clear();
-	for (auto& kv : world.currentUpdateQueue)
-	{
-		if (LogicTile* logic = world.GetLogicTile(kv))
+	world.updateQueueA = MySet<uint64_t>(world.updateQueueC);
+	world.updateQueueC.clear();
+	do {
+		for (uint64_t kv : world.updateQueueA)
 		{
-			logic->DoWireLogic();
+			if (LogicTile* logic = world.GetLogicTile(kv))
+			{
+				logic->DoWireLogic();
+			}
 		}
-	}
-
+		world.updateQueueA = MySet<uint64_t>(world.updateQueueB);
+		world.updateQueueB.clear();
+	} while (world.updateQueueA.size() != 0);
 	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
 	for (auto iter = world.craftingQueue.begin(); iter != world.craftingQueue.end(); )
 	{
@@ -134,10 +137,10 @@ void LeftMousePressed()
 					LogicTile* logicPlace = hotbarElement->Copy();
 					logicPlace->pos = mouseHovering;
 					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
-					world.updateQueue.insert(logicPlace->pos.CoordToEncoded());										// Queue update for placed element
+					world.updateQueueC.insert(logicPlace->pos.CoordToEncoded());										// Queue update for placed element
 					for (int i = 0; i < 4; i++)
 					{
-						world.updateQueue.insert(logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded());
+						world.updateQueueC.insert(logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded());
 					}
 					program.selectedLogicTile = logicPlace;
 				}
@@ -158,7 +161,7 @@ void RightMousePressed()
 	}
 	for (int i = 0; i < 4; i++)
 	{
-		world.updateQueue.insert(mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
+		world.updateQueueC.insert(mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
 	}
 	program.selectedLogicTile = nullptr;
 }
@@ -240,7 +243,7 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 				program.selectedLogicTile->facing = Facing((int(program.selectedLogicTile->facing) + 1) & 3);
 				for (int i = 0; i < 4; i++)
 				{
-					world.updateQueue.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
+					world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
 				}
 				program.placeRotation = program.selectedLogicTile->facing;
 			}
@@ -305,13 +308,14 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 				world.logictiles.erase(program.selectedLogicTile->pos.CoordToEncoded());
 				for (int i = 0; i < 4; i++)
 				{
-					world.updateQueue.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
+					world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
 				}
 				program.selectedLogicTile = nullptr;
 			}
 		}break;
 		case sf::Keyboard::Escape:
 		{
+			program.selectedLogicTile = nullptr;
 			program.gamePaused = !program.gamePaused;
 		}break;
 		}

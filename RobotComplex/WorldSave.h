@@ -17,8 +17,9 @@ public:
 	MyMap<uint64_t, LogicTile*> logictiles;
 	MyMap<uint64_t, WorldChunk> worldChunks;
 	MyMap<uint64_t, CraftingProcess> craftingQueue;
-	MySet<uint64_t> currentUpdateQueue;
-	MySet<uint64_t> updateQueue;
+	MySet<uint64_t> updateQueueA;
+	MySet<uint64_t> updateQueueB;
+	MySet<uint64_t> updateQueueC;
 	uint64_t tick;
 	GroundTile*		 GetGroundTile(Pos pos);
 	ItemTile*		 GetItemTile(Pos pos);
@@ -39,8 +40,9 @@ public:
 		logictiles.clear();
 		worldChunks.clear();
 		craftingQueue.clear();
-		currentUpdateQueue.clear();
-		updateQueue.clear();
+		updateQueueA.clear();
+		updateQueueB.clear();
+		updateQueueC.clear();
 		tick = 0;
 	}
 };

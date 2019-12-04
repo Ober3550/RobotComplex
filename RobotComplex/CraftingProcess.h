@@ -5,4 +5,5 @@ public:
 	Pos pos;
 	uint16_t craftingRecipe;
 	uint32_t ticks;
+	uint8_t animationSlide;
 };

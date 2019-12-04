@@ -12,19 +12,87 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "Windows.h"
+#include "MyMod.h"
+
+LogicTile* LogicTile::Factory(uint16_t classType)
+{
+	LogicTypes newClass = LogicTypes(classType);
+	switch (newClass)
+	{
+	case wire:
+		return new Wire();
+	case pressureplate:
+		return new PressurePlate();
+	case redirector:
+		return new Redirector();
+	case inverter:
+		return new Inverter();
+	case booster:
+		return new Booster();
+	case counter:
+		return new Counter();
+	case repeater:
+		return new Repeater();
+	case holder:
+		return new Holder();
+	}
+}
+
+void LogicTile::Serialize(std::ofstream* writer)
+{
+	writer->write((char*)&this->logictype,	sizeof(LogicTypes));
+	writer->write((char*)&this->pos,		sizeof(Pos));
+	writer->write((char*)&this->facing,		sizeof(Facing));
+	writer->write((char*)&this->prevSignal,	sizeof(uint8_t));
+	writer->write((char*)&this->signal,		sizeof(uint8_t));
+	writer->write((char*)&this->colorClass,	sizeof(uint8_t));
+}
+
+void LogicTile::Deserialize(std::ifstream* reader)
+{
+	reader->read((char*)&this->pos,			sizeof(Pos));
+	reader->read((char*)&this->facing,		sizeof(Facing));
+	reader->read((char*)&this->prevSignal,	sizeof(uint8_t));
+	reader->read((char*)&this->signal,		sizeof(uint8_t));
+	reader->read((char*)&this->colorClass,	sizeof(uint8_t));
+}
+
+void Redirector::Serialize(std::ofstream* writer)
+{
+	LogicTile::Serialize(writer);
+	writer->write((char*)&this->itemFilter, sizeof(uint16_t));
+	writer->write((char*)&this->dropItem,	sizeof(bool));
+}
+
+void Redirector::Deserialize(std::ifstream* reader)
+{
+	LogicTile::Deserialize(reader);
+	reader->read((char*)&this->itemFilter,	sizeof(uint16_t));
+	reader->read((char*)&this->dropItem,	sizeof(bool));
+}
 
 void LogicTile::BaseCopy(LogicTile* logicTile)
 {
+	logicTile->logictype = this->logictype;
 	logicTile->pos = this->pos;
 	logicTile->facing = this->facing;
 	logicTile->prevSignal = this->prevSignal;
 	logicTile->colorClass = this->colorClass;
 }
 
+bool LogicTile::ReceivesSignal(Pos pos)
+{
+	if (LogicTile* neighbour = world.GetLogicTile(pos.CoordToEncoded()))
+	{
+		if (this->colorClass == neighbour->colorClass)
+			return true;
+	}
+	return false;
+}
 void LogicTile::DoWireLogic() {
+	Sleep(10);
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
 	std::array<LogicTile*, 4> neighbourTile = std::array<LogicTile*, 4>();
-	uint8_t numNeighbours = 0;
 	this->prevSignal = this->signal;
 
 	for (uint8_t i = 0; i < 4; i++)
@@ -34,31 +102,16 @@ void LogicTile::DoWireLogic() {
 		{
 			neighbourTile[i] = *temp;
 			// If neighbour is 'directional signal provider'
-			if (typeid(*neighbourTile[i]) == typeid(Inverter) || 
-				typeid(*neighbourTile[i]) == typeid(Booster) || 
-				typeid(*neighbourTile[i]) == typeid(Repeater) || 
-				typeid(*neighbourTile[i]) == typeid(Counter) ||
-				typeid(*neighbourTile[i]) == typeid(Memory))
+			if (neighbourTile[i]->ReceivesSignal(this->pos))
 			{
-				++numNeighbours;
-				if (neighbourTile[i]->pos.FacingPosition(neighbourTile[i]->facing) == this->pos)
+				if(neighbourTile[i]->IsSource())
 					neighbourSignals[i] = neighbourTile[i]->signal + 1;
+				else
+					neighbourSignals[i] = neighbourTile[i]->signal;
 			}
-			// If neighbour is 'signal provider'
-			else if (typeid(*neighbourTile[i]) == typeid(PressurePlate))
+			if(!neighbourTile[i]->IsConnected(this->pos))
 			{
-				++numNeighbours;
-				neighbourSignals[i] = neighbourTile[i]->signal + 1;
-			}
-			else if(neighbourTile[i]->colorClass == this->colorClass)
-			{
-				++numNeighbours;
-				// If neighbour is wire or redirector or holder
-				neighbourSignals[i] = neighbourTile[i]->signal;
-			}
-			else
-			{
-				// If neigbour is wire or redirector that doesn't share the same colorclass don't update it
+				// If neighbour isn't connected to this element don't update it
 				neighbourTile[i] = nullptr;
 			}
 		}
@@ -69,26 +122,21 @@ void LogicTile::DoWireLogic() {
 	if (this->signal > max_value)
 	{
 		this->signal = 0;
-		world.currentUpdateQueue.insert(this->pos.CoordToEncoded());
 	}
 	else
 	{
 		signal = max_value > 0 ? max_value - 1 : 0;
 	}
 
-	// Update neighbours
-	if (this->prevSignal != this->signal)
+	for (uint8_t i = 0; i < 4; i++)
 	{
-		for (uint8_t i = 0; i < 4; i++)
+		if (neighbourTile[i])
 		{
-			if (neighbourTile[i])
+			// Update neighbours
+			if (this->prevSignal != this->signal || (neighbourTile[i]->signal == 0 && this->signal > 0))
 			{
-				if (neighbourTile[i]->signal == 0 && this->signal == 0)
-				{
-
-				}
-				else
-					neighbourTile[i]->DoWireLogic();
+				if (neighbourTile[i]->signal != 0 || this->signal != 0)
+					world.updateQueueB.insert({ neighbourTile[i]->pos.CoordToEncoded() });
 			}
 		}
 	}
@@ -118,6 +166,19 @@ bool DirectionalLogicTile::IsConnected(Pos pos) {
 	else
 		return false;
 };
+bool DirectionalLogicTile::ReceivesSignal(Pos pos)
+{
+	if (LogicTile* neighbour = world.GetLogicTile(pos.CoordToEncoded()))
+	{
+		Pos infront = this->pos.FacingPosition(this->facing);
+		if (pos == infront)
+			return true;
+		else
+			return false;
+	}
+	else
+		return false;
+}
 std::string Wire::GetTooltip()
 {
 	return program.logicTooltips[0][0];
@@ -203,31 +264,48 @@ std::string PressurePlate::GetTooltip()
 
 void Inverter::DoWireLogic()
 {
-	Pos tileBack = this->pos.BehindPosition(this->facing);
-	if (LogicTile* tileBehind = world.GetLogicTile(tileBack.CoordToEncoded()))
+	Pos Back = this->pos.BehindPosition(this->facing);
+	Pos Left = this->pos.FacingPosition(Facing(int(this->facing) - 1));
+	Pos Right = this->pos.FacingPosition(Facing(int(this->facing) + 1));
+	int a = 0;
+	int b1 = 0;
+	int b2 = 0;
+	if (LogicTile* tileBack = world.GetLogicTile(Back.CoordToEncoded()))
 	{
-		this->prevSignal = this->signal;
-		this->signal = Gconstants::maxSignalStrength - tileBehind->signal;
-		if (this->prevSignal != this->signal)
-		{
-			Pos tileFore = this->pos.FacingPosition(this->facing);
-			if (LogicTile* tileInfront = world.GetLogicTile(tileFore.CoordToEncoded()))
-			{
-				world.updateQueue.insert(tileFore.CoordToEncoded());
-			}
-		}
+		if (tileBack->ReceivesSignal(this->pos))
+			a = tileBack->signal;
+	}
+	if (LogicTile* tileLeft = world.GetLogicTile(Left.CoordToEncoded()))
+	{
+		if (tileLeft->ReceivesSignal(this->pos))
+			b1 = tileLeft->signal;
+	}
+	if (LogicTile* tileRight = world.GetLogicTile(Right.CoordToEncoded()))
+	{
+		if (tileRight->ReceivesSignal(this->pos))
+			b2 = tileRight->signal;
+	}
+	this->prevSignal = this->signal;
+	if (b1 > b2)
+	{
+		if (Gconstants::maxSignalStrength - a + b1 > 0)
+			this->signal = MyMod(Gconstants::maxSignalStrength - a + b1,32);
+		else
+			this->signal = 0;
 	}
 	else
 	{
-		this->prevSignal = this->signal;
-		this->signal = Gconstants::maxSignalStrength;
-		if (this->prevSignal != this->signal)
+		if (Gconstants::maxSignalStrength - a + b2 > 0)
+			this->signal = MyMod(Gconstants::maxSignalStrength - a + b2, 32);
+		else
+			this->signal = 0;
+	}
+	if (this->prevSignal != this->signal)
+	{
+		Pos tileFore = this->pos.FacingPosition(this->facing);
+		if (LogicTile* tileInfront = world.GetLogicTile(tileFore.CoordToEncoded()))
 		{
-			Pos tileFore = this->pos.FacingPosition(this->facing);
-			if (LogicTile* tileInfront = world.GetLogicTile(tileFore.CoordToEncoded()))
-			{
-				world.updateQueue.insert(tileFore.CoordToEncoded());
-			}
+			world.updateQueueC.insert(tileFore.CoordToEncoded());
 		}
 	}
 }
@@ -249,7 +327,7 @@ void Booster::DoWireLogic()
 			Pos tileFore = this->pos.FacingPosition(this->facing);
 			if (LogicTile* tileInfront = world.GetLogicTile(tileFore.CoordToEncoded()))
 			{
-				world.updateQueue.insert(tileFore.CoordToEncoded());
+				world.updateQueueC.insert(tileFore.CoordToEncoded());
 			}
 		}
 	}
@@ -273,7 +351,7 @@ void Repeater::DoWireLogic()
 			Pos tileFore = this->pos.FacingPosition(this->facing);
 			if (LogicTile * *neighbourLogic = world.logictiles.GetValue(tileFore.CoordToEncoded()))
 			{
-				world.updateQueue.insert(tileFore.CoordToEncoded());
+				world.updateQueueC.insert(tileFore.CoordToEncoded());
 			}
 		}
 	}
@@ -309,43 +387,6 @@ void Holder::DoWireLogic()
 std::string Holder::GetTooltip()
 {
 	return program.logicTooltips[7][0];
-}
-
-void Memory::DoWireLogic()
-{
-	Pos tileBack = this->pos.BehindPosition(this->facing);
-	if (auto temp = world.logictiles.GetValue(tileBack.CoordToEncoded()))
-	{
-		LogicTile* tileBehind = *temp;
-		this->prevSignal = this->inputSignal;
-		this->inputSignal = tileBehind->signal;
-		if (this->prevSignal != this->inputSignal && tileBehind->prevSignal == 0 && tileBehind->signal > 0)
-		{
-			memIndex++;
-			if (memIndex > 15)
-			{
-				memIndex = 0;
-			}
-		}
-	}
-	if(memIndex >= 0)
-		this->signal = memory[memIndex];
-	Pos facingTile = this->pos.FacingPosition(this->facing);
-	if (auto temp = world.logictiles.GetValue(facingTile.CoordToEncoded()))
-	{
-		LogicTile* neighbour = *temp;
-		neighbour->DoWireLogic();
-	}
-}
-void Memory::SetMemIndex(int i)
-{
-	this->memIndex = i;
-	this->DoWireLogic();
-}
-
-std::string Memory::GetTooltip()
-{
-	return program.logicTooltips[6][0];
 }
 
 void Counter::DoWireLogic()

@@ -100,7 +100,7 @@ void CreateTestWorld()
 	inv->pos = { 17,18 };
 	inv->facing = north;
 	world.logictiles.insert({ inv->pos.CoordToEncoded(),inv });
-	world.updateQueue.insert({ inv->pos.CoordToEncoded() });
+	world.updateQueueC.insert({ inv->pos.CoordToEncoded() });
 
 	// East y direct
 	Redirector* redirector;

@@ -1,5 +1,6 @@
 #include "Pos.h"
 #include "Constants.h"
+#include "MyMod.h"
 
 uint64_t Pos::CoordToEncoded()
 {
@@ -11,6 +12,7 @@ Pos Pos::EncodedToCoord(uint64_t input)
 }
 Pos Pos::FacingPosition(Facing facing)
 {
+	facing = Facing(MyMod(facing, 4));
 	switch (facing)
 	{
 	case north:

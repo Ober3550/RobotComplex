@@ -2,7 +2,6 @@
 #include "WorldSave.h"
 #include "ProgramData.h"
 #include "Pos.h"
-#include "Windows.h"
 #include "LogicTile.h"
 #include <string>
 #include "MyMod.h"
@@ -12,35 +11,21 @@
 #include "TestWorld.h"
 #include "PrototypeLoader.h"
 #include "RecipePrototype.h"
+#include "Textures.h"
 
-// Central function for error checking on texture loading
-sf::Texture LoadTexture(std::string filename)
+sf::Texture* LoadTexture(std::string filename)
 {
-	sf::Texture texture;
-	if (!texture.loadFromFile("Assets/x32/" + filename))
+	sf::Texture* texture = new sf::Texture();
+	//sf::Texture* texture = nullptr;
+	if (!texture->loadFromFile("Assets/x32/" + filename))
 	{
 		OutputDebugStringA((filename + " failed to load\r\n").c_str());
 	}
 	return texture;
 }
 
-sf::Texture LogicTile::texture = LoadTexture("blank.png");
-sf::Texture Wire::texture = LoadTexture("logic/wire.png");
-sf::Texture PressurePlate::texture = LoadTexture("logic/pressureplate.png");
-sf::Texture Redirector::texture = LoadTexture("logic/redirector.png");
-sf::Texture Inverter::texture = LoadTexture("logic/inverter.png");
-sf::Texture Booster::texture = LoadTexture("logic/inverter.png");
-sf::Texture Repeater::texture = LoadTexture("logic/inverter.png");
-sf::Texture Holder::texture = LoadTexture("logic/holder.png");
-sf::Texture Memory::texture = LoadTexture("logic/memory.png");
-sf::Texture Counter::texture = LoadTexture("logic/counter.png");
-
 void LoadAllTextures()
 {
-	// Load Robot Texture
-	program.robotTexture = LoadTexture("robotNew.png");
-	program.font = LoadTexture("font.png");
-
 	std::string fontIndex = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
 	for (int i = 0; i < (int)fontIndex.length(); i++)
 	{
@@ -51,7 +36,6 @@ void LoadAllTextures()
 	{
 		//error
 	}
-	program.buttonTexture = LoadTexture("button.png");
 }
 
 template < typename T>
@@ -88,7 +72,7 @@ void LoadPrototypes()
 
 	for (const std::string& text : groundPrototypes)
 	{
-		program.groundTextures.emplace_back(LoadTexture("ground/" + text + ".png"));
+		groundTextures.emplace_back(LoadTexture("ground/" + text + ".png"));
 	}
 
 	// Item prototypes
@@ -117,7 +101,7 @@ void LoadPrototypes()
 
 	for (const std::string& text : itemPrototypes)
 	{
-		program.itemTextures.emplace_back(LoadTexture("items/" + text + ".png"));
+		itemTextures.emplace_back(LoadTexture("items/" + text + ".png"));
 	}
 	for (const std::string& text : itemTooltips)
 	{
@@ -140,7 +124,7 @@ void LoadPrototypes()
 	program.logicTooltips[1].emplace_back("Redirects and makes robot drop it's item");
 	program.logicTooltips[1].emplace_back("Redirects when robot's holding ");
 	program.logicTooltips[2].emplace_back("Creates signal when robot or item ontop");
-	program.logicTooltips[3].emplace_back("Inverter: output = max - input");
+	program.logicTooltips[3].emplace_back("Inverter: output = 16 - a + b");
 	program.logicTooltips[4].emplace_back("Gives out max signal for any input above zero");
 	program.logicTooltips[5].emplace_back("Gives out same signal as input");
 	program.logicTooltips[6].emplace_back("Stores 16 different values that cycle when input rises to high");
@@ -153,7 +137,7 @@ void LoadPrototypes()
 
 	for (const std::string& text : animationPrototypes)
 	{
-		program.animationTextures.emplace_back(LoadTexture("machines/" + text + ".png"));
+		animationTextures.emplace_back(LoadTexture("machines/" + text + ".png"));
 	}
 
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Recipe Catalyst, Animation, Animation Offset
@@ -188,9 +172,7 @@ void LoadPrototypes()
 		// Animation Population
 		newRecipe.animationTextureRef = findInVector(animationPrototypes, recipeProto.animation).second;
 		// Animation slides is equal to total texture width / 32 * recipe width. So that animation slides are tile aligned
-		newRecipe.animationJump = newRecipe.width * 32;
 		newRecipe.animationOffset = recipeProto.animationOffset;
-		newRecipe.animationFrames = program.animationTextures[newRecipe.animationTextureRef].getSize().x / newRecipe.animationJump;
 		// Add 1 to animationTextureRef since 0 is no animation
 		++newRecipe.animationTextureRef;
 

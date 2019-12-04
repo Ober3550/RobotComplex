@@ -1,12 +1,12 @@
 #pragma once
-enum LogicTypes { 
-	redback = 0,
-	blueback = 1,
-	wire = 2,
-	pressureplate = 3,
-	redirector = 4, 
-	inverter = 5,
-	booster = 6,
+#include <cstdint>
+enum LogicTypes : uint8_t { 
+	wire = 1,
+	pressureplate = 2,
+	redirector = 3, 
+	inverter = 4,
+	booster = 5,
+	counter = 6,
 	repeater = 7,
-	rom = 8
+	holder = 8
 };

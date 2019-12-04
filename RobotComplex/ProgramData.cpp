@@ -10,13 +10,14 @@
 #include "CraftingProcess.h"
 #include "RedirectorColors.h"
 #include "SpriteGenerator.h"
+#include "Textures.h"
 
 void ProgramData::RecreateGroundSprites(Pos tilePos, int x, int y)
 {
 	if (GroundTile * tile = world.GetGroundTile(tilePos))
 	{
 		sf::Sprite sprite;
-		sprite.setTexture(program.groundTextures[tile->groundTile]);
+		sprite.setTexture(*groundTextures[tile->groundTile]);
 		sprite.setPosition(float(x), float(y));
 		program.groundSprites.emplace_back(sprite);
 	}
@@ -28,7 +29,7 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, int x, int y)
 		if (tile->itemTile > 2)
 		{
 			sf::Sprite sprite;
-			sprite.setTexture(program.itemTextures[tile->itemTile]);
+			sprite.setTexture(*itemTextures[tile->itemTile]);
 			sprite.setOrigin(Gconstants::halfItemSprite, Gconstants::halfItemSprite);
 			sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
 			program.itemSprites.emplace_back(sprite);
@@ -57,15 +58,36 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
 		if (craftingRef.animationTextureRef > 0)	// Default animation is none
 		{
 			sf::Sprite sprite;
-			sprite.setTexture(program.animationTextures[craftingRef.animationTextureRef - 1]);
-			sf::FloatRect spriteRect = sprite.getGlobalBounds();
-			int8_t animationPosition = MyMod(recipe->ticks / craftingRef.animationSpeed, (craftingRef.animationFrames << 1) - 1);
-			if (animationPosition >= craftingRef.animationFrames)
+			sprite.setTexture(*animationTextures[craftingRef.animationTextureRef - 1]);
+			int numSlides = int(sprite.getGlobalBounds().width) / (craftingRef.width * Gconstants::tileSize);
+			if (MyMod(recipe->ticks, craftingRef.animationSpeed) == 0)
 			{
-				animationPosition = -animationPosition + craftingRef.animationFrames;
+				switch (craftingRef.animationType)
+				{
+				case ping:
+				{
+					int rotation = MyMod(recipe->ticks / craftingRef.animationSpeed, (numSlides * 2) - 2);
+					if (rotation > numSlides - 1)
+					{
+						recipe->animationSlide = (numSlides * 2) - 2 - rotation;
+					}
+					else
+					{
+						recipe->animationSlide = rotation;
+					}
+				}break;
+				case forward:
+				{
+					MyMod(recipe->ticks / craftingRef.animationSpeed, numSlides);
+				}break;
+				case backward:
+				{
+					MyMod(-int(recipe->ticks) / craftingRef.animationSpeed, numSlides);
+				}break;
+				}
 			}
-			sf::IntRect subRect(int(animationPosition * craftingRef.animationJump), 0, int(craftingRef.animationJump), int(spriteRect.height));
-			sprite.setTextureRect(subRect);
+			sf::IntRect animationRect((craftingRef.width * Gconstants::tileSize)*recipe->animationSlide,0, (craftingRef.width * Gconstants::tileSize), int(sprite.getGlobalBounds().height));
+			sprite.setTextureRect(animationRect);
 			sprite.setPosition(float(x + craftingRef.animationOffset.x), float(y + craftingRef.animationOffset.y));
 			program.animationSprites.emplace_back(sprite);
 		}
@@ -233,11 +255,11 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	{
 		window.draw(sprite);
 	}
-	for (sf::Sprite sprite : program.robotSprites)
+	for (sf::Sprite sprite : program.animationSprites)
 	{
 		window.draw(sprite);
 	}
-	for (sf::Sprite sprite : program.animationSprites)
+	for (sf::Sprite sprite : program.robotSprites)
 	{
 		window.draw(sprite);
 	}
