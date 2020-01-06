@@ -53,7 +53,7 @@ void CraftingClass::DoCrafting(Pos pos)
 			{
 				if (CheckCrafting(pos.RelativePosition(-i, -j)))
 				{
-					CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks };
+					CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks, craftTicks };
 					world.craftingQueue.insert({ pos.RelativePosition(-i,-j).CoordToEncoded(),addProcess });
 				}
 			}

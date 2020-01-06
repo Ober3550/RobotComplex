@@ -6,13 +6,10 @@
 void SwapBots()
 {
 	// Swap the two robot maps
-	if (program.nextRobotPos.size() != 0)
+	if (world.nextRobotPos.size() != 0)
 	{
-		for (auto& kv : program.nextRobotPos)
-		{
-			world.robots.insert({ kv.first,kv.second });
-		}
-		program.nextRobotPos.clear();
+		world.robots = MyMap<uint64_t, Robot>(world.nextRobotPos);
+		world.nextRobotPos.clear();
 	}
 }
 
@@ -316,7 +313,21 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 		case sf::Keyboard::Escape:
 		{
 			program.selectedLogicTile = nullptr;
-			program.gamePaused = !program.gamePaused;
+			if (program.showMain)
+			{
+				program.showMain = false;
+				program.gamePaused = false;
+			}
+			else if (program.showSave)
+			{
+				program.showSave = false;
+				program.showMain = true;
+			}
+			else
+			{
+				program.gamePaused = true;
+				program.showMain = true;
+			}
 		}break;
 		}
 	}

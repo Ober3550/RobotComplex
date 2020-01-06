@@ -78,26 +78,52 @@ void LoadPrototypes()
 	// Item prototypes
 	std::vector<std::string> itemTooltips;
 	std::vector<std::string> itemPrototypes;
-	itemPrototypes.emplace_back("nothing");
+	itemPrototypes.emplace_back("");
 	itemTooltips.emplace_back("Nothing");
 	itemPrototypes.emplace_back("anything");
 	itemTooltips.emplace_back("Anything");
 	itemPrototypes.emplace_back("energy");
 	itemTooltips.emplace_back("");
+
+	// Ores
 	itemPrototypes.emplace_back("coal_ore");
 	itemTooltips.emplace_back("Coal ore");
 	itemPrototypes.emplace_back("iron_ore");
 	itemTooltips.emplace_back("Iron ore");
 	itemPrototypes.emplace_back("copper_ore");
 	itemTooltips.emplace_back("Copper ore");
+	itemPrototypes.emplace_back("clay");
+	itemTooltips.emplace_back("Clay");
+
+	// Tier 1 Products
 	itemPrototypes.emplace_back("iron_ingot");
 	itemTooltips.emplace_back("Iron ingot");
 	itemPrototypes.emplace_back("copper_ingot");
 	itemTooltips.emplace_back("Copper ingot");
-	itemPrototypes.emplace_back("clay");
-	itemTooltips.emplace_back("Clay");
 	itemPrototypes.emplace_back("clay_brick");
 	itemTooltips.emplace_back("Clay Brick");
+	itemPrototypes.emplace_back("steel_beam");
+	itemTooltips.emplace_back("Steel Beam");
+	
+	// Dies
+	itemPrototypes.emplace_back("die_plate");
+	itemTooltips.emplace_back("Plate Die");
+	itemPrototypes.emplace_back("die_gear");
+	itemTooltips.emplace_back("Gear Die");
+	itemPrototypes.emplace_back("die_extrude");
+	itemTooltips.emplace_back("Extruding Die");
+
+	// Tier 2 Products
+	itemPrototypes.emplace_back("copper_plate");
+	itemTooltips.emplace_back("Copper Plate");
+	itemPrototypes.emplace_back("copper_wire");
+	itemTooltips.emplace_back("Copper Wire");
+	itemPrototypes.emplace_back("iron_plate");
+	itemTooltips.emplace_back("Iron Plate");
+	itemPrototypes.emplace_back("iron_gear");
+	itemTooltips.emplace_back("Iron Gear");
+	itemPrototypes.emplace_back("iron_rod");
+	itemTooltips.emplace_back("Iron Rod");
 
 	for (const std::string& text : itemPrototypes)
 	{
@@ -145,7 +171,41 @@ void LoadPrototypes()
 	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation", Pos{ 0,32 }));
 	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation", Pos{ 0,32 }));
 	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation", Pos{ 0,32 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "iron_ingot",-1 }, { "iron_ingot",-1 } }, 1, 5, "iron_ingot", "furnace_animation", Pos{ 0,32 }));
+	recipePrototypes.emplace_back(RecipeProto({ 
+		{ "steel_ingot",1 }, { "steel_ingot",1 }, 
+		{ "iron_ingot",-1 }, { "iron_ingot",-1 }, 
+		{ "iron_ingot",-1 }, { "coal_ore",-1 } 
+		}, 2, 5, "coal_ore", "", Pos{0,0}));
+
+	// Dies
+	recipePrototypes.emplace_back(RecipeProto({
+		{ "clay",-1 }, { "clay",-1 }, { "clay",-1 },
+		{ "clay",-1 }, { "die_extrude",1 }, { "clay",-1 },
+		{ "clay",-1 }, { "clay",-1 }, { "clay",-1 },
+		}, 3, 1, "clay", "", Pos{ 0,0 }));
+
+	recipePrototypes.emplace_back(RecipeProto({
+		{ "",0 }, { "die_plate",1 }, 
+		{ "clay",-1 }, { "clay",-1 },
+		{ "clay",-1 }, { "clay",-1 },
+		}, 2, 1, "clay", "", Pos{ 0,0 }));\
+
+	recipePrototypes.emplace_back(RecipeProto({
+		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 },
+		{ "clay",-1 }, { "clay",-1 }, { "",0 },{ "clay",-1 }, { "clay",-1 },
+		{ "clay",-1 }, { "",0 }, { "die_gear",1 },{ "",0 }, { "clay",-1 },
+		{ "clay",-1 }, { "clay",-1 }, { "",0 },{ "clay",-1 }, { "clay",-1 },
+		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 }
+		}, 5, 1, "clay", "", Pos{ 0,0 }));
+
+	// Tier 2 Products
+
+	recipePrototypes.emplace_back(RecipeProto({ { "copper_wire"  ,1 }, { "die_extrude",0,1 },{ "copper_ingot",-1 } }, 1, 5, "copper_ingot", "", Pos{ 0,0 }));
+	recipePrototypes.emplace_back(RecipeProto({ { "copper_plate"  ,1 }, { "die_plate",0,1 },{ "copper_ingot",-1 } }, 1, 5, "copper_ingot", "", Pos{ 0,0 }));
+	recipePrototypes.emplace_back(RecipeProto({ { "iron_rod"  ,1 }, { "die_extrude",0,1 },{ "iron_ingot",-1 } }, 1, 5, "iron_ingot", "", Pos{ 0,0 }));
+	recipePrototypes.emplace_back(RecipeProto({ { "iron_gear"  ,1 }, { "die_gear",0,1 },{ "iron_ingot",-1 } }, 1, 5, "iron_ingot", "", Pos{ 0,0 }));
+	recipePrototypes.emplace_back(RecipeProto({ { "iron_plate"  ,1 }, { "die_plate",0,1 },{ "iron_ingot",-1 } }, 1, 5, "iron_ingot", "", Pos{ 0,0 }));
+	
 
 	for (const RecipeProto& recipeProto : recipePrototypes)
 	{

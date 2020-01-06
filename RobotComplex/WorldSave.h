@@ -14,6 +14,7 @@ struct WorldSave {
 public:
 	MyMap<uint64_t, ItemTile> items;
 	MyMap<uint64_t, Robot> robots;
+	MyMap<uint64_t, Robot> nextRobotPos;					// Storage for next robot position that gets swapped at end of update
 	MyMap<uint64_t, LogicTile*> logictiles;
 	MyMap<uint64_t, WorldChunk> worldChunks;
 	MyMap<uint64_t, CraftingProcess> craftingQueue;

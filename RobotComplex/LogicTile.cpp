@@ -90,7 +90,6 @@ bool LogicTile::ReceivesSignal(Pos pos)
 	return false;
 }
 void LogicTile::DoWireLogic() {
-	Sleep(10);
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
 	std::array<LogicTile*, 4> neighbourTile = std::array<LogicTile*, 4>();
 	this->prevSignal = this->signal;

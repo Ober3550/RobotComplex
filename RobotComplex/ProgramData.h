@@ -13,7 +13,6 @@
 
 class ProgramData {
 public:
-	MyMap<uint64_t, Robot> nextRobotPos;					// Storage for next robot position that gets swapped at end of update
 	MyMap<uint16_t, std::vector<uint16_t>> itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
 	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
 	
@@ -46,8 +45,12 @@ public:
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
 	Facing placeRotation;
-
+	
+	std::string selectedSave = "";
+	bool running = true;
 	bool gamePaused = true;
+	bool showMain = true;
+	bool showSave = false;
 	std::mutex rendermutex;
 	std::mutex worldmutex;
 

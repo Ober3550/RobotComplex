@@ -2,8 +2,17 @@
 #include <unordered_map>
 #include <fstream>
 #include <iostream>
+#include <cerrno>
+#include <stdexcept>
+#include <sys/stat.h>
 #include "LogicTile.h"
 #include "LogicTypes.h"
+#include "Robot.h"
+#include "CraftingProcess.h"
+#ifndef __MYMAP_H__
+#define __MYMAP_H__
+
+off_t GetFileLength(std::string const& filename);
 
 template <typename keyType, typename valueType>
 class MyMap : public std::unordered_map<keyType, valueType>
@@ -31,7 +40,9 @@ public:
 	{
 		std::ifstream myfile;
 		myfile.open(filename, std::ios::in | std::ios::binary);
-		if (myfile.is_open())
+		myfile.seekg(0, std::ios::beg);
+		int fileLength = GetFileLength(filename);
+		if (myfile.is_open() && fileLength > 0)
 		{
 			myfile.seekg(0, std::ios::beg);
 			std::pair<keyType,valueType>* readMem = new std::pair<keyType,valueType>();
@@ -42,7 +53,86 @@ public:
 			myfile.close();
 		}
 	}
-	
+};
+template <>
+class MyMap<uint64_t, Robot> : public std::unordered_map<uint64_t, Robot>
+{
+public:
+	Robot* GetValue(uint64_t key)
+	{
+		auto find = this->find(key);
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	void Serialize(std::string filename)
+	{
+		std::ofstream myfile;
+		myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+		if (myfile.is_open())
+		{
+			for (auto &kv : *this)
+			{
+				myfile.write((char*)&kv.second, sizeof(uint64_t) + sizeof(Robot));
+			}
+			myfile.close();
+		}
+	}
+	void Deserialize(std::string filename)
+	{
+		std::ifstream myfile;
+		myfile.open(filename, std::ios::in | std::ios::binary);
+		myfile.seekg(0, std::ios::beg);
+		int fileLength = GetFileLength(filename);
+		if (myfile.is_open() && fileLength > 0)
+		{
+			myfile.seekg(0, std::ios::beg);
+			Robot* readMem = new Robot();
+			while (!myfile.eof()) {
+				myfile.read((char*)readMem, sizeof(Robot));
+				this->insert({ readMem->pos.CoordToEncoded(),*readMem });
+			}
+			myfile.close();
+		}
+	}
+};
+template <>
+class MyMap<uint64_t, CraftingProcess> : public std::unordered_map<uint64_t, CraftingProcess>
+{
+public:
+	CraftingProcess* GetValue(uint64_t key)
+	{
+		auto find = this->find(key);
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	void Serialize(std::string filename)
+	{
+		std::ofstream myfile;
+		myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+		if (myfile.is_open())
+		{
+			for (auto &kv : *this)
+			{
+				myfile.write((char*)&kv.second, sizeof(CraftingProcess));
+			}
+			myfile.close();
+		}
+	}
+	void Deserialize(std::string filename)
+	{
+		std::ifstream myfile;
+		myfile.open(filename, std::ios::in | std::ios::binary);
+		myfile.seekg(0, std::ios::beg);
+		int fileLength = GetFileLength(filename);
+		if (myfile.is_open() && fileLength > 0)
+		{
+			myfile.seekg(0, std::ios::beg);
+			CraftingProcess* readMem = new CraftingProcess();
+			while (!myfile.eof()) {
+				myfile.read((char*)readMem, sizeof(CraftingProcess));
+				this->insert({ readMem->pos.CoordToEncoded(),*readMem });
+			}
+			myfile.close();
+		}
+	}
 };
 template<>
 class MyMap<uint64_t, LogicTile*> : public std::unordered_map<uint64_t, LogicTile*>
@@ -74,7 +164,9 @@ public:
 	{
 		std::ifstream myfile;
 		myfile.open(filename, std::ios::in | std::ios::binary);
-		if (myfile.is_open())
+		myfile.seekg(0, std::ios::beg);
+		int fileLength = GetFileLength(filename);
+		if (myfile.is_open() && fileLength > 0)
 		{
 			myfile.seekg(0, std::ios::beg);
 			uint16_t* sectionSize = new uint16_t();
@@ -93,3 +185,4 @@ public:
 		}
 	}
 };
+#endif

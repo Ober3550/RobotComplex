@@ -17,10 +17,13 @@
 #include <Agui/FlowLayout.hpp>
 class WidgetCreator {
 public:
+	agui::Button playButton;
 	agui::Button loadButton;
 	agui::Button saveButton;
 	agui::Button exitButton;
-	agui::Frame frame;
+	agui::ListBox worldSaves;
+	agui::Frame saveFrame;
+	agui::Frame mainFrame;
 	agui::Gui* mGui;
 	WidgetCreator(agui::Gui *guiInstance);
 };

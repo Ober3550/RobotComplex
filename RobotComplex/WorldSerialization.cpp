@@ -2,6 +2,7 @@
 #include "WorldSave.h"
 #include "ItemTile.h"
 #include "Windows.h"
+#include "ProgramData.h"
 
 void WorldSave::Serialize(std::string filename)
 {
@@ -12,9 +13,10 @@ void WorldSave::Serialize(std::string filename)
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
 	items.Serialize("saves/" + filename + "/items.bin");
 	robots.Serialize("saves/" + filename + "/robots.bin");
+	nextRobotPos.Serialize("saves/" + filename + "/robotsNext.bin");
 	logictiles.Serialize("saves/" + filename + "/logic.bin");
-	updateQueueB.Serialize("saves/" + filename + "/updateQueueA.bin");
-	updateQueueC.Serialize("saves/" + filename + "/updateQueueB.bin");
+	updateQueueB.Serialize("saves/" + filename + "/updateQueueB.bin");
+	updateQueueC.Serialize("saves/" + filename + "/updateQueueC.bin");
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 }
 void WorldSave::Deserialize(std::string filename)
@@ -23,8 +25,10 @@ void WorldSave::Deserialize(std::string filename)
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	items.Deserialize("saves/" + filename + "/items.bin");
 	robots.Deserialize("saves/" + filename + "/robots.bin");
+	nextRobotPos.Deserialize("saves/" + filename + "/robotsNext.bin");
 	logictiles.Deserialize("saves/" + filename + "/logic.bin");
-	updateQueueB.Deserialize("saves/" + filename + "/updateQueueA.bin");
-	updateQueueC.Deserialize("saves/" + filename + "/updateQueueB.bin");
+	updateQueueB.Deserialize("saves/" + filename + "/updateQueueB.bin");
+	updateQueueC.Deserialize("saves/" + filename + "/updateQueueC.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
+	program.redrawStatic = true;
 }

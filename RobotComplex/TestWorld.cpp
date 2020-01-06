@@ -150,7 +150,7 @@ void CreateTestWorld()
 	tile->quantity = 255;
 	// Clay on ground
 	tile = &world.items[Pos{ -7, 17 }.CoordToEncoded()];
-	tile->itemTile = 8;
+	tile->itemTile = 6;
 	tile->quantity = 255;
 
 	/*

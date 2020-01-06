@@ -24,7 +24,6 @@ agui::SFML2Input* inputHandler = NULL;
 agui::SFML2Graphics* graphicsHandler = NULL;
 agui::Font *defaultFont = NULL;
 std::thread worldUpdate;
-bool running;
 
 std::vector<sf::Texture*> groundTextures;
 std::vector<sf::Texture*> itemTextures;
@@ -48,68 +47,6 @@ WorldSave world;
 WorldSave test;
 WidgetCreator* creator;
 constexpr uint8_t FRAMERATE = 60;
-
-class SimpleButtonListener : public agui::ButtonListener
-{
-private:
-	std::function<void()> buttonAction;
-public:
-	SimpleButtonListener(std::function<void()> buttonAction) {
-		this->buttonAction = buttonAction;
-	};
-	void buttonStateChanged(agui::Button *, agui::Button::ButtonStateEnum state) {
-		if (state == agui::Button::ButtonStateEnum::CLICKED)
-		{
-			buttonAction();
-		}
-	}
-	void toggleStateChanged(agui::Button *, bool) {}
-	void death(agui::Button *) {}
-	void isToggleButtonChanged(agui::Button *, bool) {}
-	void textAlignmentChanged(agui::Button *, agui::AreaAlignmentEnum) {}
-	~SimpleButtonListener(void) {};
-};
-
-WidgetCreator::WidgetCreator(agui::Gui *guiInstance)
-{
-	mGui = guiInstance;
-
-	gui->add(&frame);
-	// Options frame
-	int frameWidth = 220;
-	int frameHeight = 200;
-	frame.setSize(frameWidth, frameHeight);
-	frame.setLocation((program.windowWidth / 2) - (frameWidth / 2), (program.windowHeight / 2) - (frameHeight / 2));
-	frame.setText("Main Menu");
-	// Load Button
-	loadButton.setSize(frameWidth - 10, 50);
-	loadButton.setText("Load Game");
-	loadButton.addButtonListener(new SimpleButtonListener([&] {
-		program.worldmutex.lock();
-		world.Deserialize("TestWorld");
-		program.worldmutex.unlock();
-	}));
-	frame.add(&loadButton);
-	loadButton.setLocation(0, 0);
-	// Save Button
-	saveButton.setSize(frameWidth - 10, 50);
-	saveButton.setText("Save Game");
-	saveButton.addButtonListener(new SimpleButtonListener([&] {
-		program.worldmutex.lock();
-		world.Serialize("TestWorld");
-		program.worldmutex.unlock();
-	}));
-	frame.add(&saveButton);
-	saveButton.setLocation(0, 50);
-	// Exit Button
-	exitButton.setSize(frameWidth - 10, 50);
-	exitButton.setText("Exit Game");
-	exitButton.addButtonListener(new SimpleButtonListener([&] {
-		running = false;
-	}));
-	frame.add(&exitButton);
-	exitButton.setLocation(0, 100);
-}
 
 void initializeAgui(sf::RenderTarget& target)
 {
@@ -155,10 +92,9 @@ void cleanUp()
 }
 void UpdateWorld()
 {
-	while (running) {
+	while (program.running) {
 		if (!program.gamePaused)
 		{
-			creator->frame.setVisibility(false);
 			clock_t beginUpdate = clock();
 			program.worldmutex.lock();
 			UpdateMap();
@@ -167,10 +103,6 @@ void UpdateWorld()
 			int padTime = int(CLOCKS_PER_SEC / float(FRAMERATE)) + beginUpdate - updateTime;
 			if (padTime > 0)
 				Sleep(padTime);
-		}
-		else
-		{
-			creator->frame.setVisibility(true);
 		}
 	}
 }
@@ -192,15 +124,15 @@ int main()
 	LoadPrototypes();
 	LoadLogicToHotbar();
 	world = WorldSave();
-	CreateTestWorld();
+	//CreateTestWorld();
 	program.gamePaused = true;
 
 	// Load Gui
 	initializeAgui(window);
 	addWidgets();
 	MapUpdate.launch();
-	running = true;
-	while (window.isOpen() && running)
+	program.running = true;
+	while (window.isOpen() && program.running)
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -217,10 +149,13 @@ int main()
 			inputHandler->processEvent(event);
 			GameInput(window, event);
 		}
-		
+		creator->mainFrame.setVisibility(program.showMain);
+		creator->saveFrame.setVisibility(program.showSave);
 		window.clear();
 		clock_t beginUpdate = clock();
+		program.worldmutex.lock();
 		program.DrawGameState(window);
+		program.worldmutex.unlock();
 		gui->logic();
 		gui->render();
 		window.display();
@@ -234,7 +169,7 @@ int main()
 			program.deltaTime -= CLOCKS_PER_SEC;
 		}
 	}
-	running = false;
+	program.running = false;
 	MapUpdate.wait();
 	cleanUp();
 	return 0;

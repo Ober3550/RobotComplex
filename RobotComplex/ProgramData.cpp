@@ -91,6 +91,18 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
 			sprite.setPosition(float(x + craftingRef.animationOffset.x), float(y + craftingRef.animationOffset.y));
 			program.animationSprites.emplace_back(sprite);
 		}
+		int craftbarHeight = 10;
+		sf::RectangleShape craftTotal;
+		craftTotal.setFillColor(sf::Color(50, 50, 50));
+		craftTotal.setSize(sf::Vector2f(Gconstants::tileSize, craftbarHeight / 2));
+		craftTotal.setPosition(float(x + craftingRef.animationOffset.x), float(y + craftingRef.animationOffset.y + Gconstants::halfTileSize - craftbarHeight / 2));
+		program.textBoxes.emplace_back(craftTotal);
+
+		sf::RectangleShape craftPercent;
+		craftPercent.setFillColor(sf::Color(80, 140, 200));
+		craftPercent.setSize(sf::Vector2f((float(recipe->totalTicks - recipe->ticks) / float(recipe->totalTicks))*Gconstants::tileSize, craftbarHeight / 2));
+		craftPercent.setPosition(float(x + craftingRef.animationOffset.x), float(y + craftingRef.animationOffset.y + Gconstants::halfTileSize - craftbarHeight / 2));
+		program.textBoxes.emplace_back(craftPercent);
 	}
 }
 void ProgramData::RecreateSprites() {

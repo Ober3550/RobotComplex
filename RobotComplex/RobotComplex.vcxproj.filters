@@ -18,12 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AGUIExample.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
     <ClCompile Include="CraftingClass.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
@@ -61,6 +55,12 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="WorldSerialization.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLength.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetCreator.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

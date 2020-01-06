@@ -30,7 +30,7 @@ bool Robot::Move()
 		if (auto robot = world.robots.GetValue(newPos.CoordToEncoded()) == nullptr)
 		{
 			// If there is no robot in the moved map ie. No collision between moving -> moved
-			if (auto robotNext = program.nextRobotPos.GetValue(newPos.CoordToEncoded()) == nullptr)
+			if (auto robotNext = world.nextRobotPos.GetValue(newPos.CoordToEncoded()) == nullptr)
 			{
 				// Robot cannot move into void.
 				if (GroundTile * groundTile = world.GetGroundTile(newPos))
@@ -78,7 +78,7 @@ bool Robot::Move()
 							logicTile->DoRobotLogic(nullptr);
 						}
 
-						program.nextRobotPos.insert({ this->pos.CoordToEncoded(), *this });
+						world.nextRobotPos.insert({ this->pos.CoordToEncoded(), *this });
 						return true;
 					}
 				}
