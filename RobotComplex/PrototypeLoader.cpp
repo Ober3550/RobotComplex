@@ -1,3 +1,5 @@
+#include <regex>
+#include <cctype>
 #include <SFML/Graphics.hpp>
 #include "WorldSave.h"
 #include "ProgramData.h"
@@ -7,11 +9,14 @@
 #include "MyMod.h"
 #include "CraftingProcess.h"
 #include "RedirectorColors.h"
-#include "SpriteGenerator.h"
 #include "TestWorld.h"
 #include "PrototypeLoader.h"
 #include "RecipePrototype.h"
 #include "Textures.h"
+#include "FindInVector.h"
+#include "Animation.h"
+#include "GetFileNamesInFolder.h"
+
 
 sf::Texture* LoadTexture(std::string filename)
 {
@@ -32,106 +37,58 @@ void LoadAllTextures()
 		sf::IntRect fontRect = sf::IntRect(i * 3, 0, 3, 5);
 		program.fontMap.insert({ fontIndex[i], fontRect });
 	}
-	if (!program.guiFont.loadFromFile("hemi head bd it.ttf"))
-	{
-		//error
-	}
 }
 
-template < typename T>
-std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T& element)
-{
-	std::pair<bool, int > result;
 
-	// Find given element in vector
-	auto it = std::find(vecOfElements.begin(), vecOfElements.end(), element);
-
-	if (it != vecOfElements.end())
-	{
-		result.second = distance(vecOfElements.begin(), it);
-		result.first = true;
-	}
-	else
-	{
-		result.first = false;
-		result.second = -1;
-	}
-
-	return result;
-}
 
 void LoadPrototypes()
 {
 	LoadAllTextures();
 
-	// Ground prototypes
-	std::vector<std::string> groundPrototypes;
-	groundPrototypes.emplace_back("grass");
-	groundPrototypes.emplace_back("sand");
-	groundPrototypes.emplace_back("water");
-
+	// Ground Tiles
+	std::vector<std::string> groundPrototypes = getFileNamesInFolder("Assets/x32/alien_biomes");
 	for (const std::string& text : groundPrototypes)
 	{
-		groundTextures.emplace_back(LoadTexture("ground/" + text + ".png"));
+		groundTextures.emplace_back(LoadTexture("alien_biomes/" + text));
 	}
 
-	// Item prototypes
-	std::vector<std::string> itemTooltips;
-	std::vector<std::string> itemPrototypes;
-	itemPrototypes.emplace_back("");
-	itemTooltips.emplace_back("Nothing");
-	itemPrototypes.emplace_back("anything");
-	itemTooltips.emplace_back("Anything");
-	itemPrototypes.emplace_back("energy");
-	itemTooltips.emplace_back("");
-
-	// Ores
-	itemPrototypes.emplace_back("coal_ore");
-	itemTooltips.emplace_back("Coal ore");
-	itemPrototypes.emplace_back("iron_ore");
-	itemTooltips.emplace_back("Iron ore");
-	itemPrototypes.emplace_back("copper_ore");
-	itemTooltips.emplace_back("Copper ore");
-	itemPrototypes.emplace_back("clay");
-	itemTooltips.emplace_back("Clay");
-
-	// Tier 1 Products
-	itemPrototypes.emplace_back("iron_ingot");
-	itemTooltips.emplace_back("Iron ingot");
-	itemPrototypes.emplace_back("copper_ingot");
-	itemTooltips.emplace_back("Copper ingot");
-	itemPrototypes.emplace_back("clay_brick");
-	itemTooltips.emplace_back("Clay Brick");
-	itemPrototypes.emplace_back("steel_beam");
-	itemTooltips.emplace_back("Steel Beam");
-	
-	// Dies
-	itemPrototypes.emplace_back("die_plate");
-	itemTooltips.emplace_back("Plate Die");
-	itemPrototypes.emplace_back("die_gear");
-	itemTooltips.emplace_back("Gear Die");
-	itemPrototypes.emplace_back("die_extrude");
-	itemTooltips.emplace_back("Extruding Die");
-
-	// Tier 2 Products
-	itemPrototypes.emplace_back("copper_plate");
-	itemTooltips.emplace_back("Copper Plate");
-	itemPrototypes.emplace_back("copper_wire");
-	itemTooltips.emplace_back("Copper Wire");
-	itemPrototypes.emplace_back("iron_plate");
-	itemTooltips.emplace_back("Iron Plate");
-	itemPrototypes.emplace_back("iron_gear");
-	itemTooltips.emplace_back("Iron Gear");
-	itemPrototypes.emplace_back("iron_rod");
-	itemTooltips.emplace_back("Iron Rod");
-
-	for (const std::string& text : itemPrototypes)
+	// Items
+	program.itemPrototypes = {
+		"",
+		"anything",
+		"energy",
+		"coal_ore",
+		"iron_ore",
+		"copper_ore",
+		"clay",
+		"iron_ingot",
+		"copper_ingot",
+		"clay_brick",
+		"steel_ingot",
+		"copper_plate",
+		"copper_wire",
+		"iron_plate",
+		"iron_gear",
+		"iron_rod"
+	};
+	std::regex addSpaces("_");
+	// Populate the item tooltips according to the prototype names
+	for (std::string text : program.itemPrototypes)
+	{
+		std::string temp = "";
+		temp = std::regex_replace(text, addSpaces, " ");
+		uint16_t i = 0;
+		temp[i] = std::toupper(temp[i]);
+		for (i = 1; i < temp.length(); i++)
+		{
+			if (temp[i - 1] == ' ')
+				temp[i] = std::toupper(temp[i]);
+		}
+		program.itemTooltips.emplace_back(temp);
+	}
+	for (const std::string& text : program.itemPrototypes)
 	{
 		itemTextures.emplace_back(LoadTexture("items/" + text + ".png"));
-	}
-	for (const std::string& text : itemTooltips)
-	{
-		program.itemTooltips.emplace_back(text);
 	}
 
 	//Logic Tooltips
@@ -160,6 +117,12 @@ void LoadPrototypes()
 	// Animation prototypes
 	std::vector<std::string> animationPrototypes;
 	animationPrototypes.emplace_back("furnace_animation");
+	Animation newAnimation;
+	newAnimation.animationSpeed = 10;
+	newAnimation.animationType = ping;
+	newAnimation.frameWidth = 32;
+	newAnimation.animationOffset = Pos{ 0,32 };
+	program.animationTemplates.emplace_back(newAnimation);
 
 	for (const std::string& text : animationPrototypes)
 	{
@@ -168,28 +131,43 @@ void LoadPrototypes()
 
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Recipe Catalyst, Animation, Animation Offset
 	std::vector<RecipeProto> recipePrototypes;
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation", Pos{ 0,32 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation", Pos{ 0,32 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation", Pos{ 0,32 }));
+	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ 
 		{ "steel_ingot",1 }, { "steel_ingot",1 }, 
 		{ "iron_ingot",-1 }, { "iron_ingot",-1 }, 
 		{ "iron_ingot",-1 }, { "coal_ore",-1 } 
-		}, 2, 5, "coal_ore", "", Pos{0,0}));
+		}, 2, 5, "coal_ore", ""));
 
-	// Dies
+	// Tier 2 Products
+	// Gear Shape
 	recipePrototypes.emplace_back(RecipeProto({
-		{ "clay",-1 }, { "clay",-1 }, { "clay",-1 },
-		{ "clay",-1 }, { "die_extrude",1 }, { "clay",-1 },
-		{ "clay",-1 }, { "clay",-1 }, { "clay",-1 },
-		}, 3, 1, "clay", "", Pos{ 0,0 }));
+		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
+		{ "iron_ingot",-1 }, { "iron_gear",1 }, { "iron_ingot",-1 },
+		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
+		}, 3, 1, "iron_ingot", ""));
 
 	recipePrototypes.emplace_back(RecipeProto({
-		{ "",0 }, { "die_plate",1 }, 
-		{ "clay",-1 }, { "clay",-1 },
-		{ "clay",-1 }, { "clay",-1 },
-		}, 2, 1, "clay", "", Pos{ 0,0 }));\
+		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
+		{ "copper_ingot",-1 }, { "copper_wire",1 }, { "copper_ingot",-1 },
+		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
+		}, 3, 1, "copper_ingot", ""));
 
+	// Plates
+	recipePrototypes.emplace_back(RecipeProto({
+		{ "",0 }, { "iron_plate",1 }, 
+		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
+		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
+		}, 2, 1, "iron_ingot", ""));
+
+	recipePrototypes.emplace_back(RecipeProto({
+		{ "",0 }, { "copper_plate",1 },
+		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
+		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
+		}, 2, 1, "copper_ingot", ""));
+
+	/*
 	recipePrototypes.emplace_back(RecipeProto({
 		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 },
 		{ "clay",-1 }, { "clay",-1 }, { "",0 },{ "clay",-1 }, { "clay",-1 },
@@ -197,15 +175,7 @@ void LoadPrototypes()
 		{ "clay",-1 }, { "clay",-1 }, { "",0 },{ "clay",-1 }, { "clay",-1 },
 		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 }
 		}, 5, 1, "clay", "", Pos{ 0,0 }));
-
-	// Tier 2 Products
-
-	recipePrototypes.emplace_back(RecipeProto({ { "copper_wire"  ,1 }, { "die_extrude",0,1 },{ "copper_ingot",-1 } }, 1, 5, "copper_ingot", "", Pos{ 0,0 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "copper_plate"  ,1 }, { "die_plate",0,1 },{ "copper_ingot",-1 } }, 1, 5, "copper_ingot", "", Pos{ 0,0 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_rod"  ,1 }, { "die_extrude",0,1 },{ "iron_ingot",-1 } }, 1, 5, "iron_ingot", "", Pos{ 0,0 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_gear"  ,1 }, { "die_gear",0,1 },{ "iron_ingot",-1 } }, 1, 5, "iron_ingot", "", Pos{ 0,0 }));
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_plate"  ,1 }, { "die_plate",0,1 },{ "iron_ingot",-1 } }, 1, 5, "iron_ingot", "", Pos{ 0,0 }));
-	
+		*/	
 
 	for (const RecipeProto& recipeProto : recipePrototypes)
 	{
@@ -216,25 +186,21 @@ void LoadPrototypes()
 		std::vector<RecipeComponent> recipe;
 		for (const RecipeCompProto& recipeCompProto : recipeProto.recipe)
 		{
-			uint16_t itemIndex = findInVector(itemPrototypes, recipeCompProto.itemName).second;
-			if (itemIndex == -1)
+			std::pair<bool,int> itemIndex = findInVector(program.itemPrototypes, recipeCompProto.itemName);
+			if (!itemIndex.first)
 			{
 				OutputDebugStringA(("Recipe Load Fail. Item: " + recipeCompProto.itemName + " does not exist. ").c_str());
+				assert(false);
 			}
 			else
-			recipe.emplace_back(RecipeComponent{ itemIndex, recipeCompProto.requirement, recipeCompProto.resultState });
+			recipe.emplace_back(RecipeComponent{ (uint16_t)itemIndex.second, recipeCompProto.requirement, recipeCompProto.resultState });
 		}
 		newRecipe.recipe = recipe;
 		newRecipe.width = recipeProto.recipeWidth;
-		newRecipe.craftTicks = recipeProto.craftingTime * 60;
-		uint16_t catalystIndex = findInVector(itemPrototypes, recipeProto.catalyst).second;
-		
-		// Animation Population
-		newRecipe.animationTextureRef = findInVector(animationPrototypes, recipeProto.animation).second;
-		// Animation slides is equal to total texture width / 32 * recipe width. So that animation slides are tile aligned
-		newRecipe.animationOffset = recipeProto.animationOffset;
-		// Add 1 to animationTextureRef since 0 is no animation
-		++newRecipe.animationTextureRef;
+		newRecipe.height = (uint8_t)(float(recipe.size()) / newRecipe.width);
+		newRecipe.craftTicks = recipeProto.craftingTime * GC::UPDATERATE;
+		uint16_t catalystIndex = findInVector(program.itemPrototypes, recipeProto.catalyst).second;
+		newRecipe.animationReference = (findInVector(animationPrototypes, recipeProto.animation).second + 1);
 
 		program.itemRecipeList[catalystIndex].emplace_back(newRecipe.recipeIndex);
 		program.craftingRecipes.emplace_back(newRecipe);

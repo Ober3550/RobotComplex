@@ -9,19 +9,24 @@
 #include "CraftingProcess.h"
 #include "ItemTile.h"
 #include "MySet.h"
+#include "FastNoiseSIMD/FastNoiseSIMD.h"
 
 struct WorldSave {
 public:
 	MyMap<uint64_t, ItemTile> items;
+	MyMap<uint64_t, uint64_t> nextItemPos;
+	MySet<uint64_t> itemPrevMoved;
 	MyMap<uint64_t, Robot> robots;
-	MyMap<uint64_t, Robot> nextRobotPos;					// Storage for next robot position that gets swapped at end of update
+	MyMap<uint64_t, uint64_t> nextRobotPos;
 	MyMap<uint64_t, LogicTile*> logictiles;
 	MyMap<uint64_t, WorldChunk> worldChunks;
 	MyMap<uint64_t, CraftingProcess> craftingQueue;
-	MySet<uint64_t> updateQueueA;
-	MySet<uint64_t> updateQueueB;
-	MySet<uint64_t> updateQueueC;
+	MySet<uint64_t> updateQueueA;	// Processing queue for update from Queue B
+	MySet<uint64_t> updateQueueB;	// Queue for current updates
+	MySet<uint64_t> updateQueueC;	// Queue for updates next tick
 	uint64_t tick;
+	uint64_t seed = 0;
+	FastNoiseSIMD* noiseRef;
 	GroundTile*		 GetGroundTile(Pos pos);
 	ItemTile*		 GetItemTile(Pos pos);
 	ItemTile*		 GetItemTile(uint64_t encodedPos);
@@ -31,6 +36,11 @@ public:
 	LogicTile*		 GetLogicTile(uint64_t encodedPos);
 	CraftingProcess* GetCrafting(Pos pos);
 	CraftingProcess* GetCrafting(uint64_t encodedPos);
+	WorldSave()
+	{
+		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
+	}
+	bool ChangeItem(Pos pos, uint16_t item, int quantity);
 	void GenerateChunk(Pos pos);
 	void Serialize(std::string filename);
 	void Deserialize(std::string filename);

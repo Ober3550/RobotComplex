@@ -5,10 +5,10 @@
 #include "Constants.h"
 struct WorldChunk {
 	Pos chunkPos = Pos{ 0,0 };
-	std::array<GroundTile, Gconstants::chunkTileNum> tiles;
+	std::array<GroundTile, GC::chunkTileNum> tiles;
 	GroundTile* GetTile(Pos worldPos)
 	{
-		int index = worldPos.y << Gconstants::chunkShift | worldPos.x;
+		int index = (worldPos.y << GC::chunkShift) | worldPos.x;
 		return &tiles[index];
 	}
 };

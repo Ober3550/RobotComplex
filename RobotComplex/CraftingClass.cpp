@@ -53,7 +53,7 @@ void CraftingClass::DoCrafting(Pos pos)
 			{
 				if (CheckCrafting(pos.RelativePosition(-i, -j)))
 				{
-					CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks, craftTicks };
+					CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks, craftTicks, this->animationReference };
 					world.craftingQueue.insert({ pos.RelativePosition(-i,-j).CoordToEncoded(),addProcess });
 				}
 			}
@@ -89,14 +89,8 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 					Pos alterPos = pos.RelativePosition(k, l);
 					if (ItemTile * tile = &world.items[alterPos.CoordToEncoded()])
 					{
-						tile->quantity += recipeComp.resultState;
-						// Add item to tile
-						tile->itemTile = recipeComp.itemTile;
-						// Remove item if reaches 0
-						if (tile->quantity == 0)
-						{
-							world.items.erase(alterPos.CoordToEncoded());
-						}
+						// This must be true otherwise the successful craft was false
+						assert(world.ChangeItem(alterPos, recipeComp.itemTile, recipeComp.resultState));
 						if (recipeComp.resultState > 0)	// If an item is populated at a tile
 						{
 							// Try to queue a different recipe according to that item type.
@@ -109,6 +103,18 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 		if(success == craftagain)
 		{
 			world.craftingQueue[pos.CoordToEncoded()].ticks = craftTicks;
+		}
+	}
+}
+
+void CraftingClass::TryCrafting(uint16_t item, Pos itemPos)
+{
+	if (auto recipeList = program.itemRecipeList.GetValue(item))
+	{
+		// Try to craft item when placed
+		for (uint16_t recipe : *recipeList)
+		{
+			program.craftingRecipes[recipe].DoCrafting(itemPos);
 		}
 	}
 }

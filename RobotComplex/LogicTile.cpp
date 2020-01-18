@@ -1,7 +1,6 @@
 #pragma once
 #include "Pos.h"
 #include "Facing.h"
-#include "Active.h"
 #include "LogicTile.h"
 #include "LogicTypes.h"
 #include "Robot.h"
@@ -212,7 +211,7 @@ void PressurePlate::DoItemLogic()
 	if (ItemTile * thisTile = world.GetItemTile(this->pos))
 	{
 		this->prevSignal = this->signal;
-		this->signal = Gconstants::maxSignalStrength;
+		this->signal = GC::maxSignalStrength;
 	}
 	else
 	{
@@ -236,7 +235,7 @@ void PressurePlate::DoRobotLogic(Robot* robotRef)
 	if (robotRef)
 	{
 		this->prevSignal = this->signal;
-		this->signal = Gconstants::maxSignalStrength;
+		this->signal = GC::maxSignalStrength;
 	}
 	else
 	{
@@ -287,15 +286,15 @@ void Inverter::DoWireLogic()
 	this->prevSignal = this->signal;
 	if (b1 > b2)
 	{
-		if (Gconstants::maxSignalStrength - a + b1 > 0)
-			this->signal = MyMod(Gconstants::maxSignalStrength - a + b1,32);
+		if (GC::maxSignalStrength - a + b1 > 0)
+			this->signal = MyMod(GC::maxSignalStrength - a + b1,32);
 		else
 			this->signal = 0;
 	}
 	else
 	{
-		if (Gconstants::maxSignalStrength - a + b2 > 0)
-			this->signal = MyMod(Gconstants::maxSignalStrength - a + b2, 32);
+		if (GC::maxSignalStrength - a + b2 > 0)
+			this->signal = MyMod(GC::maxSignalStrength - a + b2, 32);
 		else
 			this->signal = 0;
 	}
@@ -320,7 +319,7 @@ void Booster::DoWireLogic()
 	if (LogicTile* tileBehind = world.GetLogicTile(tileBack.CoordToEncoded()))
 	{
 		this->prevSignal = this->signal;
-		this->signal = tileBehind->signal > 0 ? Gconstants::maxSignalStrength : 0;
+		this->signal = tileBehind->signal > 0 ? GC::maxSignalStrength : 0;
 		if (this->prevSignal != this->signal)
 		{
 			Pos tileFore = this->pos.FacingPosition(this->facing);

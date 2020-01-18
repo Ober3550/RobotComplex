@@ -11,10 +11,8 @@
 #include "MyMod.h"
 #include "CraftingProcess.h"
 #include "RedirectorColors.h"
-#include "SpriteGenerator.h"
 #include "TestWorld.h"
 #include "PrototypeLoader.h"
-#include "GameInput.h"
 #include "TitleScreen.h"
 #include "WidgetCreator.h"
 #include "Textures.h"
@@ -47,6 +45,7 @@ WorldSave world;
 WorldSave test;
 WidgetCreator* creator;
 constexpr uint8_t FRAMERATE = 60;
+constexpr uint8_t UPDATERATE = 20;
 
 void initializeAgui(sf::RenderTarget& target)
 {
@@ -66,14 +65,11 @@ void initializeAgui(sf::RenderTarget& target)
 	//Set the graphics handler
 	gui->setGraphics(graphicsHandler);
 	//Set the font
-	defaultFont = agui::Font::load("Fonts/DejaVuSans.ttf", 16);
+	std::string font = "Fonts/DejaVuSans.ttf";
+	defaultFont = agui::Font::load(font, 16);
+	program.guiFont.loadFromFile(font);
 	//Setting a global font is required and failure to do so will crash.
 	agui::Widget::setGlobalFont(defaultFont);
-}
-
-void addWidgets()
-{
-	creator = new WidgetCreator(gui);
 }
 
 void cleanUp()
@@ -93,17 +89,18 @@ void cleanUp()
 void UpdateWorld()
 {
 	while (program.running) {
+		clock_t beginUpdate = clock();
+		program.worldMutex.lock();
+		program.framesSinceTick = 0;
 		if (!program.gamePaused)
-		{
-			clock_t beginUpdate = clock();
-			program.worldmutex.lock();
-			UpdateMap();
-			program.worldmutex.unlock();
-			clock_t updateTime = clock();
-			int padTime = int(CLOCKS_PER_SEC / float(FRAMERATE)) + beginUpdate - updateTime;
-			if (padTime > 0)
-				Sleep(padTime);
-		}
+			program.UpdateMap();
+		program.worldMutex.unlock();
+		clock_t updateTime = clock();
+		int padTime = int(CLOCKS_PER_SEC / float(GC::UPDATERATE)) + beginUpdate - updateTime;
+		if (padTime > 0)
+			Sleep(padTime);
+		clock_t endUpdate = clock();
+		program.updateRate = (program.updateRate + float(CLOCKS_PER_SEC) / float(endUpdate - beginUpdate)) * 0.5;
 	}
 }
 
@@ -114,22 +111,22 @@ int main()
 	// Generate the window
 	program.windowHeight = 1010;
 	program.windowWidth = 1920;
-	sf::RenderWindow window(sf::VideoMode(program.windowWidth, program.windowHeight), "Agui - SFML2 Example");
+	sf::RenderWindow window(sf::VideoMode(program.windowWidth, program.windowHeight), "Terraforma");
 	sf::View view = window.getView();
 	view.setCenter(0, 0);
 	window.setView(view);
-	window.setFramerateLimit(FRAMERATE);
+	window.setFramerateLimit(GC::FRAMERATE);
 
 	// Load program
 	LoadPrototypes();
 	LoadLogicToHotbar();
 	world = WorldSave();
-	//CreateTestWorld();
+	CreateTestWorld2();
 	program.gamePaused = true;
 
 	// Load Gui
 	initializeAgui(window);
-	addWidgets();
+	creator = new WidgetCreator(gui, &window);
 	MapUpdate.launch();
 	program.running = true;
 	while (window.isOpen() && program.running)
@@ -147,27 +144,20 @@ int main()
 				gui->resizeToDisplay();
 			}
 			inputHandler->processEvent(event);
-			GameInput(window, event);
+			creator->UserInput(event);
 		}
-		creator->mainFrame.setVisibility(program.showMain);
-		creator->saveFrame.setVisibility(program.showSave);
+		creator->SetGuiVisibility();
 		window.clear();
 		clock_t beginUpdate = clock();
-		program.worldmutex.lock();
+		program.worldMutex.lock();
+		program.framesSinceTick++;
 		program.DrawGameState(window);
-		program.worldmutex.unlock();
+		program.worldMutex.unlock();
 		gui->logic();
 		gui->render();
 		window.display();
 		clock_t endUpdate = clock();
-		program.deltaTime += endUpdate - beginUpdate;
-		program.frames++;
-		if (program.deltaTime > 1000.0)
-		{
-			program.frameRate = double(program.frames) * 0.5 + program.frameRate * 0.5;
-			program.frames = 0;
-			program.deltaTime -= CLOCKS_PER_SEC;
-		}
+		program.frameRate = (program.frameRate + float(CLOCKS_PER_SEC) / float(endUpdate - beginUpdate)) * 0.5;
 	}
 	program.running = false;
 	MapUpdate.wait();

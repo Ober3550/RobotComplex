@@ -56,7 +56,7 @@ Pos Pos::RelativePosition(Pos other)
 }
 Pos Pos::ChunkPosition()
 {
-	Pos result{ this->x >> Gconstants::chunkShift, this->y >> Gconstants::chunkShift };
+	Pos result{ this->x >> GC::chunkShift, this->y >> GC::chunkShift };
 	return result;
 }
 uint64_t Pos::ChunkEncoded()
@@ -65,7 +65,7 @@ uint64_t Pos::ChunkEncoded()
 }
 Pos Pos::InChunkPosition()
 {
-	Pos result{ this->x & Gconstants::chunkMask,this->y & Gconstants::chunkMask };
+	Pos result{ this->x & GC::chunkMask,this->y & GC::chunkMask };
 	return result;
 }
 bool Pos::operator==(Pos other)

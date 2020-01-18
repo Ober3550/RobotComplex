@@ -9,154 +9,183 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Header Files\FastNoise">
+      <UniqueIdentifier>{97e51884-16c8-4a86-9928-41101c4ecf7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\WorldElements">
+      <UniqueIdentifier>{d3290081-3c98-482a-adf5-1653ce5ede08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\HelperElements">
+      <UniqueIdentifier>{44162ca3-5338-4361-ac8e-13d43e156972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Enums">
+      <UniqueIdentifier>{8abb71f9-c372-445c-b91c-35fcfe78d90a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CraftingClass.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
-    <ClCompile Include="GameInput.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx2.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
-    <ClCompile Include="LogicTile.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx512.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
-    <ClCompile Include="LogicTileDrawing.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_internal.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
-    <ClCompile Include="MyMap.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_neon.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
-    <ClCompile Include="MyMod.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse2.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
-    <ClCompile Include="ProgramData.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PrototypeLoader.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Robot.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestWorld.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WorldSave.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Pos.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WorldSerialization.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse41.cpp">
+      <Filter>Header Files\FastNoise</Filter>
     </ClCompile>
     <ClCompile Include="FileLength.cpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
+    <ClCompile Include="GetFileNamesInFolder.cpp">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
+    <ClCompile Include="MyMod.cpp">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Pos.cpp">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
+    <ClCompile Include="CraftingClass.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="CraftingProcess.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="LogicTile.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="LogicTileDrawing.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgramData.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="PrototypeLoader.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Robot.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="TestWorld.cpp">
+      <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
     <ClCompile Include="WidgetCreator.cpp">
-      <Filter>Resource Files</Filter>
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldSave.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldSerialization.cpp">
+      <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Active.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h">
+      <Filter>Header Files\FastNoise</Filter>
     </ClInclude>
-    <ClInclude Include="Animation.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD_internal.h">
+      <Filter>Header Files\FastNoise</Filter>
     </ClInclude>
-    <ClInclude Include="Constants.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="FindInVector.h">
+      <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
-    <ClInclude Include="CraftingClass.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GetFileNamesInFolder.h">
+      <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
-    <ClInclude Include="CraftingProcess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CraftingSuccess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Facing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GameInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Header.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LogicTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LogicTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyMod.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Pos.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProgramData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PrototypeLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RecipePrototype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RedirectorColors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReservedItems.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Robot.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpriteGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TestWorld.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorldChunk.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorldSave.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WidgetCreator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MySet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Textures.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="KeyNames.h">
+      <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
     <ClInclude Include="AnimationType.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Facing.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="CraftingClass.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="CraftingProcess.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="CraftingSuccess.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTile.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="LogicTile.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="LogicTypes.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMap.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMod.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="MySet.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Pos.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgramData.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="PrototypeLoader.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="RecipePrototype.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="RedirectorColors.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="ReservedItems.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Robot.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="TestWorld.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Textures.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Tile.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="WidgetCreator.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldSave.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldChunk.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

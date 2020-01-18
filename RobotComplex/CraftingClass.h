@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "Pos.h"
-#include "AnimationType.h"
 struct RecipeComponent
 {
 	uint16_t itemTile;		// Item required
@@ -13,13 +12,12 @@ public:
 	uint16_t recipeIndex;
 	std::vector<RecipeComponent> recipe;
 	uint8_t width;
-	uint16_t animationTextureRef = 0;
-	Pos animationOffset;
-	uint8_t animationSpeed = 10;
+	uint8_t height;
 	uint32_t craftTicks;
-	AnimationType animationType = ping;
+	uint16_t animationReference;
 	int CheckCrafting(Pos pos);
 	void TryCraftingOther(uint16_t item, Pos itemPos); // Tries crafting a different recipe once the previous one has finished. For chaining processes
 	void DoCrafting(Pos pos);
 	void SuccessfulCraft(Pos pos);
+	static void TryCrafting(uint16_t item, Pos itemPos);
 };

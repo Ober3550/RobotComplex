@@ -1,2 +1,7 @@
 #pragma once
-enum ReservedItem{nothing, anything, energy};
+enum ReservedItems{
+	nothing = 0, 
+	anything = 1, 
+	energy = 2,
+	totalReserved = 3
+};

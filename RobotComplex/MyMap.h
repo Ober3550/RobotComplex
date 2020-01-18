@@ -9,6 +9,7 @@
 #include "LogicTypes.h"
 #include "Robot.h"
 #include "CraftingProcess.h"
+#include "Pos.h"
 #ifndef __MYMAP_H__
 #define __MYMAP_H__
 
@@ -21,6 +22,11 @@ public:
 	valueType* GetValue(keyType key)
 	{
 		auto find = this->find(key);
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	valueType* GetValue(Pos key)
+	{
+		auto find = this->find(key.CoordToEncoded());
 		return find != this->end() ? &(find->second) : nullptr;
 	}
 	void Serialize(std::string filename)

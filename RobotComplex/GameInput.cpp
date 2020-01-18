@@ -3,81 +3,15 @@
 #include "WorldSave.h"
 #include "WidgetCreator.h"
 
-void SwapBots()
-{
-	// Swap the two robot maps
-	if (world.nextRobotPos.size() != 0)
-	{
-		world.robots = MyMap<uint64_t, Robot>(world.nextRobotPos);
-		world.nextRobotPos.clear();
-	}
-}
-
-void MoveRobots()
-{
-	for (auto iter = world.robots.begin(); iter != world.robots.end(); )
-	{
-		if (program.selectedRobot != &iter->second)
-		{
-			if (iter->second.Move())
-			{
-				iter = world.robots.erase(iter);
-			}
-			else
-				++iter;
-		}
-		else
-			++iter;
-	}
-	SwapBots();
-}
-
-void UpdateMap()
-{
-	// Update all the logic tiles that were queued last tick
-	world.updateQueueA = MySet<uint64_t>(world.updateQueueC);
-	world.updateQueueC.clear();
-	do {
-		for (uint64_t kv : world.updateQueueA)
-		{
-			if (LogicTile* logic = world.GetLogicTile(kv))
-			{
-				logic->DoWireLogic();
-			}
-		}
-		world.updateQueueA = MySet<uint64_t>(world.updateQueueB);
-		world.updateQueueB.clear();
-	} while (world.updateQueueA.size() != 0);
-	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
-	for (auto iter = world.craftingQueue.begin(); iter != world.craftingQueue.end(); )
-	{
-		iter->second.ticks--;
-		// Erase all 0 tick recipes from craftingQueue
-		if (iter->second.ticks == 0)
-			program.craftingRecipes[iter->second.craftingRecipe].SuccessfulCraft(iter->second.pos);
-		if (iter->second.ticks == 0) // Check twice because SuccessfulCraft() may add ticks to queue a new craft
-			iter = world.craftingQueue.erase(iter);
-		else
-			++iter;
-	}
-
-	// Move the robots 8 times a second
-	if ((world.tick & Gconstants::robotMoveFrequency) == 0)
-	{
-		MoveRobots();
-	}
-	++world.tick;
-}
-
 void MouseMoved()
 {
 	if (!program.gamePaused)
 	{
-		Pos mouseHovering = (program.mousePos + program.cameraPos) >> Gconstants::tileShift;
+		Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
 		if (Robot * robot = world.GetRobot(mouseHovering.CoordToEncoded()))
 		{
 			program.selectedRobot = robot;
-			program.cameraPos = mouseHovering << Gconstants::tileShift;
+			program.cameraPos = mouseHovering << GC::tileShift;
 			program.redrawStatic = true;
 			program.hotbarIndex = 0;
 			program.hotbar[0] = nullptr;
@@ -116,7 +50,7 @@ void LeftMousePressed()
 {
 	if (!program.gamePaused)
 	{
-		Pos mouseHovering = (program.mousePos + program.cameraPos) >> Gconstants::tileShift;
+		Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
 		if (Robot * robot = world.robots.GetValue(mouseHovering.CoordToEncoded()))
 		{
 		}
@@ -133,6 +67,10 @@ void LeftMousePressed()
 					LogicTile* hotbarElement = program.hotbar[program.hotbarIndex];
 					LogicTile* logicPlace = hotbarElement->Copy();
 					logicPlace->pos = mouseHovering;
+					if(Robot* robot = world.GetRobot(mouseHovering))
+					{
+						logicPlace->DoRobotLogic(robot);
+					}
 					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
 					world.updateQueueC.insert(logicPlace->pos.CoordToEncoded());										// Queue update for placed element
 					for (int i = 0; i < 4; i++)
@@ -151,10 +89,14 @@ void LeftMousePressed()
 
 void RightMousePressed()
 {
-	Pos mouseHovering = (program.mousePos + program.cameraPos) >> Gconstants::tileShift;
+	Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
 	if (LogicTile * deleteLogic = world.GetLogicTile(mouseHovering.CoordToEncoded()))
 	{
 		world.logictiles.erase(mouseHovering.CoordToEncoded());
+		if (Robot* robot = world.GetRobot(mouseHovering))
+		{
+			robot->stopped = false;
+		}
 	}
 	for (int i = 0; i < 4; i++)
 	{
@@ -177,16 +119,16 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 				Pos newPos = oldPos.FacingPosition(program.selectedRobot->facing);
 				if (program.selectedRobot->Move())
 				{
-					program.cameraPos = newPos << Gconstants::tileShift;
+					program.cameraPos = newPos << GC::tileShift;
 					world.robots.erase(oldPos.CoordToEncoded());
 					program.redrawStatic = true;
-					SwapBots();
+					program.SwapBots();
 					program.selectedRobot = world.robots.GetValue(newPos.CoordToEncoded());
 				}
 			}
 			else
 			{
-				program.cameraPos.y -= Gconstants::cameraSpeed;
+				program.cameraPos.y -= GC::cameraSpeed;
 				program.redrawStatic = true;
 			}
 		}break;
@@ -198,7 +140,7 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 			}
 			else
 			{
-				program.cameraPos.x -= Gconstants::cameraSpeed;
+				program.cameraPos.x -= GC::cameraSpeed;
 				program.redrawStatic = true;
 			}
 		}break;
@@ -210,7 +152,7 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 			}
 			else
 			{
-				program.cameraPos.y += Gconstants::cameraSpeed;
+				program.cameraPos.y += GC::cameraSpeed;
 				program.redrawStatic = true;
 			}
 		}break;
@@ -222,7 +164,7 @@ void GameInput(sf::RenderWindow &window, sf::Event event)
 			}
 			else
 			{
-				program.cameraPos.x += Gconstants::cameraSpeed;
+				program.cameraPos.x += GC::cameraSpeed;
 				program.redrawStatic = true;
 			}
 		}break;

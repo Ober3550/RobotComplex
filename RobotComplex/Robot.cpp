@@ -20,6 +20,40 @@ void Robot::Rotate(int r)
 	// Then converts back to enum
 	facing = Facing((int(facing) + r) & 3);
 }
+void Robot::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft)
+{
+	Pos prevPos = itemsMoving->back();
+	ItemTile* prevItem = world.GetItemTile(prevPos);
+	if (pushesLeft == 0)
+	{
+		// There is an item at the front of the stack that isn't the same type
+		if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
+		{
+			if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
+			{
+				itemsMoving->pop_back();
+			}
+		}
+		return;
+	}
+	if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
+	{
+		if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
+		{
+			return;
+		}
+		else
+		{
+			itemsMoving->emplace_back(prevPos.FacingPosition(toward));
+			PushItems(itemsMoving, toward, pushesLeft - 1);
+		}
+	}
+	else
+	{
+		itemsMoving->emplace_back(prevPos.FacingPosition(toward));
+		return;
+	}
+}
 bool Robot::Move()
 {
 	// For logic tile that stops robot untill it receives a signal
@@ -35,83 +69,49 @@ bool Robot::Move()
 				// Robot cannot move into void.
 				if (GroundTile * groundTile = world.GetGroundTile(newPos))
 				{
-					ItemTile* nextTile = world.GetItemTile(newPos.CoordToEncoded());
 					// If next tile has an item on it and robot is not carying an item
 					// reduce the quantity of the tile and assign the item id to the robot
-					if (nextTile)
+					if (ItemTile* nextTile = world.GetItemTile(newPos))
 					{
-						if (this->itemCarying == (uint16_t)ReservedItem::nothing && nextTile->quantity != 0)
+						std::vector<Pos> pushStack = { newPos};
+						PushItems(&pushStack, this->facing, GC::robotStrength);
+						if (!pushStack.empty())
 						{
-							nextTile->quantity--;
-							itemCarying = nextTile->itemTile;
-							// If the tile has no items on it remove the item id
-							if (nextTile->quantity == 0)
+							for (uint16_t i=1; i<pushStack.size();i++)
 							{
-								world.items.erase(newPos.CoordToEncoded());
-								nextTile = nullptr;
-								if (auto temp = world.logictiles.GetValue(newPos.CoordToEncoded()))
-								{
-									LogicTile* logicTile = *temp;
-									logicTile->DoItemLogic();
-								}
+								world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),pushStack[i].CoordToEncoded() });
 							}
+						}
+						/*
+						if (this->itemCarying == (uint16_t)ReservedItems::nothing && nextTile->quantity != 0)
+						{
+							itemCarying = nextTile->itemTile;
+							world.ChangeItem(newPos, nextTile->itemTile, -1);
 							Rotate(2);
-						}
+						}*/
 					}
-					// If no collisions move the robot
-					if (nextTile == nullptr)
-					{
-						Pos tempPos = this->pos;
-						this->pos = newPos;
-
-						// If the robot landed on a logic tile, apply its logic this tick
-						if (auto temp = world.logictiles.GetValue(newPos.CoordToEncoded()))
-						{
-							LogicTile* logicTile = *temp;
-							logicTile->DoRobotLogic(this);
-						}
-
-						// If the robot left a logic tile, update its logic
-						if (auto temp = world.logictiles.GetValue(tempPos.CoordToEncoded()))
-						{
-							LogicTile* logicTile = *temp;
-							logicTile->DoRobotLogic(nullptr);
-						}
-
-						world.nextRobotPos.insert({ this->pos.CoordToEncoded(), *this });
-						return true;
-					}
+					world.nextRobotPos.insert({ this->pos.CoordToEncoded(), newPos.CoordToEncoded() });
+					return true;
 				}
 			}
 		}
 	}
 	return false;
 }
-void Robot::TryCrafting(uint16_t item, Pos itemPos)
-{
-	if (auto recipeList = program.itemRecipeList.GetValue(item))
-	{
-		// Try to craft item when placed
-		for (uint16_t recipe:*recipeList)
-		{
-			program.craftingRecipes[recipe].DoCrafting(itemPos);
-		}
-	}
-}
 void Robot::Drop()
 {
-	if (this->itemCarying != (uint16_t)ReservedItem::nothing)
+	if (this->itemCarying != (uint16_t)ReservedItems::nothing)
 	{
 		Pos itemPos = pos.FacingPosition(facing);
 		{
 			if (ItemTile * item = &world.items[itemPos.CoordToEncoded()])
 			{
-				if (item->itemTile == (uint16_t)ReservedItem::nothing)
+				if (item->itemTile == (uint16_t)ReservedItems::nothing)
 				{
 					item->itemTile = itemCarying;
 					item->quantity++;
-					TryCrafting(itemCarying, itemPos);
-					itemCarying = (uint16_t)ReservedItem::nothing;
+					//TryCrafting(itemCarying, itemPos);
+					itemCarying = (uint16_t)ReservedItems::nothing;
 
 					// Apply item logic to update pressureplates
 					if (auto temp = world.logictiles.GetValue(itemPos.CoordToEncoded()))
@@ -120,11 +120,11 @@ void Robot::Drop()
 						logicTile->DoItemLogic();
 					}
 				}
-				else if (item->itemTile == itemCarying && item->quantity < Gconstants::tileItemLimit)
+				else if (item->itemTile == itemCarying && item->quantity < GC::tileItemLimit)
 				{
 					item->quantity++;
-					TryCrafting(itemCarying, itemPos);
-					itemCarying = (uint16_t)ReservedItem::nothing;
+					//TryCrafting(itemCarying, itemPos);
+					itemCarying = (uint16_t)ReservedItems::nothing;
 				}
 			}
 		}
@@ -138,16 +138,16 @@ void Robot::DrawTile(int x, int y)
 		sf::Sprite sprite;
 		sprite.setTexture(*robotTexture);
 		sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
-		sprite.setPosition(float(x), float(y - Gconstants::halfTileSize));
+		sprite.setPosition(float(x), float(y - GC::halfTileSize));
 		program.robotSprites.emplace_back(sprite);
 		if (itemCarying > 2)
 		{
 			sf::Sprite sprite;
 			sprite.setTexture(*itemTextures[itemCarying]);
-			sprite.setOrigin(Gconstants::halfItemSprite, Gconstants::halfTileSize + 10);
+			sprite.setOrigin(GC::halfItemSprite, GC::halfTileSize + 10);
 			float rotation = float(facing) * float(90);
 			sprite.setRotation(rotation);
-			sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+			sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 			program.robotSprites.emplace_back(sprite);
 		}
 	}
@@ -157,16 +157,16 @@ void Robot::DrawTile(int x, int y)
 		{
 			sf::Sprite sprite;
 			sprite.setTexture(*itemTextures[itemCarying]);
-			sprite.setOrigin(Gconstants::halfItemSprite, Gconstants::halfTileSize + 10);
+			sprite.setOrigin(GC::halfItemSprite, GC::halfTileSize + 10);
 			float rotation = float(facing) * float(90);
 			sprite.setRotation(rotation);
-			sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+			sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 			program.robotSprites.emplace_back(sprite);
 		}
 		sf::Sprite sprite;
 		sprite.setTexture(*robotTexture);
 		sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
-		sprite.setPosition(float(x), float(y - Gconstants::halfTileSize));
+		sprite.setPosition(float(x), float(y - GC::halfTileSize));
 		program.robotSprites.emplace_back(sprite);
 	}
 }

@@ -1,6 +1,5 @@
 #include "Pos.h"
 #include "Facing.h"
-#include "Active.h"
 #include "LogicTile.h"
 #include "LogicTypes.h"
 #include "Robot.h"
@@ -35,10 +34,10 @@ void LogicTile::DrawSpriteFromProperties(int x, int y, sf::Texture* texture, sf:
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 	sprite.setTextureRect(subRect);
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(rotation) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 }
@@ -47,10 +46,10 @@ void LogicTile::DrawSprite(int x, int y, sf::Texture* texture)
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setColor(sf::Color(255, 255, 255, 255));
 
 	program.logicSprites.emplace_back(sprite);
@@ -61,10 +60,10 @@ void LogicTile::DrawSprite(int x, int y, sf::Texture* texture, sf::IntRect subRe
 	sprite.setTexture(*texture);
 	sprite.setTextureRect(subRect);
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 }
@@ -79,7 +78,7 @@ void LogicTile::DrawSignalStrength(int x, int y, int signal)
 	{
 		signalStrength.setTextureRect(program.fontMap[displayValue[i]]);
 		float adjustLeft = (float(displayValue.length() / 2)) * 3;
-		signalStrength.setPosition(float(x + Gconstants::halfTileSize - adjustLeft + i * 4),float(y + Gconstants::halfTileSize));
+		signalStrength.setPosition(float(x + GC::halfTileSize - adjustLeft + i * 4),float(y + GC::halfTileSize));
 
 		program.logicSprites.emplace_back(signalStrength);
 	}
@@ -102,8 +101,8 @@ void Wire::DrawTile(int x, int y)
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 	
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 	// Neighbour Sprites
@@ -119,7 +118,7 @@ void Wire::DrawTile(int x, int y)
 
 				sprite_rotation = ((float)i) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
-				sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+				sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 				program.logicSprites.emplace_back(sprite);
 			}
@@ -149,10 +148,10 @@ void Redirector::DrawTile(int x, int y)
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -177,10 +176,10 @@ void Inverter::DrawTile(int x, int y)
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -196,10 +195,10 @@ void Inverter::DrawTile(int x, int y)
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));	
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -224,10 +223,10 @@ void Booster::DrawTile(int x, int y)
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -236,10 +235,10 @@ void Booster::DrawTile(int x, int y)
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -264,10 +263,10 @@ void Repeater::DrawTile(int x, int y)
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -276,10 +275,10 @@ void Repeater::DrawTile(int x, int y)
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -295,10 +294,10 @@ void Counter::DrawTile(int x,int y)
 	sprite.setTexture(*texture);
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
-	sprite.setOrigin(Gconstants::halfTileSize, Gconstants::halfTileSize);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 
 	program.logicSprites.emplace_back(sprite);
 
@@ -311,6 +310,6 @@ void Counter::DrawTile(int x,int y)
 	counterValue.setFillColor(sf::Color::Black);
 	sf::FloatRect textRect = counterValue.getLocalBounds();
 	counterValue.setOrigin(textRect.width / 2, textRect.height / 2);
-	counterValue.setPosition(float(x + Gconstants::halfTileSize), float(y + Gconstants::halfTileSize));
+	counterValue.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	program.textOverlay.emplace_back(counterValue);
 }

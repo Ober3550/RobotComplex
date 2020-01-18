@@ -6,7 +6,6 @@
 #include "Pos.h"
 #include "WorldSave.h"
 
-
 void WorldSave::GenerateChunk(Pos pos)
 {
 	uint64_t encoded = pos.CoordToEncoded();
@@ -15,10 +14,16 @@ void WorldSave::GenerateChunk(Pos pos)
 	if (isNewlyPlaced)
 	{
 		auto newChunk = &val.first->second;
-		newChunk->chunkPos = pos.ChunkPosition();
-		for (size_t i = 0; i < Gconstants::chunkTileNum; i++)
+		newChunk->chunkPos = pos;
+		size_t i = 0;
+		Pos currentPos = { (pos.x << GC::chunkShift) + (i & GC::chunkMask), (pos.y << GC::chunkShift) + (i / (GC::chunkMask + 1)) };
+		float* chunkNoise = noiseRef->GetSampledNoiseSet(currentPos.x, currentPos.y, 0, GC::chunkMask + 1, GC::chunkMask + 1, 1, 5);
+		for (i = 0; i < GC::chunkTileNum; i++)
 		{
-			newChunk->tiles[i] = GroundTile{1};
+			Pos currentPos = { (pos.x << GC::chunkShift) + (i & GC::chunkMask), (pos.y << GC::chunkShift) + (i / (GC::chunkMask + 1)) };
+			// For some reason mapping x to y fixes the perlin sampling
+			float normalized = ((chunkNoise[(currentPos.x & GC::chunkMask) * 32 + (currentPos.y & GC::chunkMask)] + 1.0f) / 2.0f);
+			newChunk->tiles[i] = GroundTile{(uint8_t)(normalized * 256)};
 		}
 	}
 }
@@ -29,7 +34,17 @@ GroundTile* WorldSave::GetGroundTile(Pos pos)
 		Pos inChunk = pos.InChunkPosition();
 		return chunk->GetTile(inChunk);
 	}
-	return nullptr;
+	else
+	{
+		GenerateChunk(pos.ChunkPosition());
+		if (WorldChunk * chunk = worldChunks.GetValue(pos.ChunkEncoded()))
+		{
+			Pos inChunk = pos.InChunkPosition();
+			return chunk->GetTile(inChunk);
+		}
+		// Chunk failed to generate
+		assert(false);
+	}
 }
 ItemTile* WorldSave::GetItemTile(Pos pos)
 {
@@ -68,4 +83,44 @@ CraftingProcess* WorldSave::GetCrafting(Pos pos)
 CraftingProcess* WorldSave::GetCrafting(uint64_t encodedPos)
 {
 	return world.craftingQueue.GetValue(encodedPos);
+}
+bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
+{
+	uint64_t itemPos = pos.CoordToEncoded();
+	if (ItemTile* currentItem = world.GetItemTile(itemPos))
+	{
+		if (currentItem->itemTile != item && currentItem->itemTile != 0)
+			return false;
+		else
+		{
+			currentItem->itemTile = item;
+			if (currentItem->quantity < quantity && quantity < 0 || int(currentItem->quantity) + quantity > int(GC::tileItemLimit))
+				return false;
+			else
+				currentItem->quantity += quantity;
+		}
+		if (currentItem->quantity == 0)
+		{
+			world.items.erase(itemPos);
+		}
+		if (LogicTile* logicTile = world.GetLogicTile(pos))
+		{
+			logicTile->DoItemLogic();
+		}
+		return true;
+	}
+	else
+	{
+		if (quantity <= 0)
+			return false;
+		ItemTile* newItem = new ItemTile();
+		newItem->itemTile = item;
+		newItem->quantity = quantity;
+		if (LogicTile* logicTile = world.GetLogicTile(pos))
+		{
+			logicTile->DoItemLogic();
+		}
+		world.items[pos.CoordToEncoded()] = *newItem;
+		return true;
+	}
 }

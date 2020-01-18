@@ -208,12 +208,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CraftingClass.cpp" />
+    <ClCompile Include="CraftingProcess.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx2.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx512.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_internal.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_neon.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse2.cpp" />
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse41.cpp" />
     <ClCompile Include="FileLength.cpp" />
-    <ClCompile Include="GameInput.cpp" />
+    <ClCompile Include="GetFileNamesInFolder.cpp" />
     <ClCompile Include="LogicTile.cpp" />
     <ClCompile Include="LogicTileDrawing.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyMap.cpp" />
     <ClCompile Include="MyMod.cpp" />
     <ClCompile Include="Pos.cpp" />
     <ClCompile Include="ProgramData.cpp" />
@@ -225,7 +232,6 @@
     <ClCompile Include="WorldSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Active.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationType.h" />
     <ClInclude Include="Constants.h" />
@@ -233,10 +239,12 @@
     <ClInclude Include="CraftingProcess.h" />
     <ClInclude Include="CraftingSuccess.h" />
     <ClInclude Include="Facing.h" />
-    <ClInclude Include="GameInput.h" />
-    <ClInclude Include="Header.h" />
-    <ClInclude Include="Item.h" />
+    <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h" />
+    <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD_internal.h" />
+    <ClInclude Include="FindInVector.h" />
+    <ClInclude Include="GetFileNamesInFolder.h" />
     <ClInclude Include="ItemTile.h" />
+    <ClInclude Include="KeyNames.h" />
     <ClInclude Include="LogicTile.h" />
     <ClInclude Include="LogicTypes.h" />
     <ClInclude Include="MyMap.h" />
@@ -249,7 +257,6 @@
     <ClInclude Include="RedirectorColors.h" />
     <ClInclude Include="ReservedItems.h" />
     <ClInclude Include="Robot.h" />
-    <ClInclude Include="SpriteGenerator.h" />
     <ClInclude Include="TestWorld.h" />
     <ClInclude Include="Textures.h" />
     <ClInclude Include="Tile.h" />

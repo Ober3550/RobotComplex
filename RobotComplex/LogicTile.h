@@ -1,6 +1,5 @@
 #pragma once
 #include "Robot.h"
-#include "Active.h"
 #include "LogicTypes.h"
 #include <cstdint>
 #include <SFML/Graphics.hpp>
@@ -195,7 +194,7 @@ public:
 	static sf::Texture* texture;
 	sf::Texture* GetTexture() { return this->texture; };
 	uint8_t inputSignal = 0;
-	uint8_t maxSignal = Gconstants::maxSignalStrength;
+	uint8_t maxSignal = GC::maxSignalStrength;
 	void DoWireLogic();
 	void DrawTile(int x, int y);
 	std::string GetTooltip();

@@ -16,14 +16,12 @@ public:
 	uint8_t craftingTime; // Crafting time in seconds of the recipe
 	std::string catalyst; // Item that when placed will activate the crafting
 	std::string animation;// Animation that plays when crafting
-	Pos animationOffset;  // Offset from tile position that animation plays
-	RecipeProto(std::vector<RecipeCompProto> recipe, uint8_t recipeWidth, uint8_t craftingTime, std::string catalyst, std::string animation, Pos animationOffset)
+	RecipeProto(std::vector<RecipeCompProto> recipe, uint8_t recipeWidth, uint8_t craftingTime, std::string catalyst, std::string animation)
 	{
 		this->recipe = recipe;
 		this->recipeWidth = recipeWidth;
 		this->craftingTime = craftingTime;
 		this->catalyst = catalyst;
 		this->animation = animation;
-		this->animationOffset = animationOffset;
 	}
 };
