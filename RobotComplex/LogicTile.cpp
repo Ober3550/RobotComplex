@@ -9,6 +9,7 @@
 #include "ProgramData.h"
 #include "Constants.h"
 #include <string>
+#include <algorithm>
 #include <SFML/Graphics.hpp>
 #include "Windows.h"
 #include "MyMod.h"
@@ -105,14 +106,17 @@ void LogicTile::DoWireLogic() {
 		{
 			neighbourTile[i] = *temp;
 			// If neighbour is 'directional signal provider'
-			if (neighbourTile[i]->GetConnected(Facing(i)))
+			if (neighbourTile[i]->GetConnected(Pos::BehindFacing(Facing(i))))
 			{
-				if(neighbourTile[i]->IsSource())
-					neighbourSignals[i] = neighbourTile[i]->signal + 1;
-				else
-					neighbourSignals[i] = neighbourTile[i]->signal;
+				if (neighbourTile[i]->ReceivesSignal(Pos::BehindFacing(Facing(i))))
+				{
+					if (neighbourTile[i]->IsSource())
+						neighbourSignals[i] = neighbourTile[i]->signal + 1;
+					else
+						neighbourSignals[i] = neighbourTile[i]->signal;
+				}
 			}
-			if(!neighbourTile[i]->GetConnected(Facing(i)))
+			if(!neighbourTile[i]->GetConnected(Pos::BehindFacing(Facing(i))))
 			{
 				// If neighbour isn't connected to this element don't update it
 				neighbourTile[i] = nullptr;
@@ -227,42 +231,22 @@ std::string PressurePlate::GetTooltip()
 
 void Inverter::DoWireLogic()
 {
-	Pos Back = this->pos.BehindPosition(this->facing);
-	Pos Left = this->pos.FacingPosition(Facing(int(this->facing) - 1));
-	Pos Right = this->pos.FacingPosition(Facing(int(this->facing) + 1));
-	int a = 0;
-	int b1 = 0;
-	int b2 = 0;
-	if (LogicTile* tileBack = world.GetLogicTile(Back.CoordToEncoded()))
+	// output, b1, a, b2
+	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
+	for (int i = 0; i < 4; i++)
 	{
-		if (GetConnected(Facing(((int)this->facing + 2) & 3)))
-			a = tileBack->signal;
+		if (LogicTile* tile = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing,i))))
+		{
+			if (GetConnected(Pos::RelativeFacing(this->facing, i)))
+				neighbourSignals[i] = tile->signal;
+		}
 	}
-	if (LogicTile* tileLeft = world.GetLogicTile(Left.CoordToEncoded()))
-	{
-		if (GetConnected(Facing(((int)this->facing - 1) & 3)))
-			b1 = tileLeft->signal;
-	}
-	if (LogicTile* tileRight = world.GetLogicTile(Right.CoordToEncoded()))
-	{
-		if (GetConnected(Facing(((int)this->facing + 1) & 3)))
-			b2 = tileRight->signal;
-	}
-	this->prevSignal = this->signal;
-	if (b1 > b2)
-	{
-		if (GC::maxSignalStrength - a + b1 > 0)
-			this->signal = MyMod(GC::maxSignalStrength - a + b1,32);
-		else
-			this->signal = 0;
-	}
+	int a = neighbourSignals[2];
+	int b = std::max(neighbourSignals[1], neighbourSignals[3]);
+	if (GC::maxSignalStrength - a + b > 0)
+		this->signal = GC::maxSignalStrength - a + b;
 	else
-	{
-		if (GC::maxSignalStrength - a + b2 > 0)
-			this->signal = MyMod(GC::maxSignalStrength - a + b2, 32);
-		else
-			this->signal = 0;
-	}
+		this->signal = 0;
 	if (this->prevSignal != this->signal)
 	{
 		Pos tileFore = this->pos.FacingPosition(this->facing);

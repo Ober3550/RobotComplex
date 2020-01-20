@@ -7,6 +7,8 @@ public:
 	int32_t x = 0, y = 0;
 	uint64_t CoordToEncoded();
 	static Pos EncodedToCoord(uint64_t input);
+	static Facing BehindFacing(Facing);
+	static Facing RelativeFacing(Facing,int);
 	Pos FacingPosition(Facing facing);
 	Pos BehindPosition(Facing facing);
 	Pos RelativePosition(int32_t dx, int32_t dy);

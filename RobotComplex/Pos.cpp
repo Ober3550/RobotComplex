@@ -98,3 +98,11 @@ Pos Pos::operator-(Pos other)
 {
 	return Pos{ this->x - other.x, this->y - other.y };
 }
+Facing Pos::BehindFacing(Facing input)
+{
+	return Facing(((int)input + 2) & 3);
+}
+Facing Pos::RelativeFacing(Facing input, int relative)
+{
+	return Facing(((int)input + relative) & 3);
+}
