@@ -49,7 +49,8 @@ public:
 	}
 };
 class DirectionalLogicTile : public LogicTile {
-	virtual void DoWireLogic() {};
+	virtual void DoWireLogic();								// Overrides wire logic transfer
+	virtual void SignalEval(std::array<uint8_t, 4> neighbours) { };
 	virtual void DoItemLogic() {};
 	virtual void DoRobotLogic(Robot* robotRef) {};
 	virtual void DrawTile(int x, int y) {};
@@ -138,7 +139,7 @@ public:
 	Inverter() { logictype = inverter; };
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
-	void DoWireLogic();								// Overrides wire logic transfer
+	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(int x, int y);
 	virtual bool IsConnected(Pos pos) { return true; };
 	std::string GetTooltip();
@@ -155,7 +156,7 @@ public:
 	Booster() { logictype = booster; };
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
-	void DoWireLogic();										// Overrides wire logic transfer
+	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(int x, int y);
 	std::string GetTooltip();
 	Booster* Copy()
@@ -171,7 +172,7 @@ public:
 	Repeater() { logictype = repeater; };
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
-	void DoWireLogic();										// Overrides wire logic transfer
+	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(int x, int y);
 	std::string GetTooltip();
 	Repeater* Copy()
@@ -206,7 +207,7 @@ public:
 	sf::Texture* GetTexture() { return this->texture; };
 	uint8_t inputSignal = 0;
 	uint8_t maxSignal = GC::maxSignalStrength;
-	void DoWireLogic();
+	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(int x, int y);
 	std::string GetTooltip();
 	Counter* Copy()

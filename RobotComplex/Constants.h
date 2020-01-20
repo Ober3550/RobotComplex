@@ -4,7 +4,7 @@
 namespace GC
 {
 	static constexpr int32_t  FRAMERATE = 60;
-	static constexpr int32_t  UPDATERATE = 20;
+	static constexpr int32_t  UPDATERATE = 15;
 	static constexpr uint8_t  chunkShift = 5;
 	static constexpr uint8_t  chunkMask = 31;
 	static constexpr uint16_t chunkTileNum = 1024;
