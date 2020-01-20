@@ -45,7 +45,7 @@ void CreateTestWorld()
 				tile = new Redirector();
 				tile->facing = south;
 				tile->pos = { x,y };
-				tile->colorClass = MyMod(y, 2) == 0 ? red : cyan;
+				//tile->colorClass = MyMod(y, 2) == 0 ? red : cyan;
 				tile->itemFilter = anything;
 				tile->dropItem = true;
 				world.logictiles.insert({ tile->pos.CoordToEncoded(),tile });
@@ -58,7 +58,7 @@ void CreateTestWorld()
 		Redirector* tile;
 		tile = new Redirector();
 		tile->pos = { x,17 };
-		tile->colorClass = MyMod(17, 2) == 0 ? red : cyan;
+		//tile->colorClass = MyMod(17, 2) == 0 ? red : cyan;
 		tile->itemFilter = anything;
 		world.logictiles.insert({ tile->pos.CoordToEncoded(),tile });
 

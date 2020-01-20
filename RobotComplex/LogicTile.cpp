@@ -44,7 +44,7 @@ void LogicTile::Serialize(std::ofstream* writer)
 	writer->write((char*)&this->facing,		sizeof(Facing));
 	writer->write((char*)&this->prevSignal,	sizeof(uint8_t));
 	writer->write((char*)&this->signal,		sizeof(uint8_t));
-	writer->write((char*)&this->colorClass,	sizeof(uint8_t));
+	//writer->write((char*)&this->colorClass,	sizeof(uint8_t));
 }
 
 void LogicTile::Deserialize(std::ifstream* reader)
@@ -53,7 +53,7 @@ void LogicTile::Deserialize(std::ifstream* reader)
 	reader->read((char*)&this->facing,		sizeof(Facing));
 	reader->read((char*)&this->prevSignal,	sizeof(uint8_t));
 	reader->read((char*)&this->signal,		sizeof(uint8_t));
-	reader->read((char*)&this->colorClass,	sizeof(uint8_t));
+	//reader->read((char*)&this->colorClass,	sizeof(uint8_t));
 }
 
 void Redirector::Serialize(std::ofstream* writer)
@@ -76,16 +76,21 @@ void LogicTile::BaseCopy(LogicTile* logicTile)
 	logicTile->pos = this->pos;
 	logicTile->facing = this->facing;
 	logicTile->prevSignal = this->prevSignal;
-	logicTile->colorClass = this->colorClass;
+	//logicTile->colorClass = this->colorClass;
 }
-
-bool LogicTile::ReceivesSignal(Pos pos)
+void LogicTile::SetConnected(Facing toward, bool connect)
 {
-	if (LogicTile* neighbour = world.GetLogicTile(pos.CoordToEncoded()))
+	// Set this tile and neighbour tile to connected or not
+	connected.set(toward,connect);
+	if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(this->facing).CoordToEncoded()))
 	{
-		if (this->colorClass == neighbour->colorClass)
-			return true;
+		neighbour->connected.set(((int)this->facing + 2) & 3, connect);
 	}
+}
+bool LogicTile::GetConnected(Facing toward)
+{
+	if (this->connected[toward])
+		return true;
 	return false;
 }
 void LogicTile::DoWireLogic() {
@@ -100,14 +105,14 @@ void LogicTile::DoWireLogic() {
 		{
 			neighbourTile[i] = *temp;
 			// If neighbour is 'directional signal provider'
-			if (neighbourTile[i]->ReceivesSignal(this->pos))
+			if (neighbourTile[i]->GetConnected(Facing(i)))
 			{
 				if(neighbourTile[i]->IsSource())
 					neighbourSignals[i] = neighbourTile[i]->signal + 1;
 				else
 					neighbourSignals[i] = neighbourTile[i]->signal;
 			}
-			if(!neighbourTile[i]->IsConnected(this->pos))
+			if(!neighbourTile[i]->GetConnected(Facing(i)))
 			{
 				// If neighbour isn't connected to this element don't update it
 				neighbourTile[i] = nullptr;
@@ -139,49 +144,10 @@ void LogicTile::DoWireLogic() {
 		}
 	}
 }
-bool LogicTile::IsConnected(Pos pos)
-{
-	if (LogicTile* neighbour = world.GetLogicTile(pos.CoordToEncoded()))
-	{
-		if (neighbour->colorClass == this->colorClass)
-			return true;
-		else
-			return false;
-	}
-	else
-		return false;
-}
-bool DirectionalLogicTile::IsConnected(Pos pos) {
-	if (LogicTile* neighbour = world.GetLogicTile(pos.CoordToEncoded()))
-	{
-		Pos infront = this->pos.FacingPosition(this->facing);
-		Pos behind = this->pos.BehindPosition(this->facing);
-		if (pos == infront || pos == behind)
-			return true;
-		else
-			return false;
-	}
-	else
-		return false;
-};
-bool DirectionalLogicTile::ReceivesSignal(Pos pos)
-{
-	if (LogicTile* neighbour = world.GetLogicTile(pos.CoordToEncoded()))
-	{
-		Pos infront = this->pos.FacingPosition(this->facing);
-		if (pos == infront)
-			return true;
-		else
-			return false;
-	}
-	else
-		return false;
-}
 std::string Wire::GetTooltip()
 {
 	return program.logicTooltips[0][0];
 }
-
 void Redirector::DoRobotLogic(Robot* robotRef)
 {
 	if (robotRef && signal == 0)
@@ -194,7 +160,6 @@ void Redirector::DoRobotLogic(Robot* robotRef)
 		}
 	}
 }
-
 std::string Redirector::GetTooltip()
 {
 	if (signal)
@@ -270,17 +235,17 @@ void Inverter::DoWireLogic()
 	int b2 = 0;
 	if (LogicTile* tileBack = world.GetLogicTile(Back.CoordToEncoded()))
 	{
-		if (tileBack->ReceivesSignal(this->pos))
+		if (GetConnected(Facing(((int)this->facing + 2) & 3)))
 			a = tileBack->signal;
 	}
 	if (LogicTile* tileLeft = world.GetLogicTile(Left.CoordToEncoded()))
 	{
-		if (tileLeft->ReceivesSignal(this->pos))
+		if (GetConnected(Facing(((int)this->facing - 1) & 3)))
 			b1 = tileLeft->signal;
 	}
 	if (LogicTile* tileRight = world.GetLogicTile(Right.CoordToEncoded()))
 	{
-		if (tileRight->ReceivesSignal(this->pos))
+		if (GetConnected(Facing(((int)this->facing + 1) & 3)))
 			b2 = tileRight->signal;
 	}
 	this->prevSignal = this->signal;

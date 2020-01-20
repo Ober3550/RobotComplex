@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include "RedirectorColors.h"
 #include "Textures.h"
+static constexpr uint8_t colorClass = 1;
 
 void LogicTile::DrawSpriteFromProperties(int x, int y, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
 {
@@ -21,15 +22,15 @@ void LogicTile::DrawSpriteFromProperties(int x, int y, sf::Texture* texture, sf:
 	
 	if (inverse)
 	{
-		Red = this->signal ? 0 : 255 * (this->colorClass & 1);
-		Green = this->signal ? 0 : 255 * (this->colorClass >> 1 & 1);
-		Blue = this->signal ? 0 : 255 * (this->colorClass >> 2 & 1);
+		Red = this->signal ? 0 : 255 * (colorClass & 1);
+		Green = this->signal ? 0 : 255 * (colorClass >> 1 & 1);
+		Blue = this->signal ? 0 : 255 * (colorClass >> 2 & 1);
 	}
 	else 
 	{
-		Red = this->signal ? 255 * (this->colorClass & 1) : 0;
-		Green = this->signal ? 255 * (this->colorClass >> 1 & 1) : 0;
-		Blue = this->signal ? 255 * (this->colorClass >> 2 & 1) : 0;
+		Red = this->signal ? 255 * (colorClass & 1) : 0;
+		Green = this->signal ? 255 * (colorClass >> 1 & 1) : 0;
+		Blue = this->signal ? 255 * (colorClass >> 2 & 1) : 0;
 	}
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 	sprite.setTextureRect(subRect);
@@ -94,7 +95,7 @@ void Wire::DrawTile(int x, int y)
 
 	uint8_t color = black;
 	if (this->signal)
-		color = this->colorClass;
+		color = colorClass;
 	uint8_t Red, Green, Blue;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
@@ -111,7 +112,7 @@ void Wire::DrawTile(int x, int y)
 		Pos lookingAt = this->pos.FacingPosition(Facing(i));
 		if (LogicTile* neighbour = world.GetLogicTile(lookingAt.CoordToEncoded()))
 		{
-			if (neighbour->IsConnected(this->pos))
+			if (neighbour->GetConnected(Facing(i)))
 			{
 				sprite.setTexture(*texture);
 				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
@@ -141,7 +142,7 @@ void Redirector::DrawTile(int x, int y)
 	if (this->dropItem)
 		color = white;
 	if (this->signal)
-		color = this->colorClass;
+		color = colorClass;
 	uint8_t Red, Green, Blue;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
@@ -169,7 +170,7 @@ void Inverter::DrawTile(int x, int y)
 
 	uint8_t color = black;
 	if (!this->signal)
-		color = this->colorClass;
+		color = colorClass;
 	uint8_t Red, Green, Blue;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
@@ -189,7 +190,7 @@ void Inverter::DrawTile(int x, int y)
 
 	color = black;
 	if (this->signal)
-		color = this->colorClass;
+		color = colorClass;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
@@ -216,7 +217,7 @@ void Booster::DrawTile(int x, int y)
 
 	uint8_t color = black;
 	if (this->signal)
-		color = this->colorClass;
+		color = colorClass;
 	uint8_t Red, Green, Blue;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
@@ -256,7 +257,7 @@ void Repeater::DrawTile(int x, int y)
 
 	uint8_t color = black;
 	if (this->signal)
-		color = this->colorClass;
+		color = colorClass;
 	uint8_t Red, Green, Blue;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);

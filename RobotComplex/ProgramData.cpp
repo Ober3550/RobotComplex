@@ -352,6 +352,7 @@ void ProgramData::CheckItemsMoved()
 		if(ItemTile* item = world.items.GetValue(wasMoving))
 		CraftingClass::TryCrafting(item->itemTile, Pos::EncodedToCoord(wasMoving));
 	}
+	world.itemPrevMoved.clear();
 }
 
 void ProgramData::UpdateMap()

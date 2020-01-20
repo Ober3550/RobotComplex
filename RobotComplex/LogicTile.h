@@ -7,15 +7,17 @@
 #include "ReservedItems.h"
 #include "Constants.h"
 #include <iostream>
+#include <bitset>
 
 class LogicTile {
 public:
 	LogicTypes logictype;					// 1 byte
 	Pos pos;								// 8 bytes
-	Facing facing = north;					// 1 byte
+	Facing facing;					// 1 byte
 	uint8_t prevSignal = -1;				// 1 byte
 	uint8_t signal = 0;						// 1 byte
-	uint8_t colorClass = 1;					// xxxxxBGR 8 color byte
+	std::bitset<8> connected;
+	//uint8_t colorClass = 1;					// xxxxxBGR 8 color byte
 	static sf::Texture* texture;				// Empty texture
 	virtual sf::Texture* GetTexture() { return this->texture; };
 	virtual void DoWireLogic();
@@ -24,9 +26,10 @@ public:
 	virtual void DrawTile(int x, int y) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
-	virtual bool IsConnected(Pos pos);
-	virtual bool ReceivesSignal(Pos pos);
+	virtual bool GetConnected(Facing toward);
+	virtual void SetConnected(Facing toward, bool);
 	virtual bool IsSource() { return false; };
+	virtual bool ReceivesSignal(Facing toward) { return true; };
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
@@ -35,6 +38,15 @@ public:
 	void DrawSpriteFromProperties(int x, int y, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse);
 	void DrawSignalStrength(int x, int y, int signal);
 	static LogicTile* Factory(uint16_t classType);
+	LogicTile()
+	{
+		this->pos = Pos{ 0,0 };
+		this->facing = north;
+		this->prevSignal = -1;
+		this->signal = 0;
+		for (size_t each = 0; each < this->connected.size(); each++)
+			this->connected.set(each, true);
+	}
 };
 class DirectionalLogicTile : public LogicTile {
 	virtual void DoWireLogic() {};
@@ -42,10 +54,9 @@ class DirectionalLogicTile : public LogicTile {
 	virtual void DoRobotLogic(Robot* robotRef) {};
 	virtual void DrawTile(int x, int y) {};
 	virtual std::string GetTooltip() { return "base class"; };
-	virtual LogicTile* Copy() = 0;
-	virtual bool IsConnected(Pos pos);
-	virtual bool ReceivesSignal(Pos pos);
 	virtual bool IsSource() { return true; };
+	virtual bool ReceivesSignal(Facing toward) { if (toward == this->facing) return true; else return false; };
+	virtual LogicTile* Copy() = 0;
 };
 
 class Wire : public LogicTile {
