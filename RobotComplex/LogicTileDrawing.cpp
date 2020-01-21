@@ -11,7 +11,7 @@
 #include <SFML/Graphics.hpp>
 #include "RedirectorColors.h"
 #include "Textures.h"
-static constexpr uint8_t colorClass = 1;
+//static constexpr uint8_t colorClass = 1;
 
 void LogicTile::DrawSpriteFromProperties(int x, int y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
 {
@@ -117,7 +117,7 @@ void Wire::DrawTile(int x, int y, float s)
 		Pos lookingAt = this->pos.FacingPosition(Facing(i));
 		if (LogicTile* neighbour = world.GetLogicTile(lookingAt.CoordToEncoded()))
 		{
-			if (neighbour->GetConnected(Facing(i)))
+			if (neighbour->GetConnected(this))
 			{
 				sprite.setTexture(*texture);
 				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));

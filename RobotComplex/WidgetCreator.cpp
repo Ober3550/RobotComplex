@@ -322,6 +322,16 @@ void WidgetCreator::SetDefaultKeyMapping()
 	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Set Robot Auto" });
 
+	//C
+	userActions.insert({ "Change ColorClass",[&] {
+		if (program.placeColor == 1)
+			program.placeColor = 4;
+		else
+			program.placeColor = 1;
+	} });
+	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Change ColorClass" });
+
 	userActions.insert({ "Hotbar 1",[&] {
 		program.hotbarIndex = 0;
 	} });
@@ -575,6 +585,7 @@ void WidgetCreator::LeftMousePressed()
 				{
 					LogicTile* hotbarElement = program.hotbar[program.hotbarIndex];
 					LogicTile* logicPlace = hotbarElement->Copy();
+					logicPlace->colorClass = program.placeColor;
 					logicPlace->pos = mouseHovering;
 					if (Robot* robot = world.GetRobot(mouseHovering))
 					{

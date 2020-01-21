@@ -13,12 +13,11 @@ class LogicTile {
 public:
 	LogicTypes logictype;					// 1 byte
 	Pos pos;								// 8 bytes
-	Facing facing;					// 1 byte
-	uint8_t prevSignal = -1;				// 1 byte
-	uint8_t signal = 0;						// 1 byte
-	std::bitset<8> connected;
-	//uint8_t colorClass = 1;					// xxxxxBGR 8 color byte
-	static sf::Texture* texture;				// Empty texture
+	Facing facing;							// 1 byte
+	uint8_t prevSignal;						// 1 byte
+	uint8_t signal;							// 1 byte
+	uint8_t colorClass;						// xxxxxBGR 8 color byte
+	static sf::Texture* texture;			// Empty texture
 	virtual sf::Texture* GetTexture() { return this->texture; };
 	virtual void DoWireLogic();
 	virtual void DoItemLogic() {};
@@ -26,8 +25,7 @@ public:
 	virtual void DrawTile(int x, int y, float s) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
-	virtual bool GetConnected(Facing toward);
-	virtual void SetConnected(Facing toward, bool);
+	virtual bool GetConnected(LogicTile* querier);
 	virtual bool IsSource() { return false; };
 	virtual bool ReceivesSignal(Facing toward) { return true; };
 	virtual void Serialize(std::ofstream*);
@@ -44,12 +42,14 @@ public:
 		this->facing = north;
 		this->prevSignal = -1;
 		this->signal = 0;
-		for (size_t each = 0; each < this->connected.size(); each++)
-			this->connected.set(each, true);
+		this->colorClass = 1;
+		//for (size_t each = 0; each < this->connected.size(); each++)
+			//this->connected.set(each, true);
 	}
 };
 class DirectionalLogicTile : public LogicTile {
 	virtual void DoWireLogic();								// Overrides wire logic transfer
+	virtual bool GetConnected(LogicTile* querier);
 	virtual void SignalEval(std::array<uint8_t, 4> neighbours) { };
 	virtual void DoItemLogic() {};
 	virtual void DoRobotLogic(Robot* robotRef) {};

@@ -208,6 +208,7 @@ void ProgramData::DrawHotbar()
 		if (program.hotbar[i])
 		{
 			program.hotbar[i]->facing = program.placeRotation;
+			program.hotbar[i]->colorClass = program.placeColor;
 			program.hotbar[i]->DrawTile(x - GC::halfTileSize, y - GC::halfTileSize, 1.0f);
 		}
 	}

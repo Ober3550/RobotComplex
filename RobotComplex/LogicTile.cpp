@@ -77,22 +77,24 @@ void LogicTile::BaseCopy(LogicTile* logicTile)
 	logicTile->pos = this->pos;
 	logicTile->facing = this->facing;
 	logicTile->prevSignal = this->prevSignal;
-	//logicTile->colorClass = this->colorClass;
+	logicTile->colorClass = this->colorClass;
 }
-void LogicTile::SetConnected(Facing toward, bool connect)
+bool LogicTile::GetConnected(LogicTile* querier)
 {
-	// Set this tile and neighbour tile to connected or not
-	connected.set(toward,connect);
-	if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(this->facing).CoordToEncoded()))
+	if (querier)
 	{
-		neighbour->connected.set(((int)this->facing + 2) & 3, connect);
+		if (querier->IsSource())
+			return true;
+		if (this->IsSource())
+			return true;
+		if (querier->colorClass == this->colorClass)
+			return true;
 	}
-}
-bool LogicTile::GetConnected(Facing toward)
-{
-	if (this->connected[toward])
-		return true;
 	return false;
+}
+bool DirectionalLogicTile::GetConnected(LogicTile* querier)
+{
+	return true;
 }
 void LogicTile::DoWireLogic() {
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
@@ -106,7 +108,7 @@ void LogicTile::DoWireLogic() {
 		{
 			neighbourTile[i] = *temp;
 			// If neighbour is 'directional signal provider'
-			if (neighbourTile[i]->GetConnected(Pos::BehindFacing(Facing(i))))
+			if (neighbourTile[i]->GetConnected(this))
 			{
 				if (neighbourTile[i]->ReceivesSignal(Pos::BehindFacing(Facing(i))))
 				{
@@ -116,7 +118,7 @@ void LogicTile::DoWireLogic() {
 						neighbourSignals[i] = neighbourTile[i]->signal;
 				}
 			}
-			if(!neighbourTile[i]->GetConnected(Pos::BehindFacing(Facing(i))))
+			if(!neighbourTile[i]->GetConnected(this))
 			{
 				// If neighbour isn't connected to this element don't update it
 				neighbourTile[i] = nullptr;
@@ -156,7 +158,7 @@ void DirectionalLogicTile::DoWireLogic()
 	{
 		if (LogicTile* tile = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing, i))))
 		{
-			if (GetConnected(Pos::RelativeFacing(this->facing, i)))
+			if (tile->GetConnected(this))
 				neighbourSignals[i] = tile->signal;
 		}
 	}

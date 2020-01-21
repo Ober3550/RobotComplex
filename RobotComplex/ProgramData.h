@@ -36,8 +36,8 @@ public:
 
 	int windowWidth;
 	int windowHeight;
-	float zoom = 5;
-	float scale;
+	float zoom = 5.0f;
+	float scale = 1.0f;
 
 	Pos mousePos;
 	Pos cameraPos = { 0, 300 };
@@ -47,6 +47,7 @@ public:
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
 	Facing placeRotation;
+	uint8_t placeColor = 1;
 	
 	std::string selectedSave = "";
 	bool running = true;
