@@ -58,7 +58,7 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, int x, int y)
 {
 	if (LogicTile * logic = world.GetLogicTile(encodedPos))
 	{
-		logic->DrawTile(x, y);
+		logic->DrawTile(x, y, program.scale);
 	}
 }
 void ProgramData::RecreateRobotSprites(uint64_t encodedPos, int x, int y)
@@ -208,7 +208,7 @@ void ProgramData::DrawHotbar()
 		if (program.hotbar[i])
 		{
 			program.hotbar[i]->facing = program.placeRotation;
-			program.hotbar[i]->DrawTile(x - GC::halfTileSize, y - GC::halfTileSize);
+			program.hotbar[i]->DrawTile(x - GC::halfTileSize, y - GC::halfTileSize, 1.0f);
 		}
 	}
 }
