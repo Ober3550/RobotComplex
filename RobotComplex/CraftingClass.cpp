@@ -77,7 +77,6 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 	int success = CheckCrafting(pos);
 	if (success)
 	{
-		program.redrawDynamic = true;
 		for (int l = 0; l < (int)recipe.size() / width; l++)
 		{
 			int row2 = l * width;

@@ -30,5 +30,4 @@ void WorldSave::Deserialize(std::string filename)
 	updateQueueB.Deserialize("saves/" + filename + "/updateQueueB.bin");
 	updateQueueC.Deserialize("saves/" + filename + "/updateQueueC.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
-	program.redrawStatic = true;
 }

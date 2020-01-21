@@ -25,8 +25,6 @@ public:
 	std::vector<Animation> animationTemplates;
 
 	//Stores sprite layers
-	bool redrawStatic = true;
-	bool redrawDynamic = true;				// Redraws items, logic, robots, animations
 	std::vector<sf::Sprite> groundSprites;	// Ground sprites are only repopulated when the camera moves
 	std::vector<sf::Sprite> itemSprites;
 	std::vector<sf::Sprite> logicSprites;
@@ -38,6 +36,8 @@ public:
 
 	int windowWidth;
 	int windowHeight;
+	float zoom = 5;
+	float scale;
 
 	Pos mousePos;
 	Pos cameraPos = { 0, 300 };

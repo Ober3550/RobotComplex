@@ -104,8 +104,7 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
 	}
 }
 void ProgramData::RecreateSprites() {
-	if (program.redrawStatic)
-		program.groundSprites.clear();
+	program.groundSprites.clear();
 	program.itemSprites.clear();
 	program.logicSprites.clear();
 	program.robotSprites.clear();
@@ -120,7 +119,6 @@ void ProgramData::RecreateSprites() {
 			if (step > 1.0f)
 				step = 1.0f;
 			program.cameraPos = (program.selectedRobot->pos << GC::tileShift) + Pos{ int(float(diff.x) * float(GC::tileSize) * step), int(float(diff.y) * float(GC::tileSize) * step) };
-			program.redrawStatic = true;
 		}
 	}
 	for (int y = -(program.windowHeight >> 1) - (program.cameraPos.y & GC::tileMask); y < (program.windowHeight >> 1); y += GC::tileSize)
@@ -129,8 +127,7 @@ void ProgramData::RecreateSprites() {
 		{
 			Pos tilePos = (Pos{ x,y } +program.cameraPos) >> GC::tileShift;
 			uint64_t encodedPos = tilePos.CoordToEncoded();
-			if (program.redrawStatic)
-				RecreateGroundSprites(tilePos, x, y);
+			RecreateGroundSprites(tilePos, x, y);
 			RecreateItemSprites(encodedPos, x, y);
 			RecreateLogicSprites(encodedPos, x, y);
 			RecreateRobotSprites(encodedPos, x, y);
@@ -172,6 +169,10 @@ void ProgramData::DrawTooltips()
 	sprintf_s(buffer, "Screen x/y: %d/%d", program.mousePos.x, program.mousePos.y);
 	displayValue = buffer;
 	CreateText(program.mousePos.x, program.mousePos.y - 60, displayValue);
+
+	sprintf_s(buffer, "Zoom/Scale: %.2f/%.2f", program.zoom, program.scale);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 80, displayValue);
 #endif
 }
 void ProgramData::DrawSelectedBox()
@@ -234,7 +235,6 @@ void ProgramData::CreateText(int x, int y, std::string input)
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	if (!program.gamePaused)
 	{
-		program.redrawDynamic = true;
 		program.textOverlay.clear();
 		program.textBoxes.clear();
 		RecreateSprites();
@@ -242,8 +242,6 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		DrawTooltips();
 		DrawHotbar();
 		DrawSelectedBox();
-		program.redrawDynamic = false;
-		program.redrawStatic = false;
 	}
 	for (sf::Sprite sprite : program.groundSprites)
 	{

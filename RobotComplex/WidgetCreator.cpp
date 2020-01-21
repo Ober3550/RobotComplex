@@ -204,12 +204,10 @@ void WidgetCreator::SetDefaultKeyMapping()
 		if (program.selectedRobot)
 			{
 				program.selectedRobot->Move();
-				program.redrawStatic = true;
 			}
 			else
 			{
 				program.cameraPos.y -= GC::cameraSpeed;
-				program.redrawStatic = true;
 			}
 	} });
 	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -224,7 +222,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 		else
 		{
 			program.cameraPos.x -= GC::cameraSpeed;
-			program.redrawStatic = true;
 		}
 	} });
 	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -239,7 +236,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 		else
 		{
 			program.cameraPos.y += GC::cameraSpeed;
-			program.redrawStatic = true;
 		}
 	} });
 	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -254,7 +250,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 		else
 		{
 			program.cameraPos.x += GC::cameraSpeed;
-			program.redrawStatic = true;
 		}
 	} });
 	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -446,7 +441,7 @@ void WidgetCreator::UserInput(sf::Event input)
 			MapNewButton(input.key);
 		}
 	}
-	if (input.type == sf::Event::MouseMoved)
+	else if (input.type == sf::Event::MouseMoved)
 	{
 		sf::Vector2i tempPos = sf::Mouse::getPosition(*window);
 		program.mousePos = Pos{ tempPos.x - (program.windowWidth >> 1),tempPos.y - (program.windowHeight >> 1) };
@@ -456,16 +451,30 @@ void WidgetCreator::UserInput(sf::Event input)
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			RightMousePressed();
 	}
-	if (input.type == sf::Event::MouseButtonPressed)
+	else if (input.type == sf::Event::MouseButtonPressed)
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			LeftMousePressed();
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			RightMousePressed();
 	}
-	if (input.type == sf::Event::MouseButtonReleased)
+	else if (input.type == sf::Event::MouseButtonReleased)
 	{
 
+	}
+	else if (input.type == sf::Event::MouseWheelScrolled)
+	{
+		if (input.mouseWheelScroll.delta != 0)
+		{
+			program.zoom += input.mouseWheelScroll.delta;
+			// Clamp between 1 and 10
+			if (program.zoom < 1)
+				program.zoom = 1.0f;
+			if (program.zoom > 10)
+				program.zoom = 10.0f;
+			// Change to range between 1/5th and 2
+			program.scale = program.zoom / 5.0f;
+		}
 	}
 }
 void WidgetCreator::MapNewButton(sf::Event::KeyEvent newButton)
@@ -511,7 +520,6 @@ void WidgetCreator::MouseMoved()
 			program.selectedRobot = robot;
 			program.selectedRobot->stopped = false;
 			program.cameraPos = mouseHovering << GC::tileShift;
-			program.redrawStatic = true;
 			program.hotbarIndex = 0;
 			program.hotbar[0] = nullptr;
 		}
