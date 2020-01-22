@@ -20,7 +20,9 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, int x, int y)
 		uint8_t textureIndex = tile->groundTile;
 		sprite.setTexture(*groundTextures[textureIndex / 4]);
 		sprite.setTextureRect(sf::IntRect((textureIndex & 3)*32, 0, 32, 32));
-		sprite.setPosition(float(x), float(y));
+		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+		sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+		sprite.setScale(sf::Vector2f(program.scale, program.scale));
 		program.groundSprites.emplace_back(sprite);
 	}
 }
@@ -28,8 +30,9 @@ void ProgramData::DrawItem(ItemTile item, int x, int y)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*itemTextures[item.itemTile]);
-	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
-	sprite.setPosition(x + GC::halfItemSprite, y + GC::halfItemSprite);
+	sprite.setOrigin(8, 8);
+	sprite.setPosition(float(x + 16), float(y + 16));
+	sprite.setScale(sf::Vector2f(program.scale,program.scale));
 	program.itemSprites.emplace_back(sprite);
 }
 void ProgramData::RecreateItemSprites(uint64_t encodedPos, int x, int y)
@@ -73,10 +76,10 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, int x, int y)
 			if (step > 1.0f)
 				step = 1.0f;
 			Pos screenPos = { x + int(float(difference.x) * float(GC::tileSize) * step), y + int(float(difference.y) * float(GC::tileSize) * step) };
-			robot->DrawTile(screenPos.x, screenPos.y);
+			robot->DrawTile(screenPos.x, screenPos.y, program.scale);
 		}
 		else
-			robot->DrawTile(x, y);
+			robot->DrawTile(x, y, program.scale);
 	}
 }
 void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
@@ -121,11 +124,11 @@ void ProgramData::RecreateSprites() {
 			program.cameraPos = (program.selectedRobot->pos << GC::tileShift) + Pos{ int(float(diff.x) * float(GC::tileSize) * step), int(float(diff.y) * float(GC::tileSize) * step) };
 		}
 	}
-	for (int y = -(program.windowHeight >> 1) - (program.cameraPos.y & GC::tileMask); y < (program.windowHeight >> 1); y += GC::tileSize)
+	for (int y = -(program.windowHeight >> 1) - (program.cameraPos.y & GC::tileMask); y < (program.windowHeight >> 1); y += int(float(GC::tileSize) * program.scale))
 	{
-		for (int x = -(program.windowWidth >> 1) - (program.cameraPos.x & GC::tileMask); x < (program.windowWidth >> 1); x += GC::tileSize)
+		for (int x = -(program.windowWidth >> 1) - (program.cameraPos.x & GC::tileMask); x < (program.windowWidth >> 1); x += int(float(GC::tileSize) * program.scale))
 		{
-			Pos tilePos = (Pos{ x,y } +program.cameraPos) >> GC::tileShift;
+			Pos tilePos = (Pos{ x,y } + program.cameraPos) / int(float(GC::tileSize) * program.scale);
 			uint64_t encodedPos = tilePos.CoordToEncoded();
 			RecreateGroundSprites(tilePos, x, y);
 			RecreateItemSprites(encodedPos, x, y);

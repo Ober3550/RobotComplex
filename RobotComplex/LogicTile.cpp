@@ -181,12 +181,7 @@ void Redirector::DoRobotLogic(Robot* robotRef)
 {
 	if (robotRef && signal == 0)
 	{
-		if (itemFilter == anything && robotRef->itemCarying != nothing || itemFilter == robotRef->itemCarying)
-		{
-			if (dropItem)
-				robotRef->Drop();
-			robotRef->SetFacing(this->facing);
-		}
+		robotRef->SetFacing(this->facing);
 	}
 }
 std::string Redirector::GetTooltip()

@@ -255,16 +255,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Turn Right" });
 
-	//E
-	userActions.insert({ "Drop Item",[&] {
-		if (program.selectedRobot)
-		{
-			program.selectedRobot->Drop();
-		}
-	} });
-	keyPress = { sf::Keyboard::E, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Drop Item" });
-
 	//R
 	userActions.insert({ "Rotate Placement",[&] {
 		if (program.selectedLogicTile)
@@ -483,7 +473,7 @@ void WidgetCreator::UserInput(sf::Event input)
 			if (program.zoom > 10)
 				program.zoom = 10.0f;
 			// Change to range between 1/5th and 2
-			program.scale = program.zoom / 5.0f;
+			program.scale = 0.4f + (program.zoom / 6.0f);
 		}
 	}
 }

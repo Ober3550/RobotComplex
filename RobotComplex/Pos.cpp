@@ -106,3 +106,19 @@ Facing Pos::RelativeFacing(Facing input, int relative)
 {
 	return Facing(((int)input + relative) & 3);
 }
+Pos Pos::operator*(float other)
+{
+	return Pos{ int(this->x * other), int(this->y * other) };
+}
+Pos Pos::operator/(float other)
+{
+	return Pos{ int(this->x / other), int(this->y / other) };
+}
+Pos Pos::operator*(int other)
+{
+	return Pos{ int(this->x * other), int(this->y * other) };
+}
+Pos Pos::operator/(int other)
+{
+	return Pos{ int(this->x / other), int(this->y / other) };
+}

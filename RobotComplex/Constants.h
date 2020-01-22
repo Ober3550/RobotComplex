@@ -20,5 +20,5 @@ namespace GC
 	static constexpr uint8_t tooltipPadding = 6;
 	static constexpr uint8_t hotbarSlotSize = 50;
 	static constexpr uint8_t hotbarPadding = 4;
-	static constexpr uint8_t robotStrength = 5;
+	static constexpr uint8_t robotStrength = 4;
 }

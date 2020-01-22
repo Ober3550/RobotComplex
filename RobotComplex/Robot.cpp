@@ -98,75 +98,14 @@ bool Robot::Move()
 	}
 	return false;
 }
-void Robot::Drop()
-{
-	if (this->itemCarying != (uint16_t)ReservedItems::nothing)
-	{
-		Pos itemPos = pos.FacingPosition(facing);
-		{
-			if (ItemTile * item = &world.items[itemPos.CoordToEncoded()])
-			{
-				if (item->itemTile == (uint16_t)ReservedItems::nothing)
-				{
-					item->itemTile = itemCarying;
-					item->quantity++;
-					//TryCrafting(itemCarying, itemPos);
-					itemCarying = (uint16_t)ReservedItems::nothing;
 
-					// Apply item logic to update pressureplates
-					if (auto temp = world.logictiles.GetValue(itemPos.CoordToEncoded()))
-					{
-						LogicTile* logicTile = *temp;
-						logicTile->DoItemLogic();
-					}
-				}
-				else if (item->itemTile == itemCarying && item->quantity < GC::tileItemLimit)
-				{
-					item->quantity++;
-					//TryCrafting(itemCarying, itemPos);
-					itemCarying = (uint16_t)ReservedItems::nothing;
-				}
-			}
-		}
-	}
-}
-
-void Robot::DrawTile(int x, int y)
+void Robot::DrawTile(int x, int y, float s)
 {
-	if (facing)
-	{
-		sf::Sprite sprite;
-		sprite.setTexture(*robotTexture);
-		sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
-		sprite.setPosition(float(x), float(y - GC::halfTileSize));
-		program.robotSprites.emplace_back(sprite);
-		if (itemCarying > 2)
-		{
-			sf::Sprite sprite;
-			sprite.setTexture(*itemTextures[itemCarying]);
-			sprite.setOrigin(GC::halfItemSprite, GC::halfTileSize + 10);
-			float rotation = float(facing) * float(90);
-			sprite.setRotation(rotation);
-			sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
-			program.robotSprites.emplace_back(sprite);
-		}
-	}
-	else
-	{
-		if (itemCarying > 2)
-		{
-			sf::Sprite sprite;
-			sprite.setTexture(*itemTextures[itemCarying]);
-			sprite.setOrigin(GC::halfItemSprite, GC::halfTileSize + 10);
-			float rotation = float(facing) * float(90);
-			sprite.setRotation(rotation);
-			sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
-			program.robotSprites.emplace_back(sprite);
-		}
-		sf::Sprite sprite;
-		sprite.setTexture(*robotTexture);
-		sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
-		sprite.setPosition(float(x), float(y - GC::halfTileSize));
-		program.robotSprites.emplace_back(sprite);
-	}
+	sf::Sprite sprite;
+	sprite.setTexture(*robotTexture);
+	sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
+	sprite.setOrigin(16, 32);
+	sprite.setPosition(float(x + 16), float(y + 16));
+	sprite.setScale(sf::Vector2f(s, s));
+	program.robotSprites.emplace_back(sprite);
 }
