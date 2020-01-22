@@ -40,6 +40,7 @@ public:
 	float scale = 1.0f;
 
 	Pos mousePos;
+	Pos mouseHovering;
 	Pos cameraPos = { 0, 300 };
 	int hotbarIndex = 0;
 	int hotbarSize = 10;

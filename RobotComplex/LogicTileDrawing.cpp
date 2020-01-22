@@ -82,7 +82,7 @@ void LogicTile::DrawSignalStrength(int x, int y, float s, int signal)
 	{
 		sprite.setTextureRect(program.fontMap[displayValue[i]]);
 		float adjustLeft = (float(displayValue.length() / 2)) * 3;
-		sprite.setPosition(float(x + GC::halfTileSize - adjustLeft + i * 4),float(y + GC::halfTileSize));
+		sprite.setPosition(float(x + s * float(GC::halfTileSize - adjustLeft + i * 4)),float(y + GC::halfTileSize));
 		sprite.setScale(sf::Vector2f(s, s));
 
 		program.logicSprites.emplace_back(sprite);

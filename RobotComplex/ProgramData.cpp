@@ -165,7 +165,7 @@ void ProgramData::DrawTooltips()
 	}
 #ifdef DEBUG
 	char buffer[50];
-	sprintf_s(buffer, "Map x/y: %d/%d", mouseHovering.x, mouseHovering.y);
+	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
 	std::string displayValue = buffer;
 	CreateText(program.mousePos.x, program.mousePos.y - 40, displayValue);
 

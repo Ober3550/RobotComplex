@@ -168,11 +168,11 @@ void WidgetCreator::SetDefaultKeyMapping()
 		"Turn Left",
 		"Turn Around",
 		"Turn Right",
-		"Drop Item",
 		"Rotate Placement",
 		"Copy Hovered",
 		"Remove Logic",
 		"Set Robot Auto",
+		"Change ColorClass",
 		"Hotbar 1",
 		"Hotbar 2",
 		"Hotbar 3",
@@ -286,7 +286,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	keyPress = { sf::Keyboard::Q, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Copy Hovered" });
 
-	//Q
+	//Delete
 	userActions.insert({ "Remove Logic",[&] {
 		if (program.selectedLogicTile)
 		{
@@ -467,13 +467,13 @@ void WidgetCreator::UserInput(sf::Event input)
 		if (input.mouseWheelScroll.delta != 0)
 		{
 			program.zoom += input.mouseWheelScroll.delta;
-			// Clamp between 1 and 10
+			// Clamp between 1 and 15
 			if (program.zoom < 1)
 				program.zoom = 1.0f;
-			if (program.zoom > 10)
-				program.zoom = 10.0f;
-			// Change to range between 1/5th and 2
-			program.scale = 0.4f + (program.zoom / 6.0f);
+			if (program.zoom > 15)
+				program.zoom = 15.0f;
+			// Change to range between 1/2 and 2
+			program.scale = 0.5f + (program.zoom / 10.0f);
 		}
 	}
 }
@@ -514,12 +514,12 @@ void WidgetCreator::MouseMoved()
 {
 	if (!program.gamePaused)
 	{
-		Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
-		if (Robot * robot = world.GetRobot(mouseHovering.CoordToEncoded()))
+		program.mouseHovering = (program.mousePos + program.cameraPos) / int(float(GC::tileSize) * program.scale);
+		if (Robot * robot = world.GetRobot(program.mouseHovering.CoordToEncoded()))
 		{
 			program.selectedRobot = robot;
 			program.selectedRobot->stopped = false;
-			program.cameraPos = mouseHovering << GC::tileShift;
+			program.cameraPos = program.mouseHovering << GC::tileShift;
 			program.hotbarIndex = 0;
 			program.hotbar[0] = nullptr;
 		}
@@ -539,7 +539,7 @@ void WidgetCreator::MouseMoved()
 			}
 			if (!foundLogic)
 			{
-				if (LogicTile * logic = world.GetLogicTile(mouseHovering.CoordToEncoded()))
+				if (LogicTile * logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
 				{
 					foundLogic = true;
 					program.selectedLogicTile = logic;
@@ -557,8 +557,7 @@ void WidgetCreator::LeftMousePressed()
 {
 	if (!program.gamePaused)
 	{
-		Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
-		if (Robot * robot = world.robots.GetValue(mouseHovering.CoordToEncoded()))
+		if (Robot * robot = world.robots.GetValue(program.mouseHovering.CoordToEncoded()))
 		{
 		}
 		else
@@ -567,7 +566,7 @@ void WidgetCreator::LeftMousePressed()
 				program.selectedRobot->stopped = true;
 			program.selectedRobot = nullptr;
 		}
-		if (GroundTile * withinMap = world.GetGroundTile(mouseHovering))
+		if (GroundTile * withinMap = world.GetGroundTile(program.mouseHovering))
 		{
 			if (program.hotbarIndex < (int)program.hotbar.size())
 			{
@@ -576,8 +575,8 @@ void WidgetCreator::LeftMousePressed()
 					LogicTile* hotbarElement = program.hotbar[program.hotbarIndex];
 					LogicTile* logicPlace = hotbarElement->Copy();
 					logicPlace->colorClass = program.placeColor;
-					logicPlace->pos = mouseHovering;
-					if (Robot* robot = world.GetRobot(mouseHovering))
+					logicPlace->pos = program.mouseHovering;
+					if (Robot* robot = world.GetRobot(program.mouseHovering))
 					{
 						logicPlace->DoRobotLogic(robot);
 					}
@@ -599,18 +598,17 @@ void WidgetCreator::LeftMousePressed()
 
 void WidgetCreator::RightMousePressed()
 {
-	Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
-	if (LogicTile * deleteLogic = world.GetLogicTile(mouseHovering.CoordToEncoded()))
+	if (LogicTile * deleteLogic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
 	{
-		world.logictiles.erase(mouseHovering.CoordToEncoded());
-		if (Robot* robot = world.GetRobot(mouseHovering))
+		world.logictiles.erase(program.mouseHovering.CoordToEncoded());
+		if (Robot* robot = world.GetRobot(program.mouseHovering))
 		{
 			robot->stopped = false;
 		}
 	}
 	for (int i = 0; i < 4; i++)
 	{
-		world.updateQueueC.insert(mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
+		world.updateQueueC.insert(program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
 	}
 	program.selectedLogicTile = nullptr;
 }
