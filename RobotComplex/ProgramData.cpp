@@ -77,6 +77,8 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, int x, int y)
 				step = 1.0f;
 			Pos screenPos = { x + int(float(difference.x) * float(GC::tileSize) * step), y + int(float(difference.y) * float(GC::tileSize) * step) };
 			robot->DrawTile(screenPos.x, screenPos.y, program.scale);
+			if (robot == program.selectedRobot)
+				program.nextCameraPos = screenPos;
 		}
 		else
 			robot->DrawTile(x, y, program.scale);
@@ -112,23 +114,13 @@ void ProgramData::RecreateSprites() {
 	program.logicSprites.clear();
 	program.robotSprites.clear();
 	program.animationSprites.clear();
-	if (program.selectedRobot)
+	program.cameraPos = program.nextCameraPos;
+	Pos tilePos;
+	for (int y = -program.halfWindowHeight; y < program.halfWindowHeight; y += int(float(GC::tileSize)*program.scale))
 	{
-		if (auto temp = world.nextRobotPos.GetValue(program.selectedRobot->pos))
+		for (int x = -program.halfWindowWidth; x < program.halfWindowWidth; x += int(float(GC::tileSize)*program.scale))
 		{
-			Pos newPos = Pos::EncodedToCoord(*temp);
-			Pos diff = newPos - program.selectedRobot->pos;
-			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
-			if (step > 1.0f)
-				step = 1.0f;
-			program.cameraPos = (program.selectedRobot->pos << GC::tileShift) + Pos{ int(float(diff.x) * float(GC::tileSize) * step), int(float(diff.y) * float(GC::tileSize) * step) };
-		}
-	}
-	for (int y = -(program.windowHeight >> 1) - (program.cameraPos.y & GC::tileMask); y < (program.windowHeight >> 1); y += int(float(GC::tileSize) * program.scale))
-	{
-		for (int x = -(program.windowWidth >> 1) - (program.cameraPos.x & GC::tileMask); x < (program.windowWidth >> 1); x += int(float(GC::tileSize) * program.scale))
-		{
-			Pos tilePos = (Pos{ x,y } + program.cameraPos) / int(float(GC::tileSize) * program.scale);
+			tilePos = (Pos{ x + GC::halfTileSize, y + GC::halfTileSize } +program.cameraPos) / (float(GC::tileSize) * program.scale);
 			uint64_t encodedPos = tilePos.CoordToEncoded();
 			RecreateGroundSprites(tilePos, x, y);
 			RecreateItemSprites(encodedPos, x, y);
@@ -147,10 +139,9 @@ void ProgramData::DrawUpdateCounter()
 }
 void ProgramData::DrawTooltips()
 {
-	Pos mouseHovering = (program.mousePos + program.cameraPos) >> GC::tileShift;
 	if (!program.gamePaused)
 	{
-		if (ItemTile * tile = world.GetItemTile(mouseHovering.CoordToEncoded()))
+		if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
 		{
 			if (tile->itemTile > 2)
 			{
@@ -182,13 +173,14 @@ void ProgramData::DrawSelectedBox()
 {
 	if (program.selectedLogicTile)
 	{
-		Pos selectedPosition = (program.selectedLogicTile->pos << GC::tileShift) - program.cameraPos;
 		sf::RectangleShape selectionBox;
 		selectionBox.setSize(sf::Vector2f(32, 32));
 		selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
 		selectionBox.setOutlineColor(sf::Color(0, 0, 0, 255));
+		selectionBox.setScale(sf::Vector2f(program.scale, program.scale));
 		selectionBox.setOutlineThickness(1);
-		selectionBox.setPosition(float(selectedPosition.x), float(selectedPosition.y + 7));
+		Pos drawPos = program.mouseHovering * (GC::tileSize * program.scale) - program.cameraPos;
+		selectionBox.setPosition(drawPos.x, drawPos.y);
 		program.textBoxes.emplace_back(selectionBox);
 	}
 }

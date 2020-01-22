@@ -35,13 +35,16 @@ public:
 	std::vector<sf::Text> textOverlay;
 
 	int windowWidth;
+	int halfWindowWidth;
 	int windowHeight;
+	int halfWindowHeight;
 	float zoom = 5.0f;
 	float scale = 1.0f;
 
 	Pos mousePos;
 	Pos mouseHovering;
 	Pos cameraPos = { 0, 300 };
+	Pos nextCameraPos; // Variable to move the camera to follow the robot the player is controlling
 	int hotbarIndex = 0;
 	int hotbarSize = 10;
 	std::vector<LogicTile*> hotbar;

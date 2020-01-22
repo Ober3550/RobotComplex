@@ -112,7 +112,7 @@ Pos Pos::operator*(float other)
 }
 Pos Pos::operator/(float other)
 {
-	return Pos{ int(this->x / other), int(this->y / other) };
+	return Pos{ int(round(this->x / other)), int(round(this->y / other)) };
 }
 Pos Pos::operator*(int other)
 {

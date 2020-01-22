@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "Facing.h"
 #include <cassert>
+#include <math.h>
 struct Pos {
 public:
 	int32_t x = 0, y = 0;

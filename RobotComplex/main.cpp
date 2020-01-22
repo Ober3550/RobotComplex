@@ -109,8 +109,10 @@ int main()
 	sf::Thread MapUpdate(&UpdateWorld);
 
 	// Generate the window
-	program.windowHeight = 1010;
 	program.windowWidth = 1920;
+	program.windowHeight = 1010;
+	program.halfWindowWidth = program.windowWidth / 2;
+	program.halfWindowHeight = program.windowHeight / 2;
 	sf::RenderWindow window(sf::VideoMode(program.windowWidth, program.windowHeight), "Terraforma");
 	sf::View view = window.getView();
 	view.setCenter(0, 0);

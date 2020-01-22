@@ -207,7 +207,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			}
 			else
 			{
-				program.cameraPos.y -= GC::cameraSpeed;
+				program.cameraPos.y -= int(float(GC::cameraSpeed) * program.scale);
 			}
 	} });
 	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -221,7 +221,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.x -= GC::cameraSpeed;
+			program.cameraPos.x -= int(float(GC::cameraSpeed) * program.scale);
 		}
 	} });
 	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -235,7 +235,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.y += GC::cameraSpeed;
+			program.cameraPos.y += int(float(GC::cameraSpeed) * program.scale);
 		}
 	} });
 	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -249,7 +249,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.x += GC::cameraSpeed;
+			program.cameraPos.x += int(float(GC::cameraSpeed) * program.scale);
 		}
 	} });
 	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -470,10 +470,10 @@ void WidgetCreator::UserInput(sf::Event input)
 			// Clamp between 1 and 15
 			if (program.zoom < 1)
 				program.zoom = 1.0f;
-			if (program.zoom > 15)
-				program.zoom = 15.0f;
+			if (program.zoom > 16)
+				program.zoom = 16.0f;
 			// Change to range between 1/2 and 2
-			program.scale = 0.5f + (program.zoom / 10.0f);
+			program.scale = 0.5f + (program.zoom / 16.0f);
 		}
 	}
 }
@@ -520,8 +520,6 @@ void WidgetCreator::MouseMoved()
 			program.selectedRobot = robot;
 			program.selectedRobot->stopped = false;
 			program.cameraPos = program.mouseHovering << GC::tileShift;
-			program.hotbarIndex = 0;
-			program.hotbar[0] = nullptr;
 		}
 		else
 		{
@@ -572,9 +570,7 @@ void WidgetCreator::LeftMousePressed()
 			{
 				if (program.hotbar[program.hotbarIndex])
 				{
-					LogicTile* hotbarElement = program.hotbar[program.hotbarIndex];
-					LogicTile* logicPlace = hotbarElement->Copy();
-					logicPlace->colorClass = program.placeColor;
+					LogicTile* logicPlace = program.hotbar[program.hotbarIndex]->Copy();
 					logicPlace->pos = program.mouseHovering;
 					if (Robot* robot = world.GetRobot(program.mouseHovering))
 					{
