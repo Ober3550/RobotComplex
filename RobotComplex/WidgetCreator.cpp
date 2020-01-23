@@ -207,7 +207,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			}
 			else
 			{
-				program.cameraPos.y -= int(float(GC::cameraSpeed) * program.scale);
+				program.cameraPos.y -= GC::cameraSpeed * program.zoom;
 			}
 	} });
 	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -221,7 +221,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.x -= int(float(GC::cameraSpeed) * program.scale);
+			program.cameraPos.x -= GC::cameraSpeed * program.zoom;
 		}
 	} });
 	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -235,7 +235,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.y += int(float(GC::cameraSpeed) * program.scale);
+			program.cameraPos.y += GC::cameraSpeed * program.zoom;
 		}
 	} });
 	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -249,7 +249,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.x += int(float(GC::cameraSpeed) * program.scale);
+			program.cameraPos.x += GC::cameraSpeed * program.zoom;
 		}
 	} });
 	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -466,14 +466,12 @@ void WidgetCreator::UserInput(sf::Event input)
 	{
 		if (input.mouseWheelScroll.delta != 0)
 		{
-			program.zoom += input.mouseWheelScroll.delta;
-			// Clamp between 1 and 15
-			if (program.zoom < 1)
-				program.zoom = 1.0f;
-			if (program.zoom > 16)
-				program.zoom = 16.0f;
-			// Change to range between 1/2 and 2
-			program.scale = 0.5f + (program.zoom / 16.0f);
+			program.scale -= input.mouseWheelScroll.delta;
+			if (program.scale < 0.0f)
+				program.scale = 0.0f;
+			if (program.scale > 25.0f)
+				program.scale = 25.0f;
+			program.zoom = 0.5f + program.scale / 10.0f;
 		}
 	}
 }
@@ -514,12 +512,11 @@ void WidgetCreator::MouseMoved()
 {
 	if (!program.gamePaused)
 	{
-		program.mouseHovering = (program.mousePos + program.cameraPos) / int(float(GC::tileSize) * program.scale);
+		program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 		if (Robot * robot = world.GetRobot(program.mouseHovering.CoordToEncoded()))
 		{
 			program.selectedRobot = robot;
 			program.selectedRobot->stopped = false;
-			program.cameraPos = program.mouseHovering << GC::tileShift;
 		}
 		else
 		{

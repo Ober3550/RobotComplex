@@ -114,9 +114,16 @@ int main()
 	program.halfWindowWidth = program.windowWidth / 2;
 	program.halfWindowHeight = program.windowHeight / 2;
 	sf::RenderWindow window(sf::VideoMode(program.windowWidth, program.windowHeight), "Terraforma");
-	sf::View view = window.getView();
-	view.setCenter(0, 0);
-	window.setView(view);
+
+	program.worldView = sf::View();
+	program.worldView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
+	program.worldView.setCenter(0, 0);
+
+	program.hudView = sf::View();
+	program.hudView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
+	program.hudView.setCenter(0, 0);
+
+	window.setView(program.worldView);
 	window.setFramerateLimit(GC::FRAMERATE);
 
 	// Load program

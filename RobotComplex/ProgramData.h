@@ -11,6 +11,7 @@
 #include "LogicTile.h"
 #include "Animation.h"
 #include "ItemTile.h"
+#include "SpriteVector.h"
 
 class ProgramData {
 public:
@@ -25,11 +26,13 @@ public:
 	std::vector<Animation> animationTemplates;
 
 	//Stores sprite layers
-	std::vector<sf::Sprite> groundSprites;	// Ground sprites are only repopulated when the camera moves
-	std::vector<sf::Sprite> itemSprites;
-	std::vector<sf::Sprite> logicSprites;
-	std::vector<sf::Sprite> robotSprites;
-	std::vector<sf::Sprite> animationSprites;
+	SpriteVector groundSprites;
+	SpriteVector itemSprites;
+	SpriteVector logicSprites;
+	std::vector<sf::RectangleShape> selectionBoxes;
+	SpriteVector robotSprites;
+	SpriteVector animationSprites;
+	SpriteVector hotbarSprites;
 	std::vector<sf::RectangleShape> hotbarSlots;
 	std::vector<sf::RectangleShape> textBoxes;
 	std::vector<sf::Text> textOverlay;
@@ -38,15 +41,18 @@ public:
 	int halfWindowWidth;
 	int windowHeight;
 	int halfWindowHeight;
-	float zoom = 5.0f;
 	float scale = 1.0f;
+	float zoom = 1.0f;
+	float prevZoom = 1.0f;
+	sf::View worldView;
+	sf::View hudView;
 
 	Pos mousePos;
 	Pos mouseHovering;
-	Pos cameraPos = { 0, 300 };
-	Pos nextCameraPos; // Variable to move the camera to follow the robot the player is controlling
+	Pos prevCameraPos = {0, 0};
+	Pos cameraPos = { 0, 0 };
 	int hotbarIndex = 0;
-	int hotbarSize = 10;
+	int hotbarSize = 9;
 	std::vector<LogicTile*> hotbar;
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
@@ -78,6 +84,8 @@ public:
 	void DrawTooltips();
 	void DrawHotbar();
 	void DrawGameState(sf::RenderWindow& window);
+	void DrawCrosshair(sf::RenderWindow& window);
+	void FindMovingRobot();
 	void SwapBots();
 	void SwapItems();
 	void CheckItemsMoved();

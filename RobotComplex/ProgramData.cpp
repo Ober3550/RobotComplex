@@ -22,7 +22,6 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, int x, int y)
 		sprite.setTextureRect(sf::IntRect((textureIndex & 3)*32, 0, 32, 32));
 		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 		sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
-		sprite.setScale(sf::Vector2f(program.scale, program.scale));
 		program.groundSprites.emplace_back(sprite);
 	}
 }
@@ -32,7 +31,6 @@ void ProgramData::DrawItem(ItemTile item, int x, int y)
 	sprite.setTexture(*itemTextures[item.itemTile]);
 	sprite.setOrigin(8, 8);
 	sprite.setPosition(float(x + 16), float(y + 16));
-	sprite.setScale(sf::Vector2f(program.scale,program.scale));
 	program.itemSprites.emplace_back(sprite);
 }
 void ProgramData::RecreateItemSprites(uint64_t encodedPos, int x, int y)
@@ -61,7 +59,7 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, int x, int y)
 {
 	if (LogicTile * logic = world.GetLogicTile(encodedPos))
 	{
-		logic->DrawTile(x, y, program.scale);
+		logic->DrawTile(&program.logicSprites, x, y, 1.0f);
 	}
 }
 void ProgramData::RecreateRobotSprites(uint64_t encodedPos, int x, int y)
@@ -75,13 +73,10 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, int x, int y)
 			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 			if (step > 1.0f)
 				step = 1.0f;
-			Pos screenPos = { x + int(float(difference.x) * float(GC::tileSize) * step), y + int(float(difference.y) * float(GC::tileSize) * step) };
-			robot->DrawTile(screenPos.x, screenPos.y, program.scale);
-			if (robot == program.selectedRobot)
-				program.nextCameraPos = screenPos;
+			x += int(float(difference.x) * float(GC::tileSize) * step);
+			y += int(float(difference.y) * float(GC::tileSize) * step);
 		}
-		else
-			robot->DrawTile(x, y, program.scale);
+		robot->DrawTile(x, y, 1.0f);
 	}
 }
 void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, int x, int y)
@@ -114,19 +109,22 @@ void ProgramData::RecreateSprites() {
 	program.logicSprites.clear();
 	program.robotSprites.clear();
 	program.animationSprites.clear();
-	program.cameraPos = program.nextCameraPos;
-	Pos tilePos;
-	for (int y = -program.halfWindowHeight; y < program.halfWindowHeight; y += int(float(GC::tileSize)*program.scale))
+	int begY = (-program.halfWindowHeight / (GC::tileSize / program.zoom)) - 2 + (cameraPos.y >> GC::tileShift);
+	int endY = program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift) + 2;
+	int begX = (-program.halfWindowWidth / (GC::tileSize / program.zoom)) - 2 + (cameraPos.x >> GC::tileShift);
+	int endX = program.halfWindowWidth / (GC::tileSize / program.zoom) + (cameraPos.x >> GC::tileShift) + 2;
+	for (int y = begY; y < endY; y++)
 	{
-		for (int x = -program.halfWindowWidth; x < program.halfWindowWidth; x += int(float(GC::tileSize)*program.scale))
+		for (int x = begX; x <= endX; x++)
 		{
-			tilePos = (Pos{ x + GC::halfTileSize, y + GC::halfTileSize } +program.cameraPos) / (float(GC::tileSize) * program.scale);
+			Pos screenPos = Pos{ x, y } * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+			Pos tilePos = Pos{ x,y };
 			uint64_t encodedPos = tilePos.CoordToEncoded();
-			RecreateGroundSprites(tilePos, x, y);
-			RecreateItemSprites(encodedPos, x, y);
-			RecreateLogicSprites(encodedPos, x, y);
-			RecreateRobotSprites(encodedPos, x, y);
-			RecreateAnimationSprites(encodedPos, x, y);
+			RecreateGroundSprites(tilePos, screenPos.x, screenPos.y);
+			RecreateItemSprites(encodedPos, screenPos.x, screenPos.y);
+			RecreateLogicSprites(encodedPos, screenPos.x, screenPos.y);
+			RecreateRobotSprites(encodedPos, screenPos.x, screenPos.y);
+			RecreateAnimationSprites(encodedPos, screenPos.x, screenPos.y);
 		}
 	}
 }
@@ -139,20 +137,17 @@ void ProgramData::DrawUpdateCounter()
 }
 void ProgramData::DrawTooltips()
 {
-	if (!program.gamePaused)
+	if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
 	{
-		if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
+		if (tile->itemTile > 2)
 		{
-			if (tile->itemTile > 2)
-			{
-				std::string quantity = std::to_string(tile->quantity);
-				CreateText(program.mousePos.x, program.mousePos.y - 20, program.itemTooltips[tile->itemTile] + " " + quantity);
-			}
+			std::string quantity = std::to_string(tile->quantity);
+			CreateText(program.mousePos.x, program.mousePos.y - 20, program.itemTooltips[tile->itemTile] + " " + quantity);
 		}
-		else if (program.selectedLogicTile)
-		{
-			CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip());
-		}
+	}
+	else if (program.selectedLogicTile)
+	{
+		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip());
 	}
 #ifdef DEBUG
 	char buffer[50];
@@ -167,6 +162,10 @@ void ProgramData::DrawTooltips()
 	sprintf_s(buffer, "Zoom/Scale: %.2f/%.2f", program.zoom, program.scale);
 	displayValue = buffer;
 	CreateText(program.mousePos.x, program.mousePos.y - 80, displayValue);
+
+	sprintf_s(buffer, "Camera x/y: %d/%d", program.cameraPos.x, program.cameraPos.y);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 100, displayValue);
 #endif
 }
 void ProgramData::DrawSelectedBox()
@@ -176,20 +175,29 @@ void ProgramData::DrawSelectedBox()
 		sf::RectangleShape selectionBox;
 		selectionBox.setSize(sf::Vector2f(32, 32));
 		selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
-		selectionBox.setOutlineColor(sf::Color(0, 0, 0, 255));
-		selectionBox.setScale(sf::Vector2f(program.scale, program.scale));
-		selectionBox.setOutlineThickness(1);
-		Pos drawPos = program.mouseHovering * (GC::tileSize * program.scale) - program.cameraPos;
+		selectionBox.setOutlineColor(sf::Color(255, 255, 0, 255));
+		selectionBox.setOutlineThickness(2);
+		Pos drawPos = program.mouseHovering * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
 		selectionBox.setPosition(drawPos.x, drawPos.y);
-		program.textBoxes.emplace_back(selectionBox);
+		program.selectionBoxes.emplace_back(selectionBox);
 	}
+}
+void ProgramData::DrawCrosshair(sf::RenderWindow& window)
+{
+	sf::RectangleShape verticalLine(sf::Vector2f(2, program.windowHeight));
+	sf::RectangleShape horizontalLine(sf::Vector2f(program.windowWidth, 2));
+	verticalLine.setPosition(0, -program.halfWindowHeight);
+	horizontalLine.setPosition(-program.halfWindowWidth, 0);
+	window.draw(verticalLine);
+	window.draw(horizontalLine);
 }
 void ProgramData::DrawHotbar()
 {
+	program.hotbarSprites.clear();
 	program.hotbarSlots.clear();
 	for (uint8_t i = 0; i < program.hotbarSize && i < program.hotbar.size(); ++i)
 	{
-		int x = int(i - program.hotbarSize / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int x = int(i - (program.hotbarSize - 1) / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		int y = int(program.windowHeight / 2.f) - GC::hotbarSlotSize;
 		sf::RectangleShape hotbarSlot;
 		if(i == program.hotbarIndex)
@@ -204,7 +212,7 @@ void ProgramData::DrawHotbar()
 		{
 			program.hotbar[i]->facing = program.placeRotation;
 			program.hotbar[i]->colorClass = program.placeColor;
-			program.hotbar[i]->DrawTile(x - GC::halfTileSize, y - GC::halfTileSize, 1.0f);
+			program.hotbar[i]->DrawTile(&program.hotbarSprites, x - GC::halfTileSize, y - GC::halfTileSize, 1.0f);
 		}
 	}
 }
@@ -228,41 +236,63 @@ void ProgramData::CreateText(int x, int y, std::string input)
 	program.textBoxes.emplace_back(backPlane);
 	program.textOverlay.emplace_back(text);
 }
+void ProgramData::FindMovingRobot()
+{
+	if (program.selectedRobot)
+	{
+		if (uint64_t* movingTo = world.nextRobotPos.GetValue(program.selectedRobot->pos))
+		{
+			Pos difference = Pos::EncodedToCoord(*movingTo) - program.selectedRobot->pos;
+			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+			if (step > 1.0f)
+				step = 1.0f;
+			program.cameraPos = (program.selectedRobot->pos << GC::tileShift) + Pos{ int(float(difference.x) * float(GC::tileSize) * step) ,int(float(difference.y) * float(GC::tileSize) * step) };
+		}
+		else
+		{
+			program.cameraPos = (program.selectedRobot->pos << GC::tileShift);
+		}
+	}
+}
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	if (!program.gamePaused)
 	{
+		FindMovingRobot();
+		if (program.prevZoom != program.zoom)
+		{
+			program.worldView.zoom(program.zoom / program.prevZoom);
+			program.prevZoom = program.zoom;
+		}
+		if (program.prevCameraPos != program.cameraPos)
+		{
+			program.worldView.move(sf::Vector2f(program.cameraPos.x - program.prevCameraPos.x, program.cameraPos.y - program.prevCameraPos.y));
+			program.prevCameraPos = program.cameraPos;
+		}
 		program.textOverlay.clear();
 		program.textBoxes.clear();
+		program.selectionBoxes.clear();
 		RecreateSprites();
 		DrawUpdateCounter();
 		DrawTooltips();
 		DrawHotbar();
 		DrawSelectedBox();
 	}
-	for (sf::Sprite sprite : program.groundSprites)
+	window.setView(program.worldView);
+	program.groundSprites.draw(window);
+	program.logicSprites.draw(window);
+	program.itemSprites.draw(window);
+	program.animationSprites.draw(window);
+	program.robotSprites.draw(window);
+	for (sf::RectangleShape sprite : program.selectionBoxes)
 	{
 		window.draw(sprite);
 	}
-	for (sf::Sprite sprite : program.logicSprites)
-	{
-		window.draw(sprite);
-	}
-	for (sf::Sprite sprite : program.itemSprites)
-	{
-		window.draw(sprite);
-	}
-	for (sf::Sprite sprite : program.animationSprites)
-	{
-		window.draw(sprite);
-	}
-	for (sf::Sprite sprite : program.robotSprites)
-	{
-		window.draw(sprite);
-	}
+	window.setView(program.hudView);
 	for (sf::RectangleShape sprite : program.hotbarSlots)
 	{
 		window.draw(sprite);
 	}
+	program.hotbarSprites.draw(window);
 	for (sf::RectangleShape sprite : program.textBoxes)
 	{
 		window.draw(sprite);
@@ -271,6 +301,9 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	{
 		window.draw(sprite);
 	}
+#ifdef DEBUG
+	//DrawCrosshair(window);
+#endif
 }
 void ProgramData::SwapItems()
 {

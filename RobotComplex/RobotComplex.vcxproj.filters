@@ -187,5 +187,8 @@
     <ClInclude Include="Animation.h">
       <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
+    <ClInclude Include="SpriteVector.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@
 #include "Textures.h"
 //static constexpr uint8_t colorClass = 1;
 
-void LogicTile::DrawSpriteFromProperties(int x, int y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
+void LogicTile::DrawSpriteFromProperties(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
 {
 	// Output Sprite
 	sf::Sprite sprite;
@@ -41,9 +41,9 @@ void LogicTile::DrawSpriteFromProperties(int x, int y, float s, sf::Texture* tex
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s,s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 }
-void LogicTile::DrawSprite(int x, int y, float s, sf::Texture* texture)
+void LogicTile::DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
@@ -55,9 +55,9 @@ void LogicTile::DrawSprite(int x, int y, float s, sf::Texture* texture)
 	sprite.setColor(sf::Color(255, 255, 255, 255));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 }
-void LogicTile::DrawSprite(int x, int y, float s, sf::Texture* texture, sf::IntRect subRect)
+void LogicTile::DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture, sf::IntRect subRect)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
@@ -69,9 +69,9 @@ void LogicTile::DrawSprite(int x, int y, float s, sf::Texture* texture, sf::IntR
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 }
-void LogicTile::DrawSignalStrength(int x, int y, float s, int signal)
+void LogicTile::DrawSignalStrength(SpriteVector* appendTo, int x, int y, float s, int signal)
 {
 	// Signal value
 	sf::Sprite sprite;
@@ -85,11 +85,11 @@ void LogicTile::DrawSignalStrength(int x, int y, float s, int signal)
 		sprite.setPosition(float(x + s * float(GC::halfTileSize - adjustLeft + i * 4)),float(y + GC::halfTileSize));
 		sprite.setScale(sf::Vector2f(s, s));
 
-		program.logicSprites.emplace_back(sprite);
+		appendTo->emplace_back(sprite);
 	}
 }
 
-void Wire::DrawTile(int x, int y, float s)
+void Wire::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -110,7 +110,7 @@ void Wire::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 	// Neighbour Sprites
 	for (uint8_t i = 0; i < 4; i++)
 	{
@@ -127,16 +127,16 @@ void Wire::DrawTile(int x, int y, float s)
 				sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 				sprite.setScale(sf::Vector2f(s, s));
 
-				program.logicSprites.emplace_back(sprite);
+				appendTo->emplace_back(sprite);
 			}
 		}
 	}
 	// Signal value
 	if(this->signal!=0)
-	DrawSignalStrength(x, y, s, this->signal);
+	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Redirector::DrawTile(int x, int y, float s)
+void Redirector::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -161,14 +161,14 @@ void Redirector::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Signal value
 	if (this->signal != 0)
-	DrawSignalStrength(x, y, s, this->signal);
+	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Inverter::DrawTile(int x, int y, float s)
+void Inverter::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -190,7 +190,7 @@ void Inverter::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Output Sprite
 	sprite.setTexture(*texture);
@@ -210,14 +210,14 @@ void Inverter::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Signal value
 	if (this->signal != 0)
-	DrawSignalStrength(x, y, s, this->signal);
+	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Booster::DrawTile(int x, int y, float s)
+void Booster::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 {
 	// Input Sprite
 	sf::Sprite sprite;
@@ -239,7 +239,7 @@ void Booster::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Output Sprite
 	sprite.setTexture(*texture);
@@ -252,14 +252,14 @@ void Booster::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Signal value
 	if (this->signal != 0)
-	DrawSignalStrength(x, y, s, this->signal);
+	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Repeater::DrawTile(int x, int y, float s)
+void Repeater::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 {
 	// Input Sprite
 	sf::Sprite sprite;
@@ -281,7 +281,7 @@ void Repeater::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Output Sprite
 	sprite.setTexture(*texture);
@@ -294,14 +294,14 @@ void Repeater::DrawTile(int x, int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Signal value
 	if (this->signal != 0)
-	DrawSignalStrength(x, y, s, this->signal);
+	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Counter::DrawTile(int x,int y, float s)
+void Counter::DrawTile(SpriteVector* appendTo, int x,int y, float s)
 {
 	// Baseplate
 	sf::Sprite sprite;
@@ -314,7 +314,7 @@ void Counter::DrawTile(int x,int y, float s)
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
-	program.logicSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Signal value
 	std::string counterDisplay = std::to_string(this->signal) + " / " + std::to_string(this->maxSignal);

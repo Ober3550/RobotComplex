@@ -193,7 +193,7 @@ void CreateTestWorld2()
 
 	std::string itemName = "iron_ore";
 	getItemNumber = findInVector(program.itemPrototypes, itemName);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		if (getItemNumber.first)
 		{
@@ -206,7 +206,7 @@ void CreateTestWorld2()
 			OutputDebugStringA(("Failed to place " + itemName + "\r\n").c_str());
 		}
 	}
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		std::string itemName = "coal_ore";
 		getItemNumber = findInVector(program.itemPrototypes, itemName);
