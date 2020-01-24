@@ -20,40 +20,6 @@ void Robot::Rotate(int r)
 	// Then converts back to enum
 	facing = Facing((int(facing) + r) & 3);
 }
-void Robot::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft)
-{
-	Pos prevPos = itemsMoving->back();
-	ItemTile* prevItem = world.GetItemTile(prevPos);
-	if (pushesLeft == 0)
-	{
-		// There is an item at the front of the stack that isn't the same type
-		if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
-		{
-			if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
-			{
-				itemsMoving->pop_back();
-			}
-		}
-		return;
-	}
-	if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
-	{
-		if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
-		{
-			return;
-		}
-		else
-		{
-			itemsMoving->emplace_back(prevPos.FacingPosition(toward));
-			PushItems(itemsMoving, toward, pushesLeft - 1);
-		}
-	}
-	else
-	{
-		itemsMoving->emplace_back(prevPos.FacingPosition(toward));
-		return;
-	}
-}
 bool Robot::Move()
 {
 	// For logic tile that stops robot untill it receives a signal
@@ -74,7 +40,7 @@ bool Robot::Move()
 					if (ItemTile* nextTile = world.GetItemTile(newPos))
 					{
 						std::vector<Pos> pushStack = { newPos};
-						PushItems(&pushStack, this->facing, GC::robotStrength);
+						world.PushItems(&pushStack, this->facing, GC::robotStrength);
 						if (!pushStack.empty())
 						{
 							for (uint16_t i=1; i<pushStack.size();i++)

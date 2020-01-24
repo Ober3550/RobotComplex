@@ -24,6 +24,7 @@ public:
 	MySet<uint64_t> updateQueueA;	// Processing queue for update from Queue B
 	MySet<uint64_t> updateQueueB;	// Queue for current updates
 	MySet<uint64_t> updateQueueC;	// Queue for updates next tick
+	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
 	uint64_t tick;
 	uint64_t seed = 0;
 	FastNoiseSIMD* noiseRef;
@@ -40,6 +41,7 @@ public:
 	{
 		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
 	}
+	void PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft);
 	bool ChangeItem(Pos pos, uint16_t item, int quantity);
 	void GenerateChunk(Pos pos);
 	void Serialize(std::string filename);
@@ -57,6 +59,7 @@ public:
 		updateQueueA.clear();
 		updateQueueB.clear();
 		updateQueueC.clear();
+		updateQueueD.clear();
 		tick = 0;
 		seed = 0;
 	}

@@ -39,6 +39,7 @@ sf::Texture* Booster::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Holder::texture = LoadTexture("logic/holder.png");
 sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
+sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
 
 ProgramData program;
 WorldSave world;

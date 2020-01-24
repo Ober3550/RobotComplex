@@ -515,6 +515,9 @@ void WidgetCreator::MouseMoved()
 		program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 		if (Robot * robot = world.GetRobot(program.mouseHovering.CoordToEncoded()))
 		{
+			if (program.selectedRobot)
+				if(program.selectedRobot != robot)
+					program.selectedRobot->stopped = true;
 			program.selectedRobot = robot;
 			program.selectedRobot->stopped = false;
 		}
@@ -554,15 +557,6 @@ void WidgetCreator::LeftMousePressed()
 {
 	if (!program.gamePaused)
 	{
-		if (Robot * robot = world.robots.GetValue(program.mouseHovering.CoordToEncoded()))
-		{
-		}
-		else
-		{
-			if(program.selectedRobot)
-				program.selectedRobot->stopped = true;
-			program.selectedRobot = nullptr;
-		}
 		if (GroundTile * withinMap = world.GetGroundTile(program.mouseHovering))
 		{
 			if (program.hotbarIndex < (int)program.hotbar.size())
@@ -585,7 +579,18 @@ void WidgetCreator::LeftMousePressed()
 					program.selectedLogicTile = logicPlace;
 				}
 				else
+				{
 					program.selectedLogicTile = nullptr;
+					if (Robot * robot = world.robots.GetValue(program.mouseHovering.CoordToEncoded()))
+					{
+					}
+					else
+					{
+						if (program.selectedRobot)
+							program.selectedRobot->stopped = true;
+						program.selectedRobot = nullptr;
+					}
+				}
 
 			}
 		}
@@ -601,10 +606,10 @@ void WidgetCreator::RightMousePressed()
 		{
 			robot->stopped = false;
 		}
+		for (int i = 0; i < 4; i++)
+		{
+			world.updateQueueC.insert(program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
+		}
+		program.selectedLogicTile = nullptr;
 	}
-	for (int i = 0; i < 4; i++)
-	{
-		world.updateQueueC.insert(program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
-	}
-	program.selectedLogicTile = nullptr;
 }

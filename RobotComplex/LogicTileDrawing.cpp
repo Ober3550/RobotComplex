@@ -326,3 +326,95 @@ void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 
 	program.textOverlay.emplace_back(counterValue);
 }
+
+void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+{
+	// Main Sprite
+	sf::Sprite sprite;
+	sprite.setTexture(*texture);
+
+	uint8_t color = black;
+	if (this->signal)
+		color = colorClass;
+	uint8_t Red, Green, Blue;
+	Red = 255 * (color & 1);
+	Green = 255 * (color >> 1 & 1);
+	Blue = 255 * (color >> 2 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	float sprite_rotation = float(this->facing) * 90.f;
+	sprite.setRotation(sprite_rotation);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+
+	appendTo->emplace_back(sprite);
+
+	// Signal value
+	if (this->signal != 0)
+		DrawSignalStrength(appendTo, x, y, s, this->signal);
+}
+
+void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+{
+	// Centre Sprite
+	sf::Sprite sprite;
+	float sprite_rotation;
+	sprite.setTexture(*Wire::texture);
+	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
+
+	uint8_t color = black;
+	if (this->signal)
+		color = GC::colorClassA;
+	uint8_t Red, Green, Blue;
+	Red = 255 * (color & 1);
+	Green = 255 * (color >> 1 & 1);
+	Blue = 255 * (color >> 2 & 1);
+
+	uint8_t color2 = black;
+	if (this->signal2)
+		color2 = GC::colorClassB;
+	uint8_t Red2, Green2, Blue2;
+	Red2 = 255 * (color2 & 1);
+	Green2 = 255 * (color2 >> 1 & 1);
+	Blue2 = 255 * (color2 >> 2 & 1);
+	
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+
+	appendTo->emplace_back(sprite);
+	// Neighbour Sprites
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		
+		Pos lookingAt = this->pos.FacingPosition(Facing(i));
+		if (LogicTile* neighbour = world.GetLogicTile(lookingAt.CoordToEncoded()))
+		{
+			if (this->GetConnected(neighbour))
+			{
+				sprite.setTexture(*Wire::texture);
+				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
+
+				if (int(Pos::RelativeFacing(this->facing, i)) & 1)
+					sprite.setColor(sf::Color(Red2, Green2, Blue2, 255));
+				else
+					sprite.setColor(sf::Color(Red, Green, Blue, 255));
+
+				sprite_rotation = ((float)i) * (float)90.f;
+				sprite.setRotation(sprite_rotation);
+				sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+				sprite.setScale(sf::Vector2f(s, s));
+
+				appendTo->emplace_back(sprite);
+			}
+		}
+	}
+	// Signal value
+	if (this->signal != 0)
+		DrawSignalStrength(appendTo, x - 5, y, s, this->signal);
+
+	// Signal value
+	if (this->signal2 != 0)
+		DrawSignalStrength(appendTo, x + 5, y, s, this->signal2);
+}

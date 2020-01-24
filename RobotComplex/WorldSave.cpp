@@ -104,10 +104,7 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		{
 			world.items.erase(itemPos);
 		}
-		if (LogicTile* logicTile = world.GetLogicTile(pos))
-		{
-			logicTile->DoItemLogic();
-		}
+		world.updateQueueD.insert(pos.CoordToEncoded());
 		return true;
 	}
 	else
@@ -118,10 +115,52 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		newItem->itemTile = item;
 		newItem->quantity = quantity;
 		world.items[pos.CoordToEncoded()] = *newItem;
-		if (LogicTile* logicTile = world.GetLogicTile(pos))
-		{
-			logicTile->DoItemLogic();
-		}
+		world.updateQueueD.insert(pos.CoordToEncoded());
 		return true;
+	}
+}
+void WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft)
+{
+	Pos prevPos = itemsMoving->back();
+	ItemTile* prevItem = world.GetItemTile(prevPos);
+	if (pushesLeft == 0)
+	{
+		// There is an item at the front of the stack that isn't the same type
+		if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
+		{
+			if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
+			{
+				itemsMoving->pop_back();
+			}
+		}
+		return;
+	}
+	else
+	{
+		if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
+		{
+			if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
+			{
+				return;
+			}
+			else
+			{
+				// If the item infront of the stack is the same type but is already 'full' don't push the stack
+				if (pushesLeft == 1 && nextItem->quantity == UINT8_MAX)
+				{
+					itemsMoving->clear();
+				}
+				else
+				{
+					itemsMoving->emplace_back(prevPos.FacingPosition(toward));
+					PushItems(itemsMoving, toward, pushesLeft - 1);
+				}
+			}
+		}
+		else
+		{
+			itemsMoving->emplace_back(prevPos.FacingPosition(toward));
+			return;
+		}
 	}
 }

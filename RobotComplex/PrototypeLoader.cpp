@@ -214,6 +214,8 @@ void LoadLogicToHotbar()
 	Wire* wire = new Wire();
 	Inverter* inverter = new Inverter();
 	Booster* booster = new Booster();
+	Belt* belt = new Belt();
+	WireBridge* wireBridge = new WireBridge();
 	
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(redirect);
@@ -222,4 +224,6 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(wire);
 	program.hotbar.emplace_back(inverter);
 	program.hotbar.emplace_back(booster);
+	program.hotbar.emplace_back(belt);
+	program.hotbar.emplace_back(wireBridge);
 }

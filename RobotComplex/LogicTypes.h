@@ -8,5 +8,7 @@ enum LogicTypes : uint8_t {
 	booster = 5,
 	counter = 6,
 	repeater = 7,
-	holder = 8
+	holder = 8,
+	belt = 9,
+	wirebridge = 10
 };

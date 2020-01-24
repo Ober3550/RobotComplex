@@ -18,6 +18,7 @@ void WorldSave::Serialize(std::string filename)
 	logictiles.Serialize("saves/" + filename + "/logic.bin");
 	updateQueueB.Serialize("saves/" + filename + "/updateQueueB.bin");
 	updateQueueC.Serialize("saves/" + filename + "/updateQueueC.bin");
+	updateQueueD.Serialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 }
 void WorldSave::Deserialize(std::string filename)
@@ -31,5 +32,6 @@ void WorldSave::Deserialize(std::string filename)
 	logictiles.Deserialize("saves/" + filename + "/logic.bin");
 	updateQueueB.Deserialize("saves/" + filename + "/updateQueueB.bin");
 	updateQueueC.Deserialize("saves/" + filename + "/updateQueueC.bin");
+	updateQueueD.Deserialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 }

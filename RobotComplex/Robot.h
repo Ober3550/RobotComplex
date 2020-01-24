@@ -11,6 +11,5 @@ public:
 	void SetFacing(Facing direction);
 	void Rotate(int r);
 	bool Move();
-	void PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft);
 	void DrawTile(int x, int y, float s);
 };

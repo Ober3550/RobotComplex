@@ -105,33 +105,67 @@ void LogicTile::DoWireLogic() {
 	std::array<LogicTile*, 4> neighbourTile = std::array<LogicTile*, 4>();
 	this->prevSignal = this->signal;
 
-	for (uint8_t i = 0; i < 4; i++)
+	// output, b1, a, b2
+	for (int i = 0; i < 4; i++)
 	{
-		Pos lookingAt = this->pos.FacingPosition(Facing(i));
-		if (auto temp = world.logictiles.GetValue(lookingAt.CoordToEncoded()))
+		if (neighbourTile[i] = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing, i))))
 		{
-			neighbourTile[i] = *temp;
-			// If neighbour is 'directional signal provider'
-			if (neighbourTile[i]->GetConnected(this))
+			if (NeighbourConnects())
 			{
-				if (neighbourTile[i]->ReceivesSignal(this))
+				if (neighbourTile[i]->GetConnected(this))
 				{
-					if (neighbourTile[i]->IsSource())
-						neighbourSignals[i] = neighbourTile[i]->signal + 1;
-					else
-						neighbourSignals[i] = neighbourTile[i]->signal;
+					if (neighbourTile[i]->ReceivesSignal(this))
+						if (neighbourTile[i]->IsSource())
+							neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
+						else
+							neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
+				}
+				else
+				{
+					// If neighbour isn't connected to this element don't update it
+					neighbourTile[i] = nullptr;
 				}
 			}
-			if(!neighbourTile[i]->GetConnected(this))
+			else
 			{
-				// If neighbour isn't connected to this element don't update it
-				neighbourTile[i] = nullptr;
+				if (this->GetConnected(neighbourTile[i]))
+				{
+					if (neighbourTile[i]->ReceivesSignal(this))
+						if (neighbourTile[i]->IsSource())
+							neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
+						else
+							neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
+				}
+				else
+				{
+					// If neighbour isn't connected to this element don't update it
+					neighbourTile[i] = nullptr;
+				}
 			}
 		}
 	}
 
-	// This tiles signal will be the max value of its neighbours - 1
-	int max_value = *std::max_element(neighbourSignals.begin(), neighbourSignals.end());
+	
+	SignalEval(neighbourSignals);
+
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		if (neighbourTile[i])
+		{
+			// Update neighbours
+			if (this->prevSignal != this->signal || (neighbourTile[i]->GetSignal(this) == 0 && this->GetSignal(neighbourTile[i]) > 0))
+			{
+				if (neighbourTile[i]->GetSignal(this) != 0 || this->GetSignal(neighbourTile[i]) != 0)
+					world.updateQueueB.insert({ neighbourTile[i]->pos.CoordToEncoded() });
+			}
+		}
+	}
+}
+
+// This tiles signal will be the max value of its neighbours - 1
+void LogicTile::SignalEval(std::array<uint8_t, 4> neighbours)
+{
+	int max_value = std::max({ neighbours[0],neighbours[1],neighbours[2],neighbours[3] });
 	if (this->signal > max_value)
 	{
 		this->signal = 0;
@@ -140,20 +174,8 @@ void LogicTile::DoWireLogic() {
 	{
 		signal = max_value > 0 ? max_value - 1 : 0;
 	}
-
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		if (neighbourTile[i])
-		{
-			// Update neighbours
-			if (this->prevSignal != this->signal || (neighbourTile[i]->signal == 0 && this->signal > 0))
-			{
-				if (neighbourTile[i]->signal != 0 || this->signal != 0)
-					world.updateQueueB.insert({ neighbourTile[i]->pos.CoordToEncoded() });
-			}
-		}
-	}
 }
+
 void DirectionalLogicTile::DoWireLogic()
 {
 	// output, b1, a, b2
@@ -164,7 +186,7 @@ void DirectionalLogicTile::DoWireLogic()
 		{
 			if (tile->GetConnected(this))
 				if(tile->ReceivesSignal(this))
-					neighbourSignals[i] = tile->signal;
+					neighbourSignals[i] = tile->GetSignal(this);
 		}
 	}
 	this->SignalEval(neighbourSignals);
@@ -339,3 +361,75 @@ std::string Counter::GetTooltip()
 	return program.logicTooltips[8][0];
 }
 
+void Belt::DoRobotLogic(Robot* robotRef)
+{
+	if (robotRef && signal == 0)
+	{
+		robotRef->SetFacing(this->facing);
+	}
+}
+
+void Belt::DoItemLogic()
+{
+	if (signal == 0)
+	{
+		if (ItemTile* item = world.GetItemTile(this->pos))
+		{
+			std::vector<Pos> pushStack = { this->pos };
+			world.PushItems(&pushStack, this->facing, GC::robotStrength);
+			if (!pushStack.empty())
+			{
+				for (uint16_t i = 1; i < pushStack.size(); i++)
+				{
+					world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),pushStack[i].CoordToEncoded() });
+				}
+			}
+		}
+	}
+}
+
+uint8_t WireBridge::GetSignal(LogicTile* querier)
+{
+	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
+	{
+		return this->signal;
+	}
+	else
+	{
+		return this->signal2;
+	}
+}
+
+bool WireBridge::GetConnected(LogicTile* querier)
+{
+	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
+	{
+		if(querier->colorClass == GC::colorClassA)
+		return true;
+	}
+	else
+	{
+		if (querier->colorClass == GC::colorClassB)
+		return true;
+	}
+	return false;
+}
+
+void WireBridge::SignalEval(std::array<uint8_t, 4> neighbours)
+{
+	uint8_t temp = signal2;
+	uint8_t maxA = std::max({ neighbours[0],neighbours[2] });
+	uint8_t maxB = std::max({ neighbours[1],neighbours[3] });
+	if (this->signal > maxA)
+		this->signal = 0;
+	else
+		signal = maxA > 0 ? maxA - 1 : 0;
+
+	if (this->signal2 > maxB)
+		this->signal2 = 0;
+	else
+		signal2 = maxB > 0 ? maxB - 1 : 0;
+
+	if (temp != signal2)
+		this->prevSignal = this->signal - 1;
+}

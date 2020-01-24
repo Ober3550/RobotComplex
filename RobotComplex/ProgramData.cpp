@@ -133,7 +133,7 @@ void ProgramData::DrawUpdateCounter()
 	char buffer[50];
 	sprintf_s(buffer, "FPS/UPS: %.0f/%.0f", round(program.frameRate), round(program.updateRate));
 	std::string displayValue = buffer;
-	CreateText(program.halfWindowWidth - 100, -program.halfWindowHeight + 10, buffer);
+	CreateText(int(program.halfWindowWidth) - 100, int(-program.halfWindowHeight) + 10, buffer);
 }
 void ProgramData::DrawTooltips()
 {
@@ -212,7 +212,7 @@ void ProgramData::DrawHotbar()
 		{
 			program.hotbar[i]->facing = program.placeRotation;
 			program.hotbar[i]->colorClass = program.placeColor;
-			program.hotbar[i]->DrawTile(&program.hotbarSprites, x - GC::halfTileSize, y - GC::halfTileSize, 1.0f);
+			program.hotbar[i]->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f);
 		}
 	}
 }
@@ -411,6 +411,13 @@ void ProgramData::UpdateMap()
 			iter = world.craftingQueue.erase(iter);
 		else
 			++iter;
+	}
+	for (uint64_t kv : world.updateQueueD)
+	{
+		if (LogicTile* logic = world.GetLogicTile(kv))
+		{
+			logic->DoItemLogic();
+		}
 	}
 	SwapItems();
 	MoveBots();

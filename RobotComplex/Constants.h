@@ -26,6 +26,8 @@ namespace GC
 
 	// Game constants
 	static constexpr uint8_t robotStrength = 4;
-	static constexpr uint8_t  maxSignalStrength = 32;
-	static constexpr uint8_t  startSignalStrength = 16;
+	static constexpr uint8_t maxSignalStrength = 32;
+	static constexpr uint8_t startSignalStrength = 16;
+	static constexpr uint8_t colorClassA = 1;
+	static constexpr uint8_t colorClassB = 4;
 }
