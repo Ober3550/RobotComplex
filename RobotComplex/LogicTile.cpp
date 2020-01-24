@@ -96,6 +96,13 @@ bool DirectionalLogicTile::GetConnected(LogicTile* querier)
 {
 	return true;
 }
+bool DirectionalLogicTile::ReceivesSignal(LogicTile* querier)
+{
+	if (this->pos.FacingPosition(this->facing) == querier->pos)
+		return true;
+	else
+		return false;
+}
 void LogicTile::DoWireLogic() {
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
 	std::array<LogicTile*, 4> neighbourTile = std::array<LogicTile*, 4>();
@@ -110,7 +117,7 @@ void LogicTile::DoWireLogic() {
 			// If neighbour is 'directional signal provider'
 			if (neighbourTile[i]->GetConnected(this))
 			{
-				if (neighbourTile[i]->ReceivesSignal(Pos::BehindFacing(Facing(i))))
+				if (neighbourTile[i]->ReceivesSignal(this))
 				{
 					if (neighbourTile[i]->IsSource())
 						neighbourSignals[i] = neighbourTile[i]->signal + 1;
@@ -159,7 +166,8 @@ void DirectionalLogicTile::DoWireLogic()
 		if (LogicTile* tile = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing, i))))
 		{
 			if (tile->GetConnected(this))
-				neighbourSignals[i] = tile->signal;
+				if(tile->ReceivesSignal(this))
+					neighbourSignals[i] = tile->signal;
 		}
 	}
 	this->SignalEval(neighbourSignals);
@@ -200,7 +208,7 @@ void PressurePlate::DoItemLogic()
 	if (ItemTile * thisTile = world.GetItemTile(this->pos))
 	{
 		this->prevSignal = this->signal;
-		this->signal = GC::maxSignalStrength;
+		this->signal = GC::startSignalStrength;
 	}
 	else
 	{
@@ -224,7 +232,7 @@ void PressurePlate::DoRobotLogic(Robot* robotRef)
 	if (robotRef)
 	{
 		this->prevSignal = this->signal;
-		this->signal = GC::maxSignalStrength;
+		this->signal = GC::startSignalStrength;
 	}
 	else
 	{
@@ -252,8 +260,8 @@ std::string PressurePlate::GetTooltip()
 void Inverter::SignalEval(std::array<uint8_t, 4> neighbours)
 {
 	int b = std::max(neighbours[1], neighbours[3]);
-	if (GC::maxSignalStrength - neighbours[2] + b > 0)
-		this->signal = GC::maxSignalStrength - neighbours[2] + b;
+	if (GC::startSignalStrength - neighbours[2] + b > 0)
+		this->signal = MyMod(GC::startSignalStrength - neighbours[2] + b, GC::maxSignalStrength);
 	else
 		this->signal = 0;
 }
@@ -267,7 +275,7 @@ void Booster::SignalEval(std::array<uint8_t, 4> neighbours)
 {
 	int b = std::max(neighbours[1], neighbours[3]);
 	if (neighbours[2] > b)
-		this->signal = neighbours[2] + GC::maxSignalStrength;
+		this->signal = MyMod(neighbours[2] + GC::startSignalStrength, GC::maxSignalStrength);
 	else
 		this->signal = 0;
 }

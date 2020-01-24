@@ -94,7 +94,7 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		else
 		{
 			currentItem->itemTile = item;
-			if (currentItem->quantity < quantity && quantity < 0 || int(currentItem->quantity) + quantity > int(GC::tileItemLimit))
+			if (currentItem->quantity < quantity && quantity < 0 || int(currentItem->quantity) + quantity > int(UINT8_MAX))
 				return false;
 			else
 				currentItem->quantity += quantity;
@@ -116,11 +116,11 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		ItemTile* newItem = new ItemTile();
 		newItem->itemTile = item;
 		newItem->quantity = quantity;
+		world.items[pos.CoordToEncoded()] = *newItem;
 		if (LogicTile* logicTile = world.GetLogicTile(pos))
 		{
 			logicTile->DoItemLogic();
 		}
-		world.items[pos.CoordToEncoded()] = *newItem;
 		return true;
 	}
 }

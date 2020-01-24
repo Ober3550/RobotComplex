@@ -82,13 +82,6 @@ bool Robot::Move()
 								world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),pushStack[i].CoordToEncoded() });
 							}
 						}
-						/*
-						if (this->itemCarying == (uint16_t)ReservedItems::nothing && nextTile->quantity != 0)
-						{
-							itemCarying = nextTile->itemTile;
-							world.ChangeItem(newPos, nextTile->itemTile, -1);
-							Rotate(2);
-						}*/
 					}
 					world.nextRobotPos.insert({ this->pos.CoordToEncoded(), newPos.CoordToEncoded() });
 					return true;

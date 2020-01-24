@@ -207,7 +207,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			}
 			else
 			{
-				program.cameraPos.y -= GC::cameraSpeed * program.zoom;
+				program.cameraPos.y -= int(GC::cameraSpeed * program.zoom);
 			}
 	} });
 	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -221,7 +221,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.x -= GC::cameraSpeed * program.zoom;
+			program.cameraPos.x -= int(GC::cameraSpeed * program.zoom);
 		}
 	} });
 	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -235,7 +235,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.y += GC::cameraSpeed * program.zoom;
+			program.cameraPos.y += int(GC::cameraSpeed * program.zoom);
 		}
 	} });
 	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -249,7 +249,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
-			program.cameraPos.x += GC::cameraSpeed * program.zoom;
+			program.cameraPos.x += int(GC::cameraSpeed * program.zoom);
 		}
 	} });
 	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -444,7 +444,7 @@ void WidgetCreator::UserInput(sf::Event input)
 	else if (input.type == sf::Event::MouseMoved)
 	{
 		sf::Vector2i tempPos = sf::Mouse::getPosition(*window);
-		program.mousePos = Pos{ tempPos.x - (program.windowWidth >> 1),tempPos.y - (program.windowHeight >> 1) };
+		program.mousePos = Pos{ tempPos.x - int(program.halfWindowWidth),tempPos.y - int(program.halfWindowHeight) };
 		MouseMoved();
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			LeftMousePressed();
@@ -521,6 +521,7 @@ void WidgetCreator::MouseMoved()
 		else
 		{
 			bool foundLogic = false;
+			program.hoveringHotbar = false;
 			for (uint8_t i = 0; i < program.hotbarSlots.size(); ++i)
 			{
 				sf::RectangleShape rect = program.hotbarSlots[i];
@@ -528,6 +529,7 @@ void WidgetCreator::MouseMoved()
 				if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
 				{
 					program.selectedLogicTile = program.hotbar[i];
+					program.hoveringHotbar = true;
 					if (program.selectedLogicTile)
 						foundLogic = true;
 				}
@@ -574,6 +576,7 @@ void WidgetCreator::LeftMousePressed()
 						logicPlace->DoRobotLogic(robot);
 					}
 					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
+					logicPlace->DoItemLogic();
 					world.updateQueueC.insert(logicPlace->pos.CoordToEncoded());										// Queue update for placed element
 					for (int i = 0; i < 4; i++)
 					{

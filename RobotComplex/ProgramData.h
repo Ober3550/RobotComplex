@@ -37,11 +37,11 @@ public:
 	std::vector<sf::RectangleShape> textBoxes;
 	std::vector<sf::Text> textOverlay;
 
-	int windowWidth;
-	int halfWindowWidth;
-	int windowHeight;
-	int halfWindowHeight;
-	float scale = 1.0f;
+	float windowWidth;
+	float halfWindowWidth;
+	float windowHeight;
+	float halfWindowHeight;
+	float scale = 5.0f;
 	float zoom = 1.0f;
 	float prevZoom = 1.0f;
 	sf::View worldView;
@@ -54,6 +54,7 @@ public:
 	int hotbarIndex = 0;
 	int hotbarSize = 9;
 	std::vector<LogicTile*> hotbar;
+	bool hoveringHotbar;
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
 	Facing placeRotation;
@@ -71,14 +72,15 @@ public:
 	double updateRate = 30;
 	int framesSinceTick = 0;
 
-	void RecreateGroundSprites(Pos tilePos, int x, int y);
-	void DrawItem(ItemTile item, int x, int y);
-	void RecreateItemSprites(uint64_t encodedPos, int x, int y);
-	void RecreateLogicSprites(uint64_t encodedPos, int x, int y);
-	void RecreateRobotSprites(uint64_t encodedPos, int x, int y);
-	void RecreateAnimationSprites(uint64_t encodedPos, int x, int y);
-	void RecreateSprites();
+	void RecreateGroundSprites(Pos tilePos, float x, float y);
+	void DrawItem(ItemTile item, float x, float y);
+	void RecreateItemSprites(uint64_t encodedPos, float x, float y);
+	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);
+	void RecreateRobotSprites(uint64_t encodedPos, float x, float y);
+	void RecreateAnimationSprites(uint64_t encodedPos, float x, float y);
 	void CreateText(int x, int y, std::string text);
+	void RecreateSprites();
+
 	void DrawSelectedBox();
 	void DrawUpdateCounter();
 	void DrawTooltips();

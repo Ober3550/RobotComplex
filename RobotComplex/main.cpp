@@ -113,7 +113,7 @@ int main()
 	program.windowHeight = 1010;
 	program.halfWindowWidth = program.windowWidth / 2;
 	program.halfWindowHeight = program.windowHeight / 2;
-	sf::RenderWindow window(sf::VideoMode(program.windowWidth, program.windowHeight), "Terraforma");
+	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma");
 
 	program.worldView = sf::View();
 	program.worldView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));

@@ -23,19 +23,20 @@ public:
 	virtual void DoWireLogic();
 	virtual void DoItemLogic() {};
 	virtual void DoRobotLogic(Robot* robotRef) {};
-	virtual void DrawTile(SpriteVector* appendTo, int x, int y, float s) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
 	virtual bool GetConnected(LogicTile* querier);
 	virtual bool IsSource() { return false; };
-	virtual bool ReceivesSignal(Facing toward) { return true; };
+	virtual bool ReceivesSignal(LogicTile* querier) { return true; };
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
-	void DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture);
-	void DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture, sf::IntRect subRect);
-	void DrawSpriteFromProperties(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse);
-	void DrawSignalStrength(SpriteVector* appendTo, int x, int y, float s, int signal);
+
+	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s) {};
+	void DrawSprite(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture);
+	void DrawSprite(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect);
+	void DrawSpriteFromProperties(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse);
+	void DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal);
 	static LogicTile* Factory(uint16_t classType);
 	LogicTile()
 	{
@@ -51,10 +52,11 @@ public:
 class DirectionalLogicTile : public LogicTile {
 	virtual void DoWireLogic();								// Overrides wire logic transfer
 	virtual bool GetConnected(LogicTile* querier);
+	virtual bool ReceivesSignal(LogicTile* querier);
 	virtual void SignalEval(std::array<uint8_t, 4> neighbours) { };
 	virtual void DoItemLogic() {};
 	virtual void DoRobotLogic(Robot* robotRef) {};
-	virtual void DrawTile(SpriteVector* appendTo, int x, int y, float s) {};
+	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual bool IsSource() { return true; };
 	virtual bool ReceivesSignal(Facing toward) { if (toward == this->facing) return true; else return false; };
@@ -66,7 +68,7 @@ public:
 	Wire() { logictype = wire; };
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip();
 	Wire* Copy()
 	{
@@ -101,7 +103,7 @@ public:
 		this->dropItem = other->dropItem;
 	}
 	void DoRobotLogic(Robot* robotRef);						// Redirects robots when stepped onto
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip();
 	Redirector* Copy()
 	{
@@ -121,7 +123,7 @@ public:
 	void DoWireLogic() {}									// Overwrite base method to not transfer signals
 	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
 	void DoRobotLogic(Robot* robotRef);						// Activates when a robot holding the correct item filter steps onto it
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s){
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s){
 		this->facing = north;
 		LogicTile::DrawSprite(appendTo, x, y, s, this->texture);
 	}
@@ -141,7 +143,7 @@ public:
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	virtual bool IsConnected(Pos pos) { return true; };
 	std::string GetTooltip();
 	Inverter* Copy()
@@ -158,7 +160,7 @@ public:
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip();
 	Booster* Copy()
 	{
@@ -174,7 +176,7 @@ public:
 	static sf::Texture* texture;								// A textures for drawing
 	sf::Texture* GetTexture() { return this->texture; };
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip();
 	Repeater* Copy()
 	{
@@ -189,7 +191,7 @@ public:
 	Holder() { logictype = holder; };
 	static sf::Texture* texture;
 	Robot* robotRef;
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s) { LogicTile::DrawSprite(appendTo, x, y, s, this->texture); }
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s) { LogicTile::DrawSprite(appendTo, x, y, s, this->texture); }
 	void DoWireLogic();
 	void DoRobotLogic(Robot* robotRef);
 	std::string GetTooltip();
@@ -207,9 +209,9 @@ public:
 	static sf::Texture* texture;
 	sf::Texture* GetTexture() { return this->texture; };
 	uint8_t inputSignal = 0;
-	uint8_t maxSignal = GC::maxSignalStrength;
+	uint8_t maxSignal = GC::startSignalStrength;
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip();
 	Counter* Copy()
 	{

@@ -47,7 +47,10 @@ public:
 	void clear()
 	{
 		items.clear();
+		nextItemPos.clear();
+		itemPrevMoved.clear();
 		robots.clear();
+		nextRobotPos.clear();
 		logictiles.clear();
 		worldChunks.clear();
 		craftingQueue.clear();
@@ -55,6 +58,7 @@ public:
 		updateQueueB.clear();
 		updateQueueC.clear();
 		tick = 0;
+		seed = 0;
 	}
 };
 extern WorldSave world;

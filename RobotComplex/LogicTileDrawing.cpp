@@ -13,7 +13,7 @@
 #include "Textures.h"
 //static constexpr uint8_t colorClass = 1;
 
-void LogicTile::DrawSpriteFromProperties(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
+void LogicTile::DrawSpriteFromProperties(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
 {
 	// Output Sprite
 	sf::Sprite sprite;
@@ -38,12 +38,12 @@ void LogicTile::DrawSpriteFromProperties(SpriteVector* appendTo, int x, int y, f
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(rotation) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s,s));
 
 	appendTo->emplace_back(sprite);
 }
-void LogicTile::DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture)
+void LogicTile::DrawSprite(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
@@ -51,13 +51,13 @@ void LogicTile::DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Te
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setColor(sf::Color(255, 255, 255, 255));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
 }
-void LogicTile::DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Texture* texture, sf::IntRect subRect)
+void LogicTile::DrawSprite(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
@@ -66,12 +66,12 @@ void LogicTile::DrawSprite(SpriteVector* appendTo, int x, int y, float s, sf::Te
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
 }
-void LogicTile::DrawSignalStrength(SpriteVector* appendTo, int x, int y, float s, int signal)
+void LogicTile::DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal)
 {
 	// Signal value
 	sf::Sprite sprite;
@@ -89,7 +89,7 @@ void LogicTile::DrawSignalStrength(SpriteVector* appendTo, int x, int y, float s
 	}
 }
 
-void Wire::DrawTile(SpriteVector* appendTo, int x, int y, float s)
+void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -107,7 +107,7 @@ void Wire::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 	
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -124,7 +124,7 @@ void Wire::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 
 				sprite_rotation = ((float)i) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
-				sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+				sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 				sprite.setScale(sf::Vector2f(s, s));
 
 				appendTo->emplace_back(sprite);
@@ -136,7 +136,7 @@ void Wire::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Redirector::DrawTile(SpriteVector* appendTo, int x, int y, float s)
+void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -158,7 +158,7 @@ void Redirector::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -168,7 +168,7 @@ void Redirector::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Inverter::DrawTile(SpriteVector* appendTo, int x, int y, float s)
+void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -187,7 +187,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -207,7 +207,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -217,7 +217,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Booster::DrawTile(SpriteVector* appendTo, int x, int y, float s)
+void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Input Sprite
 	sf::Sprite sprite;
@@ -236,7 +236,7 @@ void Booster::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -249,7 +249,7 @@ void Booster::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -259,7 +259,7 @@ void Booster::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Repeater::DrawTile(SpriteVector* appendTo, int x, int y, float s)
+void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Input Sprite
 	sf::Sprite sprite;
@@ -278,7 +278,7 @@ void Repeater::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -291,7 +291,7 @@ void Repeater::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
@@ -301,7 +301,7 @@ void Repeater::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Counter::DrawTile(SpriteVector* appendTo, int x,int y, float s)
+void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Baseplate
 	sf::Sprite sprite;
@@ -309,15 +309,15 @@ void Counter::DrawTile(SpriteVector* appendTo, int x,int y, float s)
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-	float sprite_rotation = float(this->facing) * 90.f;
+	float sprite_rotation = float(facing) * 90.f;
 	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	std::string counterDisplay = std::to_string(this->signal) + " / " + std::to_string(this->maxSignal);
+	std::string counterDisplay = std::to_string(signal) + " / " + std::to_string(maxSignal);
 	sf::Text counterValue;
 	counterValue.setFont(program.guiFont);
 	counterValue.setString(counterDisplay);
@@ -325,7 +325,7 @@ void Counter::DrawTile(SpriteVector* appendTo, int x,int y, float s)
 	counterValue.setFillColor(sf::Color::Black);
 	sf::FloatRect textRect = counterValue.getLocalBounds();
 	counterValue.setOrigin(textRect.width / 2, textRect.height / 2);
-	counterValue.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	counterValue.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	counterValue.setScale(sf::Vector2f(s, s));
 
 	program.textOverlay.emplace_back(counterValue);
