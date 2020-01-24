@@ -143,10 +143,6 @@ void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	sprite.setTexture(*texture);
 	
 	uint8_t color = black;
-	if (this->itemFilter == nothing)
-		color = yellow;
-	if (this->dropItem)
-		color = white;
 	if (this->signal)
 		color = colorClass;
 	uint8_t Red, Green, Blue;

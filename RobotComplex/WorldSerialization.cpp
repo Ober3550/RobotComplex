@@ -12,6 +12,7 @@ void WorldSave::Serialize(std::string filename)
 		return;
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
 	items.Serialize("saves/" + filename + "/items.bin");
+	nextItemPos.Serialize("saves/" + filename + "/itemsNext.bin");
 	robots.Serialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Serialize("saves/" + filename + "/robotsNext.bin");
 	logictiles.Serialize("saves/" + filename + "/logic.bin");
@@ -24,6 +25,7 @@ void WorldSave::Deserialize(std::string filename)
 	this->clear();
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	items.Deserialize("saves/" + filename + "/items.bin");
+	nextItemPos.Deserialize("saves/" + filename + "/itemsNext.bin");
 	robots.Deserialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Deserialize("saves/" + filename + "/robotsNext.bin");
 	logictiles.Deserialize("saves/" + filename + "/logic.bin");

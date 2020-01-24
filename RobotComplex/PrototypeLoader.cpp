@@ -104,8 +104,7 @@ void LoadPrototypes()
 	program.logicTooltips.emplace_back(logicTypeTooltips);	// Counter
 	program.logicTooltips[0].emplace_back("Wire transfers signals");
 	program.logicTooltips[1].emplace_back("Does nothing when powered");
-	program.logicTooltips[1].emplace_back("Redirects and makes robot drop it's item");
-	program.logicTooltips[1].emplace_back("Redirects when robot's holding ");
+	program.logicTooltips[1].emplace_back("Redirects the robot");
 	program.logicTooltips[2].emplace_back("Creates signal when robot or item ontop");
 	program.logicTooltips[3].emplace_back("Inverter: output = 16 - a + b");
 	program.logicTooltips[4].emplace_back("Gives out max signal for any input above zero");
@@ -209,9 +208,7 @@ void LoadPrototypes()
 
 void LoadLogicToHotbar()
 {
-	Redirector* redirectAnything = new Redirector(anything,false);
-	Redirector* redirectNothing  = new Redirector(nothing, false);
-	Redirector* redirectDrop	 = new Redirector(anything, true);
+	Redirector* redirect = new Redirector();
 	Holder* holder = new Holder();
 	PressurePlate* pressureplate = new PressurePlate();
 	Wire* wire = new Wire();
@@ -219,9 +216,7 @@ void LoadLogicToHotbar()
 	Booster* booster = new Booster();
 	
 	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(redirectAnything);
-	program.hotbar.emplace_back(redirectNothing);
-	program.hotbar.emplace_back(redirectDrop);
+	program.hotbar.emplace_back(redirect);
 	program.hotbar.emplace_back(holder);
 	program.hotbar.emplace_back(pressureplate);
 	program.hotbar.emplace_back(wire);

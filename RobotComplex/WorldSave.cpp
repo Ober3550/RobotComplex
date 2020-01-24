@@ -44,6 +44,7 @@ GroundTile* WorldSave::GetGroundTile(Pos pos)
 		}
 		// Chunk failed to generate
 		assert(false);
+		return nullptr;
 	}
 }
 ItemTile* WorldSave::GetItemTile(Pos pos)

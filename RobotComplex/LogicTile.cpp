@@ -36,6 +36,7 @@ LogicTile* LogicTile::Factory(uint16_t classType)
 	case holder:
 		return new Holder();
 	}
+	return nullptr;
 }
 
 void LogicTile::Serialize(std::ofstream* writer)
@@ -60,15 +61,11 @@ void LogicTile::Deserialize(std::ifstream* reader)
 void Redirector::Serialize(std::ofstream* writer)
 {
 	LogicTile::Serialize(writer);
-	writer->write((char*)&this->itemFilter, sizeof(uint16_t));
-	writer->write((char*)&this->dropItem,	sizeof(bool));
 }
 
 void Redirector::Deserialize(std::ifstream* reader)
 {
 	LogicTile::Deserialize(reader);
-	reader->read((char*)&this->itemFilter,	sizeof(uint16_t));
-	reader->read((char*)&this->dropItem,	sizeof(bool));
 }
 
 void LogicTile::BaseCopy(LogicTile* logicTile)
@@ -194,13 +191,9 @@ void Redirector::DoRobotLogic(Robot* robotRef)
 }
 std::string Redirector::GetTooltip()
 {
-	if (signal)
+	if(this->signal)
 		return program.logicTooltips[1][0];
-	if (dropItem)
-		return program.logicTooltips[1][1];
-	if(itemFilter >= 0)
-		return program.logicTooltips[1][2] + program.itemTooltips[itemFilter];
-	return "error";
+	return program.logicTooltips[1][1];
 }
 
 void PressurePlate::DoItemLogic()

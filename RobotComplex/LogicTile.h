@@ -82,25 +82,13 @@ class Redirector : public LogicTile {
 public:
 	static sf::Texture* texture;					// A texture for drawing
 	sf::Texture* GetTexture() { return this->texture; };
-	uint16_t itemFilter;						// 2 bytes
-	bool dropItem;								// 1 bit
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
 	Redirector() { 
 		this->logictype = redirector;
-		this->itemFilter = 0; 
-		this->dropItem = false; 
 	}
-	Redirector(uint16_t itemFilter, bool dropItem)
-	{
-		this->logictype = redirector;
-		this->itemFilter = itemFilter;
-		this->dropItem = dropItem;
-	};
 	Redirector(const Redirector* other) {
 		this->logictype = redirector;
-		this->itemFilter = other->itemFilter;
-		this->dropItem = other->dropItem;
 	}
 	void DoRobotLogic(Robot* robotRef);						// Redirects robots when stepped onto
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
@@ -109,8 +97,6 @@ public:
 	{
 		Redirector* logicTile = new Redirector();
 		this->BaseCopy(logicTile);
-		logicTile->itemFilter = this->itemFilter;
-		logicTile->dropItem = this->dropItem;
 		return logicTile;
 	}
 };
