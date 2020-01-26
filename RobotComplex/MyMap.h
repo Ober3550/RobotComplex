@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <cerrno>
 #include <stdexcept>
 #include <sys/stat.h>
@@ -10,6 +11,7 @@
 #include "Robot.h"
 #include "CraftingProcess.h"
 #include "Pos.h"
+#include "ItemTile.h"
 #ifndef __MYMAP_H__
 #define __MYMAP_H__
 
@@ -60,6 +62,57 @@ public:
 		}
 	}
 };
+
+template <>
+class MyMap<uint64_t, ItemTile> : public std::unordered_map<uint64_t, ItemTile>
+{
+public:
+	ItemTile* GetValue(uint64_t key)
+	{
+		auto find = this->find(key);
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	ItemTile* GetValue(Pos key)
+	{
+		auto find = this->find(key.CoordToEncoded());
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	void Serialize(std::string filename)
+	{
+		std::ofstream myfile;
+		myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+		if (myfile.is_open())
+		{
+			for (auto &kv : *this)
+			{
+				myfile.write((char*)&kv, sizeof(uint64_t) + sizeof(ItemTile));
+			}
+			myfile.close();
+		}
+	}
+	void Deserialize(std::string filename, MyMap<uint16_t, uint16_t> newMap)
+	{
+		std::ifstream myfile;
+		myfile.open(filename, std::ios::in | std::ios::binary);
+		myfile.seekg(0, std::ios::beg);
+		int fileLength = GetFileLength(filename);
+		if (myfile.is_open() && fileLength > 0)
+		{
+			myfile.seekg(0, std::ios::beg);
+			std::pair<uint64_t, ItemTile>* readMem = new std::pair<uint64_t, ItemTile>();
+			while (!myfile.eof()) {
+				myfile.read((char*)readMem, sizeof(uint64_t) + sizeof(ItemTile));
+				if (uint16_t* newItemNum = newMap.GetValue(readMem->second.itemTile))
+				{
+					readMem->second.itemTile = *newItemNum;
+					this->insert({ readMem->first,readMem->second });
+				}
+			}
+			myfile.close();
+		}
+	}
+};
+
 template <>
 class MyMap<uint64_t, Robot> : public std::unordered_map<uint64_t, Robot>
 {

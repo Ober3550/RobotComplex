@@ -10,8 +10,8 @@ std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T&
 
 	if (it != vecOfElements.end())
 	{
-		result.second = distance(vecOfElements.begin(), it);
 		result.first = true;
+		result.second = distance(vecOfElements.begin(), it);
 	}
 	else
 	{

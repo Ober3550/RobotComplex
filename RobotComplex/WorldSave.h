@@ -27,6 +27,9 @@ public:
 	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
 	uint64_t tick;
 	uint64_t seed = 0;
+	// Variables for keeping elements and data structure organised between versions/changes
+	MyMap<uint16_t, uint16_t> oldItemNewItem;	// A map from the old items to new items
+
 	FastNoiseSIMD* noiseRef;
 	GroundTile*		 GetGroundTile(Pos pos);
 	ItemTile*		 GetItemTile(Pos pos);
@@ -45,7 +48,11 @@ public:
 	bool ChangeItem(Pos pos, uint16_t item, int quantity);
 	void GenerateChunk(Pos pos);
 	void Serialize(std::string filename);
+	void SerializeItemNames(std::string filename);
+	void SerializeMisc(std::string filename);
 	void Deserialize(std::string filename);
+	void DeserializeItemNames(std::string filename);
+	void DeserializeMisc(std::string filename);
 	void clear()
 	{
 		items.clear();

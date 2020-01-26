@@ -3,6 +3,7 @@
 #include "ItemTile.h"
 #include "Windows.h"
 #include "ProgramData.h"
+#include "FindInVector.h"
 
 void WorldSave::Serialize(std::string filename)
 {
@@ -10,6 +11,9 @@ void WorldSave::Serialize(std::string filename)
 		return;
 	if (!CreateDirectory(("saves/" + filename).c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError())
 		return;
+	// Before saving the robots make sure to stop the one that the player's meant to be controlling
+	if (program.selectedRobot)
+		program.selectedRobot->stopped = true;
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
 	items.Serialize("saves/" + filename + "/items.bin");
 	nextItemPos.Serialize("saves/" + filename + "/itemsNext.bin");
@@ -20,12 +24,15 @@ void WorldSave::Serialize(std::string filename)
 	updateQueueC.Serialize("saves/" + filename + "/updateQueueC.bin");
 	updateQueueD.Serialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
+	SerializeItemNames("saves/" + filename + "/itemNames.txt");
+	SerializeMisc("saves/" + filename + "/misc.txt");
 }
 void WorldSave::Deserialize(std::string filename)
 {
 	this->clear();
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
-	items.Deserialize("saves/" + filename + "/items.bin");
+	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
+	items.Deserialize("saves/" + filename + "/items.bin", world.oldItemNewItem);
 	nextItemPos.Deserialize("saves/" + filename + "/itemsNext.bin");
 	robots.Deserialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Deserialize("saves/" + filename + "/robotsNext.bin");
@@ -34,4 +41,48 @@ void WorldSave::Deserialize(std::string filename)
 	updateQueueC.Deserialize("saves/" + filename + "/updateQueueC.bin");
 	updateQueueD.Deserialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
+	DeserializeMisc("saves/" + filename + "/misc.txt");
 }
+
+void WorldSave::SerializeItemNames(std::string filename)
+{
+	std::ofstream myfile;
+	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+	if (myfile.is_open())
+	{
+		for (std::string item : program.itemPrototypes)
+		{
+			myfile << (item + "\r\n");
+		}
+		myfile.close();
+	}
+}
+
+void WorldSave::DeserializeItemNames(std::string filename)
+{
+	std::ifstream file(filename);
+	std::string str;
+	int i = 0;
+	while (std::getline(file, str))
+	{
+		std::pair<bool,int> map = findInVector(program.itemPrototypes, str);
+		if(map.first)
+			oldItemNewItem.insert({ i, map.second });
+		else
+		{
+			//error item doesn't exist
+		}
+		i++;
+	}
+}
+
+void WorldSave::SerializeMisc(std::string filename)
+{
+
+}
+
+void WorldSave::DeserializeMisc(std::string filename)
+{
+
+}
+
