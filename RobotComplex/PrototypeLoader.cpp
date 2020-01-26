@@ -46,10 +46,10 @@ void LoadPrototypes()
 	LoadAllTextures();
 
 	// Ground Tiles
-	std::vector<std::string> groundPrototypes = getFileNamesInFolder("Assets/x32/alien_biomes");
+	std::vector<std::string> groundPrototypes = getFileNamesInFolder("Assets/x32/new_ground");
 	for (const std::string& text : groundPrototypes)
 	{
-		groundTextures.emplace_back(LoadTexture("alien_biomes/" + text));
+		groundTextures.emplace_back(LoadTexture("new_ground/" + text));
 	}
 
 	// Items

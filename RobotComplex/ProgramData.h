@@ -12,6 +12,7 @@
 #include "Animation.h"
 #include "ItemTile.h"
 #include "SpriteVector.h"
+#include "MySet.h"
 
 class ProgramData {
 public:
@@ -36,6 +37,7 @@ public:
 	std::vector<sf::RectangleShape> hotbarSlots;
 	std::vector<sf::RectangleShape> textBoxes;
 	std::vector<sf::Text> textOverlay;
+	MySet<uint64_t> elementExists;
 
 	float windowWidth;
 	float halfWindowWidth;
@@ -44,6 +46,8 @@ public:
 	float scale = 5.0f;
 	float zoom = 1.0f;
 	float prevZoom = 1.0f;
+	bool redrawGround = true;
+	int tilesRendered = 0;
 	sf::View worldView;
 	sf::View hudView;
 
@@ -80,7 +84,9 @@ public:
 	void RecreateAnimationSprites(uint64_t encodedPos, float x, float y);
 	void CreateText(int x, int y, std::string text);
 	void RecreateSprites();
-
+	void UpdateElementExists();
+	
+	sf::Color HSV2RGB(sf::Color);
 	void DrawSelectedBox();
 	void DrawUpdateCounter();
 	void DrawTooltips();

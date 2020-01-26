@@ -167,6 +167,8 @@ int main()
 		gui->render();
 		window.display();
 		clock_t endUpdate = clock();
+		if (program.frameRate == INFINITE)
+			program.frameRate = GC::FRAMERATE;
 		program.frameRate = (program.frameRate + float(CLOCKS_PER_SEC) / float(endUpdate - beginUpdate)) * 0.5;
 	}
 	program.running = false;

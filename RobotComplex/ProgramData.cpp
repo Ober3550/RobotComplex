@@ -12,14 +12,33 @@
 #include "Textures.h"
 #include <cmath>
 
+sf::Color ProgramData::HSV2RGB(sf::Color input)
+{
+	float h = input.r * 360.f / 255.f, s = input.g / 255.f, v = input.b / 255.f;
+	float c = v * s;
+	float x = c * (1 - abs((int(h / 60) & 1) - 1));
+	float m = v - c;
+	std::array<std::array<float, 3>, 6> colorTable;
+	colorTable[0] = { c,x,0 };
+	colorTable[1] = { x,c,0 };
+	colorTable[2] = { 0,c,x };
+	colorTable[3] = { 0,x,c };
+	colorTable[4] = { x,0,c };
+	colorTable[5] = { c,0,x };
+	std::array<float, 3> color = colorTable[int(h / 60)];
+	return sf::Color((color[0] + m) * 255, (color[1] + m) * 255, (color[2] + m) * 255, input.a);
+}
+
 void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 {
 	if (GroundTile * tile = world.GetGroundTile(tilePos))
 	{
 		sf::Sprite sprite;
 		uint8_t textureIndex = tile->groundTile;
-		sprite.setTexture(*groundTextures[textureIndex / 4]);
-		sprite.setTextureRect(sf::IntRect((textureIndex & 3)*32, 0, 32, 32));
+		sprite.setTexture(*groundTextures[0]);
+		//sprite.setTextureRect(sf::IntRect((textureIndex & 3)*32, 0, 32, 32));
+		sf::Color color = HSV2RGB(sf::Color(50, MyMod(textureIndex,16) * 20, 100 + (textureIndex / 20) * 10, 255));
+		sprite.setColor(color);
 		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 		sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 		program.groundSprites.emplace_back(sprite);
@@ -103,8 +122,29 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, float x, float y
 		program.selectionBoxes.emplace_back(craftPercent);
 	}
 }
+void ProgramData::UpdateElementExists()
+{
+	elementExists.clear();
+	for (auto elem : world.items)
+	{
+		elementExists.insert({ elem.first });
+	}
+	for (auto elem : world.logictiles)
+	{
+		elementExists.insert({ elem.first });
+	}
+	for (auto elem : world.robots)
+	{
+		elementExists.insert({ elem.first });
+	}
+	for (auto elem : world.craftingQueue)
+	{
+		elementExists.insert({ elem.first });
+	}
+}
 void ProgramData::RecreateSprites() {
-	program.groundSprites.clear();
+	if(program.redrawGround)
+		program.groundSprites.clear();
 	program.itemSprites.clear();
 	program.logicSprites.clear();
 	program.robotSprites.clear();
@@ -113,6 +153,8 @@ void ProgramData::RecreateSprites() {
 	int endY = int(program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift) + 2);
 	int begX = int((-program.halfWindowWidth / (GC::tileSize / program.zoom)) - 2 + (cameraPos.x >> GC::tileShift));
 	int endX = int(program.halfWindowWidth / (GC::tileSize / program.zoom) + (cameraPos.x >> GC::tileShift) + 2);
+	program.tilesRendered = (endY - begY) * (endX - begX);
+	UpdateElementExists();
 	for (int y = begY; y < endY; y++)
 	{
 		for (int x = begX; x <= endX; x++)
@@ -120,13 +162,18 @@ void ProgramData::RecreateSprites() {
 			Pos screenPos = Pos{ x, y } * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
 			Pos tilePos = Pos{ x,y };
 			uint64_t encodedPos = tilePos.CoordToEncoded();
-			RecreateGroundSprites(tilePos, float(screenPos.x), float(screenPos.y));
-			RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
-			RecreateLogicSprites(encodedPos, float(screenPos.x), float(screenPos.y));
-			RecreateRobotSprites(encodedPos, float(screenPos.x), float(screenPos.y));
-			RecreateAnimationSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+			if (program.redrawGround)
+				RecreateGroundSprites(tilePos, float(screenPos.x), float(screenPos.y));
+			if (elementExists.find(encodedPos) != elementExists.end()) {
+				RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+				RecreateLogicSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+				RecreateRobotSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+				RecreateAnimationSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+			}
 		}
 	}
+	if (program.redrawGround)
+		program.redrawGround = false;
 }
 void ProgramData::DrawUpdateCounter()
 {
@@ -166,6 +213,10 @@ void ProgramData::DrawTooltips()
 	sprintf_s(buffer, "Camera x/y: %d/%d", program.cameraPos.x, program.cameraPos.y);
 	displayValue = buffer;
 	CreateText(program.mousePos.x, program.mousePos.y - 100, displayValue);
+
+	sprintf_s(buffer, "Tiles Rendered: %d", program.tilesRendered);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 120, displayValue);
 #endif
 }
 void ProgramData::DrawSelectedBox()
@@ -260,11 +311,13 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		FindMovingRobot();
 		if (program.prevZoom != program.zoom)
 		{
+			program.redrawGround = true;
 			program.worldView.zoom(program.zoom / program.prevZoom);
 			program.prevZoom = program.zoom;
 		}
 		if (program.prevCameraPos != program.cameraPos)
 		{
+			program.redrawGround = true;
 			program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
 			program.prevCameraPos = program.cameraPos;
 		}

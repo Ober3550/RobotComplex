@@ -168,7 +168,8 @@ void WidgetCreator::SetDefaultKeyMapping()
 		"Turn Left",
 		"Turn Around",
 		"Turn Right",
-		"Rotate Placement",
+		"Rotate Clockwise",
+		"Rotate Anti-Clockwise",
 		"Copy Hovered",
 		"Remove Logic",
 		"Set Robot Auto",
@@ -256,23 +257,34 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Turn Right" });
 
 	//R
-	userActions.insert({ "Rotate Placement",[&] {
+	userActions.insert({ "Rotate Clockwise",[&] {
+		program.placeRotation = Facing((int(program.placeRotation) + 1) & 3);
 		if (program.selectedLogicTile)
 		{
-			program.selectedLogicTile->facing = Facing((int(program.selectedLogicTile->facing) + 1) & 3);
+			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
 				world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
 			}
-			program.placeRotation = program.selectedLogicTile->facing;
-		}
-		else
-		{
-			program.placeRotation = Facing((int(program.placeRotation) + 1) & 3);
 		}
 	} });
 	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Rotate Placement" });
+	actionMap.insert({ keyPress, "Rotate Clockwise" });
+
+	//R
+	userActions.insert({ "Rotate Anti-Clockwise",[&] {
+		program.placeRotation = Facing((int(program.placeRotation) - 1) & 3);
+		if (program.selectedLogicTile)
+		{
+			program.selectedLogicTile->facing = program.placeRotation;
+			for (int i = 0; i < 4; i++)
+			{
+				world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
+			}
+		}
+	} });
+	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ true, /*system*/ false };
+	actionMap.insert({ keyPress, "Rotate Anti-Clockwise" });
 
 	//Q
 	userActions.insert({ "Copy Hovered",[&] {
@@ -469,8 +481,8 @@ void WidgetCreator::UserInput(sf::Event input)
 			program.scale -= input.mouseWheelScroll.delta;
 			if (program.scale < 0.0f)
 				program.scale = 0.0f;
-			if (program.scale > 25.0f)
-				program.scale = 25.0f;
+			if (program.scale > 35.0f)
+				program.scale = 35.0f;
 			program.zoom = 0.5f + program.scale / 10.0f;
 		}
 	}
