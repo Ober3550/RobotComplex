@@ -306,8 +306,8 @@ void ProgramData::FindMovingRobot()
 	}
 }
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
-	if (!program.gamePaused)
-	{
+	//if (!program.gamePaused)
+	//{
 		FindMovingRobot();
 		if (program.prevZoom != program.zoom)
 		{
@@ -329,7 +329,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		DrawTooltips();
 		DrawHotbar();
 		DrawSelectedBox();
-	}
+	//}
 	window.setView(program.worldView);
 	program.groundSprites.draw(window);
 	program.logicSprites.draw(window);
@@ -358,31 +358,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	//DrawCrosshair(window);
 #endif
 }
-void ProgramData::SwapItems()
-{
-	while (!world.nextItemPos.empty())
-	{
-		for (auto iter = world.nextItemPos.begin(); iter != world.nextItemPos.end(); )
-		{
-			// If item is successfully moved then remove it from the map. Else keep trying
-			ItemTile* item = world.items.GetValue(iter->first);
-			bool add = world.ChangeItem(Pos::EncodedToCoord(iter->second), item->itemTile, 1);
-			if (add)
-			{
-				world.itemPrevMoved.insert({ iter->second });
-				bool remove = world.ChangeItem(Pos::EncodedToCoord(iter->first), item->itemTile, -1);
-				if (remove)
-				{
-					iter = world.nextItemPos.erase(iter);
-				}
-			}
-			else
-			{
-				iter++;
-			}
-		}
-	}
-}
+
 void ProgramData::SwapBots()
 {
 	for (std::pair<uint64_t, uint64_t> newPos : world.nextRobotPos)
@@ -423,6 +399,33 @@ void ProgramData::MoveBots()
 	}
 }
 
+void ProgramData::SwapItems()
+{
+	world.itemPrevMoved.clear();
+	while (!world.nextItemPos.empty())
+	{
+		for (auto iter = world.nextItemPos.begin(); iter != world.nextItemPos.end(); )
+		{
+			// If item is successfully moved then remove it from the map. Else keep trying
+			ItemTile* item = world.items.GetValue(iter->first);
+			bool add = world.ChangeItem(Pos::EncodedToCoord(iter->second), item->itemTile, 1);
+			if (add)
+			{
+				world.itemPrevMoved.insert({ iter->second });
+				bool remove = world.ChangeItem(Pos::EncodedToCoord(iter->first), item->itemTile, -1);
+				if (remove)
+				{
+					iter = world.nextItemPos.erase(iter);
+				}
+			}
+			else
+			{
+				iter++;
+			}
+		}
+	}
+}
+
 void ProgramData::CheckItemsMoved()
 {
 	for (std::pair<uint64_t, uint64_t> newPos : world.nextItemPos)
@@ -434,7 +437,6 @@ void ProgramData::CheckItemsMoved()
 		if(ItemTile* item = world.items.GetValue(wasMoving))
 		CraftingClass::TryCrafting(item->itemTile, Pos::EncodedToCoord(wasMoving));
 	}
-	world.itemPrevMoved.clear();
 }
 
 void ProgramData::UpdateMap()
@@ -472,6 +474,10 @@ void ProgramData::UpdateMap()
 			logic->DoItemLogic();
 		}
 	}
+	world.prevItemMovingTo = world.itemMovingTo;
+	world.itemMovingTo.clear();
+	world.robotMovingTo.clear();
+	world.platformMovingTo.clear();
 	SwapItems();
 	MoveBots();
 	CheckItemsMoved();

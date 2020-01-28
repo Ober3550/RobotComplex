@@ -71,6 +71,10 @@ void LoadPrototypes()
 		"iron_gear",
 		"iron_rod"
 	};
+	program.regItemsEnd = program.itemPrototypes.size();
+	// Add logical elements to the end of the list to allow for crafting them
+	for(std::string logic : logicTypes)
+		program.itemPrototypes.emplace_back(logic);
 	std::regex addSpaces("_");
 	// Populate the item tooltips according to the prototype names
 	for (std::string text : program.itemPrototypes)
@@ -130,7 +134,7 @@ void LoadPrototypes()
 
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Recipe Catalyst, Animation, Animation Offset
 	std::vector<RecipeProto> recipePrototypes;
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "wire"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ 

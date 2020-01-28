@@ -7,6 +7,12 @@ template <typename keyType>
 class MySet : public std::unordered_set<keyType>
 {
 public:
+	bool contains(keyType key)
+	{
+		if (this->find(key) != this->end())
+			return true;
+		return false;
+	}
 	void Serialize(std::string filename)
 	{
 		std::ofstream myfile;

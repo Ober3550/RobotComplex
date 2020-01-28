@@ -1,5 +1,18 @@
 #pragma once
 #include <cstdint>
+static const std::vector<std::string> logicTypes =
+{
+	"wire",
+	"pressureplate",
+	"redirector",
+	"inverter",
+	"booster",
+	"counter",
+	"repeater",
+	"holder",
+	"belt",
+	"wirebridge"
+};
 enum LogicTypes : uint8_t { 
 	wire = 1,
 	pressureplate = 2,

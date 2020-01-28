@@ -92,9 +92,11 @@ void UpdateWorld()
 	while (program.running) {
 		clock_t beginUpdate = clock();
 		program.worldMutex.lock();
-		program.framesSinceTick = 0;
 		if (!program.gamePaused)
+		{
+			program.framesSinceTick = 0;
 			program.UpdateMap();
+		}
 		program.worldMutex.unlock();
 		clock_t updateTime = clock();
 		int padTime = int(CLOCKS_PER_SEC / float(GC::UPDATERATE)) + beginUpdate - updateTime;
@@ -160,7 +162,8 @@ int main()
 		window.clear();
 		clock_t beginUpdate = clock();
 		program.worldMutex.lock();
-		program.framesSinceTick++;
+		if(!program.gamePaused)
+			program.framesSinceTick++;
 		program.DrawGameState(window);
 		program.worldMutex.unlock();
 		gui->logic();

@@ -14,3 +14,13 @@ copper_wire
 iron_plate
 iron_gear
 iron_rod
+wire
+pressureplate
+redirector
+inverter
+booster
+counter
+repeater
+holder
+belt
+wirebridge

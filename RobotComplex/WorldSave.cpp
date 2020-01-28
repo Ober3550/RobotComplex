@@ -119,48 +119,101 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		return true;
 	}
 }
-void WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft)
+bool WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft)
 {
 	Pos prevPos = itemsMoving->back();
-	ItemTile* prevItem = world.GetItemTile(prevPos);
-	if (pushesLeft == 0)
+	Pos nextPos = prevPos.FacingPosition(toward);
+	// If there is already a different item moving to the position specified don't continue
+	if (!world.itemMovingTo.contains(nextPos.CoordToEncoded()) && !world.prevItemMovingTo.contains(nextPos.CoordToEncoded()))
 	{
-		// There is an item at the front of the stack that isn't the same type
-		if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
+		ItemTile* prevItem = world.GetItemTile(prevPos);
+		if (pushesLeft == 0)
 		{
-			if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
+			// There is an item at the front of the stack that isn't the same type
+			if (ItemTile* nextItem = world.GetItemTile(nextPos))
 			{
-				itemsMoving->pop_back();
-			}
-		}
-		return;
-	}
-	else
-	{
-		if (ItemTile* nextItem = world.GetItemTile(prevPos.FacingPosition(toward)))
-		{
-			if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
-			{
-				return;
-			}
-			else
-			{
-				// If the item infront of the stack is the same type but is already 'full' don't push the stack
-				if (pushesLeft == 1 && nextItem->quantity == UINT8_MAX)
+				if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
 				{
-					itemsMoving->clear();
-				}
-				else
-				{
-					itemsMoving->emplace_back(prevPos.FacingPosition(toward));
-					PushItems(itemsMoving, toward, pushesLeft - 1);
+					itemsMoving->pop_back();
 				}
 			}
+			return true;
 		}
 		else
 		{
-			itemsMoving->emplace_back(prevPos.FacingPosition(toward));
-			return;
+			if (ItemTile* nextItem = world.GetItemTile(nextPos))
+			{
+				if (prevItem->itemTile != nextItem->itemTile && nextItem->quantity > 1)
+				{
+					return true;
+				}
+				else
+				{
+					// If the item infront of the stack is the same type but is already 'full' don't push the stack
+					if (pushesLeft == 1 && nextItem->quantity == UINT8_MAX)
+					{
+						itemsMoving->clear();
+					}
+					else
+					{
+						itemsMoving->emplace_back(nextPos);
+						PushItems(itemsMoving, toward, pushesLeft - 1);
+					}
+				}
+			}
+			else
+			{
+				itemsMoving->emplace_back(nextPos);
+				return true;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool WorldSave::CheckMovePlatform(Pos pos, Facing toward)
+{
+	Pos nextPos = pos.FacingPosition(toward);
+	// Check next ground position (also activates chunk generation outside of camera view)
+	if (GroundTile* ground = world.GetGroundTile(nextPos))
+	{
+		if (uint16_t* currentPlatform = world.platforms.GetValue(pos.CoordToEncoded()))
+		{
+			// Add this current platform element to the connected set
+			world.connectedPlatform.insert(pos.CoordToEncoded());
+			if (uint16_t* nextPlatform = world.platforms.GetValue(nextPos.CoordToEncoded()))
+			{
+				if (*currentPlatform != *nextPlatform)
+				{
+					return false;
+				}
+			}
+			for (int i = 0; i < 4; i++)
+			{
+				// Check neighbours toward direction of travel first so that a failure can be detected asap
+				Pos neighbour = pos.FacingPosition(Pos::RelativeFacing(toward, i));
+				// Only check if a neighbour isn't already part of the check
+				if (!world.connectedPlatform.contains(neighbour.CoordToEncoded()))
+				{
+					return CheckMovePlatform(neighbour, toward);
+				}
+			}
+		}
+	}
+	return true;
+}
+
+void WorldSave::MovePlatform(Pos pos, Facing toward)
+{
+	world.connectedPlatform.clear();
+	if (CheckMovePlatform(pos, toward))
+	{
+		for (uint64_t plate : world.connectedPlatform)
+		{
+			world.nextPlatforms.insert({ plate,toward });
 		}
 	}
 }

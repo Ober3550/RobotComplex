@@ -18,23 +18,35 @@ int CraftingClass::CheckCrafting(Pos pos)
 			RecipeComponent recipeComp = recipe[k + row2];
 			if (recipeComp.itemTile != nothing) // If recipe component is nothing ground component doesn't matter
 			{
-				if (ItemTile * checkTile = world.GetItemTile(checkPos))
+				// If there already exists a logic or robot component at the position to be populated 
+				// do not craft otherwise the players materials will be consumed
+				if (recipeComp.itemTile >= program.regItemsEnd)
 				{
-					// Check if ground and recipe component are equal or if result will be populated at position
-					if (checkTile->itemTile == recipeComp.itemTile)
+					if (LogicTile* logic = world.GetLogicTile(checkPos.CoordToEncoded()))
 					{
-						if (recipeComp.resultState < 0)
-						{
-							int possibleCrafts = checkTile->quantity / recipeComp.requirement;
-							if (possibleCrafts == 1)
-								successReturn = success;
-						}
-					}
-					else
 						return failed;
+					}
 				}
-				else if (!(recipeComp.resultState > 0))	// If there is no item on ground but result state requires one
-					return failed; // Ground component does not exist
+				else
+				{
+					if (ItemTile * checkTile = world.GetItemTile(checkPos))
+					{
+						// Check if ground and recipe component are equal or if result will be populated at position
+						if (checkTile->itemTile == recipeComp.itemTile)
+						{
+							if (recipeComp.resultState < 0)
+							{
+								int possibleCrafts = checkTile->quantity / recipeComp.requirement;
+								if (possibleCrafts == 1)
+									successReturn = success;
+							}
+						}
+						else
+							return failed;
+					}
+					else if (!(recipeComp.resultState > 0))	// If there is no item on ground but result state requires one
+						return failed; // Ground component does not exist
+				}
 			}
 		}
 	}
@@ -86,14 +98,25 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 				if (recipeComp.resultState != 0)
 				{
 					Pos alterPos = pos.RelativePosition(k, l);
-					if (ItemTile * tile = &world.items[alterPos.CoordToEncoded()])
+					// If item number isn't an item create a different item in the world
+					if (recipeComp.itemTile >= program.regItemsEnd)
 					{
-						// This must be true otherwise the successful craft was false
-						assert(world.ChangeItem(alterPos, recipeComp.itemTile, recipeComp.resultState));
-						if (recipeComp.resultState > 0)	// If an item is populated at a tile
+						LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd + 1);
+						LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
+						logicPlace->pos = alterPos;
+						world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });
+					}
+					else
+					{
+						if (ItemTile * tile = &world.items[alterPos.CoordToEncoded()])
 						{
-							// Try to queue a different recipe according to that item type.
-							TryCraftingOther(recipeComp.itemTile, alterPos);
+							// This must be true otherwise the successful craft was false
+							assert(world.ChangeItem(alterPos, recipeComp.itemTile, recipeComp.resultState));
+							if (recipeComp.resultState > 0)	// If an item is populated at a tile
+							{
+								// Try to queue a different recipe according to that item type.
+								TryCraftingOther(recipeComp.itemTile, alterPos);
+							}
 						}
 					}
 				}

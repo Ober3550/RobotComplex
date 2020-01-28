@@ -47,8 +47,6 @@ public:
 		this->prevSignal = -1;
 		this->signal = 0;
 		this->colorClass = 1;
-		//for (size_t each = 0; each < this->connected.size(); each++)
-			//this->connected.set(each, true);
 	}
 };
 class DirectionalLogicTile : public LogicTile {

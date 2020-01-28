@@ -13,12 +13,23 @@
 
 struct WorldSave {
 public:
+	MyMap<uint64_t, uint16_t> platforms;
+	MySet<uint64_t> connectedPlatform;
+	MyMap<uint64_t, Facing> nextPlatforms;
+	MySet<uint64_t> platformMovingTo;
+
 	MyMap<uint64_t, ItemTile> items;
 	MyMap<uint64_t, uint64_t> nextItemPos;
+	MySet<uint64_t> prevItemMovingTo;
+	MySet<uint64_t> itemMovingTo;
 	MySet<uint64_t> itemPrevMoved;
+
 	MyMap<uint64_t, Robot> robots;
 	MyMap<uint64_t, uint64_t> nextRobotPos;
+	MySet<uint64_t> robotMovingTo;
+
 	MyMap<uint64_t, LogicTile*> logictiles;
+
 	MyMap<uint64_t, WorldChunk> worldChunks;
 	MyMap<uint64_t, CraftingProcess> craftingQueue;
 	MySet<uint64_t> updateQueueA;	// Processing queue for update from Queue B
@@ -44,7 +55,9 @@ public:
 	{
 		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
 	}
-	void PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft);
+	bool CheckMovePlatform(Pos pos, Facing toward);
+	void MovePlatform(Pos pos, Facing toward);
+	bool PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft); // bool is for whether the robot should move after a failed operation
 	bool ChangeItem(Pos pos, uint16_t item, int quantity);
 	void GenerateChunk(Pos pos);
 	void Serialize(std::string filename);

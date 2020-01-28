@@ -24,8 +24,21 @@ void CreateTestWorld2()
 	world.GenerateChunk(Pos{ -1,0 });
 	Robot robot;
 	robot.facing = north;
-	robot.pos = { -3,17 };
+	robot.pos = { -3,7 };
 	world.robots.insert({ robot.pos.CoordToEncoded(), robot });
+
+	Robot robot2;
+	robot2.facing = east;
+	robot2.pos = { -5,5 };
+	world.robots.insert({ robot2.pos.CoordToEncoded(), robot2 });
+
+	ItemTile* tile = &world.items[Pos{ -3, 6 }.CoordToEncoded()];
+	tile->itemTile = 4;
+	tile->quantity = 1;
+
+	tile = &world.items[Pos{ -4, 5 }.CoordToEncoded()];
+	tile->itemTile = 4;
+	tile->quantity = 1;
 
 	std::pair<bool, int> getItemNumber;
 	//std::vector<std::string> items = { "clay", , "copper_ore",   };
