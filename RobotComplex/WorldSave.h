@@ -19,13 +19,13 @@ public:
 	MySet<uint64_t> platformMovingTo;
 
 	MyMap<uint64_t, ItemTile> items;
-	MyMap<uint64_t, uint64_t> nextItemPos;
+	MyMap<uint64_t, Facing> nextItemPos;
 	MySet<uint64_t> prevItemMovingTo;
 	MySet<uint64_t> itemMovingTo;
 	MySet<uint64_t> itemPrevMoved;
 
 	MyMap<uint64_t, Robot> robots;
-	MyMap<uint64_t, uint64_t> nextRobotPos;
+	MyMap<uint64_t, Facing> nextRobotPos;
 	MySet<uint64_t> robotMovingTo;
 
 	MyMap<uint64_t, LogicTile*> logictiles;
@@ -68,6 +68,8 @@ public:
 	void DeserializeMisc(std::string filename);
 	void clear()
 	{
+		platforms.clear();
+		nextPlatforms.clear();
 		items.clear();
 		nextItemPos.clear();
 		itemPrevMoved.clear();

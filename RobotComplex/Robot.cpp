@@ -47,14 +47,14 @@ bool Robot::Move()
 							for (uint16_t i = 1; i < pushStack.size(); i++)
 							{
 								world.itemMovingTo.insert(pushStack[i].CoordToEncoded());
-								world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),pushStack[i].CoordToEncoded() });
+								world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
 							}
 						}
 					}
 					if (step)
 					{
 						world.robotMovingTo.insert(newPos.CoordToEncoded());
-						world.nextRobotPos.insert({ this->pos.CoordToEncoded(), newPos.CoordToEncoded() });
+						world.nextRobotPos.insert({ this->pos.CoordToEncoded(), this->facing });
 						return true;
 					}
 				}

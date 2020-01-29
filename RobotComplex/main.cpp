@@ -26,6 +26,7 @@ std::thread worldUpdate;
 std::vector<sf::Texture*> groundTextures;
 std::vector<sf::Texture*> itemTextures;
 std::vector<sf::Texture*> animationTextures;
+sf::Texture* platformTexture = LoadTexture("platform.png");
 sf::Texture* robotTexture = LoadTexture("robotNew.png");
 sf::Texture* font = LoadTexture("font.png");
 sf::Texture* buttonTexture = LoadTexture("button.png");
@@ -73,20 +74,6 @@ void initializeAgui(sf::RenderTarget& target)
 	agui::Widget::setGlobalFont(defaultFont);
 }
 
-void cleanUp()
-{
-	gui->getTop()->clear();
-	delete creator;
-	creator = NULL;
-	delete gui;
-	gui = NULL;
-	delete inputHandler;
-	delete graphicsHandler;
-	inputHandler = NULL;
-	graphicsHandler = NULL;
-	delete defaultFont;
-	defaultFont = NULL;
-}
 void UpdateWorld()
 {
 	while (program.running) {
@@ -176,6 +163,5 @@ int main()
 	}
 	program.running = false;
 	MapUpdate.wait();
-	cleanUp();
 	return 0;
 }

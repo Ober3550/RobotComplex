@@ -44,11 +44,34 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 		program.groundSprites.emplace_back(sprite);
 	}
 }
+void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
+{
+	if (uint16_t* platform = world.platforms.GetValue(encodedPos))
+	{
+		Pos pos = Pos::EncodedToCoord(encodedPos);
+		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+		{
+			Pos newPos = pos.FacingPosition(*nextPos);
+			Pos difference = newPos - pos;
+			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+			if (step > 1.0f)
+				step = 1.0f;
+			x += int(float(difference.x) * float(GC::tileSize) * step);
+			y += int(float(difference.y) * float(GC::tileSize) * step);
+		}
+
+		sf::Sprite sprite;
+		sprite.setTexture(*platformTexture);
+		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+		sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+		program.platformSprites.emplace_back(sprite);
+	}
+}
 void ProgramData::DrawItem(ItemTile item, float x, float y)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*itemTextures[item.itemTile]);
-	sprite.setOrigin(8, 8);
+	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
 	sprite.setPosition(x + 16.f, y + 16.f);
 	program.itemSprites.emplace_back(sprite);
 }
@@ -61,16 +84,25 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 			Pos pos = Pos::EncodedToCoord(encodedPos);
 			if (auto nextPos = world.nextItemPos.GetValue(encodedPos))
 			{
-				Pos newPos = Pos::EncodedToCoord(*nextPos);
+				Pos newPos = pos.FacingPosition(*nextPos);
 				Pos difference = newPos - pos;
 				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 				if (step > 1.0f)
 					step = 1.0f;
-				Pos screenPos = { int(x) + int(float(difference.x) * float(GC::tileSize) * step), int(y) + int(float(difference.y) * float(GC::tileSize) * step) };
-				DrawItem(*tile, float(screenPos.x), float(screenPos.y));
+				x += int(float(difference.x) * float(GC::tileSize) * step);
+				y += int(float(difference.y) * float(GC::tileSize) * step);
 			}
-			else
-				DrawItem(*tile, x, y);
+			if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+			{
+				Pos newPos = pos.FacingPosition(*nextPos);
+				Pos difference = newPos - pos;
+				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+				if (step > 1.0f)
+					step = 1.0f;
+				x += int(float(difference.x) * float(GC::tileSize) * step);
+				y += int(float(difference.y) * float(GC::tileSize) * step);
+			}
+			DrawItem(*tile, x, y);
 		}
 	}
 }
@@ -87,7 +119,17 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 	{
 		if (auto nextPos = world.nextRobotPos.GetValue(encodedPos))
 		{
-			Pos newPos = Pos::EncodedToCoord(*nextPos);
+			Pos newPos = robot->pos.FacingPosition(*nextPos);
+			Pos difference = newPos - robot->pos;
+			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+			if (step > 1.0f)
+				step = 1.0f;
+			x += float(difference.x) * float(GC::tileSize) * step;
+			y += float(difference.y) * float(GC::tileSize) * step;
+		}
+		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+		{
+			Pos newPos = robot->pos.FacingPosition(*nextPos);
 			Pos difference = newPos - robot->pos;
 			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 			if (step > 1.0f)
@@ -125,6 +167,10 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, float x, float y
 void ProgramData::UpdateElementExists()
 {
 	elementExists.clear();
+	for (auto elem : world.platforms)
+	{
+		elementExists.insert({ elem.first });
+	}
 	for (auto elem : world.items)
 	{
 		elementExists.insert({ elem.first });
@@ -145,6 +191,7 @@ void ProgramData::UpdateElementExists()
 void ProgramData::RecreateSprites() {
 	if(program.redrawGround)
 		program.groundSprites.clear();
+	program.platformSprites.clear();
 	program.itemSprites.clear();
 	program.logicSprites.clear();
 	program.robotSprites.clear();
@@ -165,6 +212,7 @@ void ProgramData::RecreateSprites() {
 			if (program.redrawGround)
 				RecreateGroundSprites(tilePos, float(screenPos.x), float(screenPos.y));
 			if (elementExists.find(encodedPos) != elementExists.end()) {
+				RecreatePlatformSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateLogicSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateRobotSprites(encodedPos, float(screenPos.x), float(screenPos.y));
@@ -291,9 +339,9 @@ void ProgramData::FindMovingRobot()
 {
 	if (program.selectedRobot)
 	{
-		if (uint64_t* movingTo = world.nextRobotPos.GetValue(program.selectedRobot->pos))
+		if (Facing* movingTo = world.nextRobotPos.GetValue(program.selectedRobot->pos))
 		{
-			Pos difference = Pos::EncodedToCoord(*movingTo) - program.selectedRobot->pos;
+			Pos difference = program.selectedRobot->pos.FacingPosition(*movingTo) - program.selectedRobot->pos;
 			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 			if (step > 1.0f)
 				step = 1.0f;
@@ -332,6 +380,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	//}
 	window.setView(program.worldView);
 	program.groundSprites.draw(window);
+	program.platformSprites.draw(window);
 	program.logicSprites.draw(window);
 	program.itemSprites.draw(window);
 	program.animationSprites.draw(window);
@@ -359,31 +408,92 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 #endif
 }
 
+void ProgramData::MovePlatform(Pos pos, Facing toward)
+{
+	Pos newPos = pos.FacingPosition(toward);
+	// If there's a platform infront and they're also moving, move them first
+	if (uint16_t* platform = world.platforms.GetValue(newPos))
+	{
+		if (auto moving = world.nextPlatforms.GetValue(newPos))
+		{
+			MovePlatform(newPos, *moving);
+		}
+	}
+	if (LogicTile* elem = world.GetLogicTile(pos))
+	{
+		elem->pos = newPos;
+		world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
+		world.logictiles.erase(pos.CoordToEncoded());
+	}
+	if (ItemTile* elem = world.GetItemTile(pos.CoordToEncoded()))
+	{
+		if (ItemTile* elem = world.GetItemTile(newPos.CoordToEncoded()))
+		{
+
+		}
+		else
+		{
+			world.items[newPos.CoordToEncoded()] = world.items[pos.CoordToEncoded()];
+			world.items.erase(pos.CoordToEncoded());
+		}
+	}
+	if (Robot* elem = world.GetRobot(pos.CoordToEncoded()))
+	{
+		elem->pos = newPos;
+		/*
+		if (auto moving = world.nextRobotPos.GetValue(pos.CoordToEncoded()))
+		{
+			world.nextRobotPos.erase(pos.CoordToEncoded());
+			world.nextRobotPos.insert({ newPos.CoordToEncoded(),toward });
+		}*/
+		world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
+		world.robots.erase(pos.CoordToEncoded());
+	}
+	world.platforms[newPos.CoordToEncoded()] = world.platforms[pos.CoordToEncoded()];
+	world.platforms.erase(pos.CoordToEncoded());
+	world.nextPlatforms.erase(pos.CoordToEncoded());
+}
+
+void ProgramData::SwapPlatforms()
+{
+	
+	while(!world.nextPlatforms.empty())
+	{
+		auto value = world.nextPlatforms.begin();
+		MovePlatform(Pos::EncodedToCoord(value->first),value->second);
+	}
+}
+
 void ProgramData::SwapBots()
 {
-	for (std::pair<uint64_t, uint64_t> newPos : world.nextRobotPos)
+	for (std::pair<uint64_t, Facing> moving : world.nextRobotPos)
 	{
-		world.robots[newPos.second] = world.robots[newPos.first];
-		world.robots[newPos.second].pos = Pos::EncodedToCoord(newPos.second);
-		// Be sure to update which robot the players controlling before removing the old copy
-		if (&world.robots[newPos.first] == program.selectedRobot)
+		Pos pos = Pos::EncodedToCoord(moving.first);
+		Pos newPos = pos.FacingPosition(moving.second);
+		if (Robot* test = world.GetRobot(pos))
 		{
-			program.selectedRobot = &world.robots[newPos.second];
-		}
-		world.robots.erase(newPos.first);
+			world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
+			world.robots[newPos.CoordToEncoded()].pos = newPos;
+			// Be sure to update which robot the players controlling before removing the old copy
+			if (&world.robots[pos.CoordToEncoded()] == program.selectedRobot)
+			{
+				program.selectedRobot = &world.robots[newPos.CoordToEncoded()];
+			}
+			world.robots.erase(pos.CoordToEncoded());
 
-		// If the robot landed on a logic tile, apply its logic this tick
-		if (auto temp = world.logictiles.GetValue(newPos.second))
-		{
-			LogicTile* logicTile = *temp;
-			logicTile->DoRobotLogic(&world.robots[newPos.second]);
-		}
+			// If the robot landed on a logic tile, apply its logic this tick
+			if (auto temp = world.logictiles.GetValue(newPos.CoordToEncoded()))
+			{
+				LogicTile* logicTile = *temp;
+				logicTile->DoRobotLogic(&world.robots[newPos.CoordToEncoded()]);
+			}
 
-		// If the robot left a logic tile, update its logic
-		if (auto temp = world.logictiles.GetValue(newPos.first))
-		{
-			LogicTile* logicTile = *temp;
-			logicTile->DoRobotLogic(nullptr);
+			// If the robot left a logic tile, update its logic
+			if (auto temp = world.logictiles.GetValue(pos.CoordToEncoded()))
+			{
+				LogicTile* logicTile = *temp;
+				logicTile->DoRobotLogic(nullptr);
+			}
 		}
 	}
 	world.nextRobotPos.clear();
@@ -399,30 +509,32 @@ void ProgramData::MoveBots()
 	}
 }
 
+void ProgramData::MoveItem(Pos pos, Facing toward)
+{
+	Pos newPos = pos.FacingPosition(toward);
+	// If there's a item infront and they're also moving, move them first
+	if (auto platform = world.items.GetValue(newPos))
+	{
+		if (auto moving = world.nextItemPos.GetValue(newPos))
+		{
+			MoveItem(newPos, *moving);
+		}
+	}
+	if (ItemTile* item = world.GetItemTile(pos))
+	{
+		world.ChangeItem(newPos, item->itemTile, 1);
+		world.ChangeItem(pos, item->itemTile, -1);
+	}
+	world.nextItemPos.erase(pos.CoordToEncoded());
+}
+
 void ProgramData::SwapItems()
 {
 	world.itemPrevMoved.clear();
 	while (!world.nextItemPos.empty())
 	{
-		for (auto iter = world.nextItemPos.begin(); iter != world.nextItemPos.end(); )
-		{
-			// If item is successfully moved then remove it from the map. Else keep trying
-			ItemTile* item = world.items.GetValue(iter->first);
-			bool add = world.ChangeItem(Pos::EncodedToCoord(iter->second), item->itemTile, 1);
-			if (add)
-			{
-				world.itemPrevMoved.insert({ iter->second });
-				bool remove = world.ChangeItem(Pos::EncodedToCoord(iter->first), item->itemTile, -1);
-				if (remove)
-				{
-					iter = world.nextItemPos.erase(iter);
-				}
-			}
-			else
-			{
-				iter++;
-			}
-		}
+		auto start = world.nextItemPos.begin();
+		MoveItem(Pos::EncodedToCoord(start->first), start->second);
 	}
 }
 
@@ -481,6 +593,7 @@ void ProgramData::UpdateMap()
 	SwapItems();
 	MoveBots();
 	CheckItemsMoved();
+	SwapPlatforms();
 	++world.tick;
 }
 

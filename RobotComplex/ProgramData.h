@@ -29,6 +29,7 @@ public:
 
 	//Stores sprite layers
 	SpriteVector groundSprites;
+	SpriteVector platformSprites;
 	SpriteVector itemSprites;
 	SpriteVector logicSprites;
 	std::vector<sf::RectangleShape> selectionBoxes;
@@ -79,6 +80,7 @@ public:
 
 	void RecreateGroundSprites(Pos tilePos, float x, float y);
 	void DrawItem(ItemTile item, float x, float y);
+	void RecreatePlatformSprites(uint64_t encodedPos, float x, float y);
 	void RecreateItemSprites(uint64_t encodedPos, float x, float y);
 	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);
 	void RecreateRobotSprites(uint64_t encodedPos, float x, float y);
@@ -95,7 +97,10 @@ public:
 	void DrawGameState(sf::RenderWindow& window);
 	void DrawCrosshair(sf::RenderWindow& window);
 	void FindMovingRobot();
+	void MovePlatform(Pos pos, Facing toward);
+	void SwapPlatforms();
 	void SwapBots();
+	void MoveItem(Pos pos, Facing toward);
 	void SwapItems();
 	void CheckItemsMoved();
 	void MoveBots();

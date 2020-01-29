@@ -40,6 +40,13 @@ void CreateTestWorld2()
 	tile->itemTile = 4;
 	tile->quantity = 1;
 
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			world.platforms[Pos{ -5 + i, - 5 + j }.CoordToEncoded()] = 10;
+		}
+	}
 	std::pair<bool, int> getItemNumber;
 	//std::vector<std::string> items = { "clay", , "copper_ore",   };
 

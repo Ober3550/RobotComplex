@@ -182,24 +182,32 @@ bool WorldSave::CheckMovePlatform(Pos pos, Facing toward)
 	{
 		if (uint16_t* currentPlatform = world.platforms.GetValue(pos.CoordToEncoded()))
 		{
-			// Add this current platform element to the connected set
-			world.connectedPlatform.insert(pos.CoordToEncoded());
-			if (uint16_t* nextPlatform = world.platforms.GetValue(nextPos.CoordToEncoded()))
+			// If this platform is moving to a position that another is already moving to exit
+			if (!world.platformMovingTo.contains(nextPos.CoordToEncoded()))
 			{
-				if (*currentPlatform != *nextPlatform)
+				// Add this current platform element to the connected set
+				world.connectedPlatform.insert(pos.CoordToEncoded());
+				if (uint16_t* nextPlatform = world.platforms.GetValue(nextPos.CoordToEncoded()))
 				{
-					return false;
+					if (*currentPlatform != *nextPlatform)
+					{
+						return false;
+					}
+				}
+				for (int i = 0; i < 4; i++)
+				{
+					// Check neighbours toward direction of travel first so that a failure can be detected asap
+					Pos neighbour = pos.FacingPosition(Pos::RelativeFacing(toward, i));
+					// Only check if a neighbour isn't already part of the check
+					if (!world.connectedPlatform.contains(neighbour.CoordToEncoded()))
+					{
+						CheckMovePlatform(neighbour, toward);
+					}
 				}
 			}
-			for (int i = 0; i < 4; i++)
+			else
 			{
-				// Check neighbours toward direction of travel first so that a failure can be detected asap
-				Pos neighbour = pos.FacingPosition(Pos::RelativeFacing(toward, i));
-				// Only check if a neighbour isn't already part of the check
-				if (!world.connectedPlatform.contains(neighbour.CoordToEncoded()))
-				{
-					return CheckMovePlatform(neighbour, toward);
-				}
+				return false;
 			}
 		}
 	}
@@ -213,6 +221,7 @@ void WorldSave::MovePlatform(Pos pos, Facing toward)
 	{
 		for (uint64_t plate : world.connectedPlatform)
 		{
+			world.platformMovingTo.insert(Pos::EncodedToCoord(plate).FacingPosition(toward).CoordToEncoded());
 			world.nextPlatforms.insert({ plate,toward });
 		}
 	}

@@ -208,6 +208,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			}
 			else
 			{
+				world.MovePlatform(program.mouseHovering,north);
 				program.cameraPos.y -= int(GC::cameraSpeed * program.zoom);
 			}
 	} });
@@ -222,6 +223,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
+			world.MovePlatform(program.mouseHovering,west);
 			program.cameraPos.x -= int(GC::cameraSpeed * program.zoom);
 		}
 	} });
@@ -236,6 +238,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
+			world.MovePlatform(program.mouseHovering,south);
 			program.cameraPos.y += int(GC::cameraSpeed * program.zoom);
 		}
 	} });
@@ -250,6 +253,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
+			world.MovePlatform(program.mouseHovering,east);
 			program.cameraPos.x += int(GC::cameraSpeed * program.zoom);
 		}
 	} });

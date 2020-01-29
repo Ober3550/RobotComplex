@@ -381,7 +381,7 @@ void Belt::DoItemLogic()
 			{
 				for (uint16_t i = 1; i < pushStack.size(); i++)
 				{
-					world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),pushStack[i].CoordToEncoded() });
+					world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
 				}
 			}
 		}

@@ -8,6 +8,7 @@ sf::Texture* LoadTexture(std::string filename);
 extern std::vector<sf::Texture*> groundTextures;
 extern std::vector<sf::Texture*> itemTextures;
 extern std::vector<sf::Texture*> animationTextures;
+extern sf::Texture* platformTexture;
 extern sf::Texture* robotTexture;
 extern sf::Texture* font;
 extern sf::Texture* buttonTexture;
