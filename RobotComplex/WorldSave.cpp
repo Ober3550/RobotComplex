@@ -23,7 +23,7 @@ void WorldSave::GenerateChunk(Pos pos)
 			Pos currentPos = { (pos.x << GC::chunkShift) + (i & GC::chunkMask), (pos.y << GC::chunkShift) + (i / (GC::chunkMask + 1)) };
 			// For some reason mapping x to y fixes the perlin sampling
 			float normalized = ((chunkNoise[(currentPos.x & GC::chunkMask) * 32 + (currentPos.y & GC::chunkMask)] + 1.0f) / 2.0f);
-			newChunk->tiles[i] = GroundTile{(uint8_t)(normalized * 256)};
+			newChunk->tiles[i] = GroundTile{(uint8_t)(normalized * 512)};
 		}
 	}
 }

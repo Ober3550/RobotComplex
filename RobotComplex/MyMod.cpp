@@ -6,3 +6,14 @@ int MyMod(int a, int b)
 		temp += b;
 	return temp;
 }
+float MyMod(float a, float b)
+{
+	if (a > b)
+	{
+		return MyMod(a - b, b);
+	}
+	else
+	{
+		return a;
+	}
+}

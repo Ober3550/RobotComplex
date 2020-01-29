@@ -27,6 +27,8 @@ public:
 	sf::Font guiFont;
 	std::vector<Animation> animationTemplates;
 
+	int minGround = 255;
+	int maxGround = 0;
 	//Stores sprite layers
 	SpriteVector groundSprites;
 	SpriteVector platformSprites;

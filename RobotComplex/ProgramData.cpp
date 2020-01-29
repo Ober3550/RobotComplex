@@ -14,9 +14,9 @@
 
 sf::Color ProgramData::HSV2RGB(sf::Color input)
 {
-	float h = input.r * 360.f / 255.f, s = input.g / 255.f, v = input.b / 255.f;
+	float h = input.r * 360.f / 256.f, s = input.g / 256.f, v = input.b / 256.f;
 	float c = v * s;
-	float x = c * (1 - abs((int(h / 60) & 1) - 1));
+	float x = c * (1.f-abs(MyMod(h / 60.f, 2.f)-1.f));
 	float m = v - c;
 	std::array<std::array<float, 3>, 6> colorTable;
 	colorTable[0] = { c,x,0 };
@@ -26,23 +26,25 @@ sf::Color ProgramData::HSV2RGB(sf::Color input)
 	colorTable[4] = { x,0,c };
 	colorTable[5] = { c,0,x };
 	std::array<float, 3> color = colorTable[int(h / 60)];
-	return sf::Color((color[0] + m) * 255, (color[1] + m) * 255, (color[2] + m) * 255, input.a);
+	return sf::Color((color[0] + m) * 256, (color[1] + m) * 256, (color[2] + m) * 256, input.a);
 }
 
 void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 {
-	if (GroundTile * tile = world.GetGroundTile(tilePos))
-	{
-		sf::Sprite sprite;
-		uint8_t textureIndex = tile->groundTile;
-		sprite.setTexture(*groundTextures[0]);
-		//sprite.setTextureRect(sf::IntRect((textureIndex & 3)*32, 0, 32, 32));
-		sf::Color color = HSV2RGB(sf::Color(50, MyMod(textureIndex,16) * 20, 100 + (textureIndex / 20) * 10, 255));
-		sprite.setColor(color);
-		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-		sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
-		program.groundSprites.emplace_back(sprite);
-	}
+	GroundTile * tile = world.GetGroundTile(tilePos);
+	sf::Sprite sprite;
+	uint8_t textureIndex = tile->groundTile;
+	if (textureIndex > program.maxGround)
+		program.maxGround = textureIndex;
+	if (textureIndex < program.minGround)
+		program.minGround = textureIndex;
+	sprite.setTexture(*groundTextures[0]);
+	sprite.setTextureRect(sf::IntRect((textureIndex / 32)*32, 0, 32, 32));
+	sf::Color color = HSV2RGB(sf::Color(MyMod(textureIndex+16,256), 150, 220, 255));
+	sprite.setColor(color);
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+	program.groundSprites.emplace_back(sprite);
 }
 void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 {
@@ -189,8 +191,12 @@ void ProgramData::UpdateElementExists()
 	}
 }
 void ProgramData::RecreateSprites() {
-	if(program.redrawGround)
+	if (program.redrawGround)
+	{
+		program.minGround = 255;
+		program.maxGround = 0;
 		program.groundSprites.clear();
+	}
 	program.platformSprites.clear();
 	program.itemSprites.clear();
 	program.logicSprites.clear();
@@ -265,6 +271,13 @@ void ProgramData::DrawTooltips()
 	sprintf_s(buffer, "Tiles Rendered: %d", program.tilesRendered);
 	displayValue = buffer;
 	CreateText(program.mousePos.x, program.mousePos.y - 120, displayValue);
+
+	if (GroundTile* ground = world.GetGroundTile(program.mouseHovering))
+	{
+		sprintf_s(buffer, "Ground Value: %d", *ground);
+		displayValue = buffer;
+		CreateText(program.mousePos.x, program.mousePos.y - 140, displayValue);
+	}
 #endif
 }
 void ProgramData::DrawSelectedBox()
