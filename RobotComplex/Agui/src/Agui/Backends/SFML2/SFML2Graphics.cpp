@@ -140,7 +140,8 @@ namespace agui
 			sfStr.setOrigin(textRect.left + textRect.width,
 			textRect.top);
 
-		sfStr.setColor(colToSf(color));
+		sfStr.setFillColor(colToSf(color));
+		sfStr.setOutlineColor(colToSf(color));
 
 		target.draw( sfStr );
 	}

@@ -148,8 +148,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>agui.lib;agui_sfml2.lib;sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\RobotComplex\Agui\lib\Release;$(SolutionDir)\RobotComplex\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\RobotComplex\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='AguiExample|Win32'">
@@ -207,6 +207,82 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Agui\src\Agui\ActionEvent.cpp" />
+    <ClCompile Include="Agui\src\Agui\ActionListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Font.cpp" />
+    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2FontLoader.cpp" />
+    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Graphics.cpp" />
+    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Image.cpp" />
+    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2ImageLoader.cpp" />
+    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Input.cpp" />
+    <ClCompile Include="Agui\src\Agui\BaseTypes.cpp" />
+    <ClCompile Include="Agui\src\Agui\BlinkingEvent.cpp" />
+    <ClCompile Include="Agui\src\Agui\BorderLayout.cpp" />
+    <ClCompile Include="Agui\src\Agui\Clipboard\Clipboard.cpp" />
+    <ClCompile Include="Agui\src\Agui\Clipboard\WinClipboard.cpp" />
+    <ClCompile Include="Agui\src\Agui\Color.cpp" />
+    <ClCompile Include="Agui\src\Agui\CursorProvider.cpp" />
+    <ClCompile Include="Agui\src\Agui\Dimension.cpp" />
+    <ClCompile Include="Agui\src\Agui\EmptyWidget.cpp" />
+    <ClCompile Include="Agui\src\Agui\EventArgs.cpp" />
+    <ClCompile Include="Agui\src\Agui\FlowLayout.cpp" />
+    <ClCompile Include="Agui\src\Agui\FocusListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\FocusManager.cpp" />
+    <ClCompile Include="Agui\src\Agui\Font.cpp" />
+    <ClCompile Include="Agui\src\Agui\Graphics.cpp" />
+    <ClCompile Include="Agui\src\Agui\GridLayout.cpp" />
+    <ClCompile Include="Agui\src\Agui\Gui.cpp" />
+    <ClCompile Include="Agui\src\Agui\Image.cpp" />
+    <ClCompile Include="Agui\src\Agui\Input.cpp" />
+    <ClCompile Include="Agui\src\Agui\KeyboardListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Layout.cpp" />
+    <ClCompile Include="Agui\src\Agui\MouseListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Point.cpp" />
+    <ClCompile Include="Agui\src\Agui\Rectangle.cpp" />
+    <ClCompile Include="Agui\src\Agui\ResizableBorderLayout.cpp" />
+    <ClCompile Include="Agui\src\Agui\ResizableText.cpp" />
+    <ClCompile Include="Agui\src\Agui\SelectionListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\TableLayout.cpp" />
+    <ClCompile Include="Agui\src\Agui\TapListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\TopContainer.cpp" />
+    <ClCompile Include="Agui\src\Agui\Transform.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widget.cpp" />
+    <ClCompile Include="Agui\src\Agui\WidgetListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Button\Button.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Button\ButtonGroup.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Button\ButtonListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\CheckBox\CheckBox.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\CheckBox\CheckBoxListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\DropDown\DropDown.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\DropDown\DropDownListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Frame\Frame.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Frame\FrameListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ImageWidget\ImageWidget.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Label\Label.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Label\LabelListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ListBox\ListBox.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ListBox\ListBoxListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\PopUp\PopUpMenu.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\PopUp\PopUpMenuItem.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\RadioButton\RadioButton.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\RadioButton\RadioButtonGroup.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\RadioButton\RadioButtonListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\HScrollBar.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\HScrollBarListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\VScrollBar.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\VScrollBarListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ScrollPane\ScrollPane.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Slider\Slider.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Slider\SliderListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Tab\Tab.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Tab\TabbedPane.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\Tab\TabbedPaneListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\TextBox\ExtendedTextBox.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\TextBox\TextBox.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\TextBox\TextBoxListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\TextField\TextField.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\TextField\TextFieldListener.cpp" />
+    <ClCompile Include="Agui\src\Agui\Widgets\ToolTip\ToolTip.cpp" />
     <ClCompile Include="CraftingClass.cpp" />
     <ClCompile Include="CraftingProcess.cpp" />
     <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD.cpp" />
@@ -264,6 +340,9 @@
     <ClInclude Include="WidgetCreator.h" />
     <ClInclude Include="WorldChunk.h" />
     <ClInclude Include="WorldSave.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

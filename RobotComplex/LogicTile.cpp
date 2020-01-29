@@ -379,7 +379,7 @@ void Belt::DoItemLogic()
 			world.PushItems(&pushStack, this->facing, GC::robotStrength);
 			if (!pushStack.empty())
 			{
-				for (uint16_t i = 1; i < pushStack.size(); i++)
+ 				for (uint16_t i = 1; i < pushStack.size(); i++)
 				{
 					world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
 				}

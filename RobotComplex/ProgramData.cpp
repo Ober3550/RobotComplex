@@ -40,7 +40,7 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 		program.minGround = textureIndex;
 	sprite.setTexture(*groundTextures[0]);
 	sprite.setTextureRect(sf::IntRect((textureIndex / 32)*32, 0, 32, 32));
-	sf::Color color = HSV2RGB(sf::Color(MyMod(textureIndex+16,256), 150, 220, 255));
+	sf::Color color = HSV2RGB(sf::Color(MyMod(textureIndex+16,256), 100 + MyMod(textureIndex,32), 220, 255 ));
 	sprite.setColor(color);
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
@@ -442,10 +442,12 @@ void ProgramData::MovePlatform(Pos pos, Facing toward)
 	{
 		if (ItemTile* elem = world.GetItemTile(newPos.CoordToEncoded()))
 		{
-
+			world.updateQueueD.insert(pos.CoordToEncoded());
+			world.updateQueueD.insert(newPos.CoordToEncoded());
 		}
 		else
 		{
+			world.updateQueueD.insert(newPos.CoordToEncoded());
 			world.items[newPos.CoordToEncoded()] = world.items[pos.CoordToEncoded()];
 			world.items.erase(pos.CoordToEncoded());
 		}
@@ -535,6 +537,7 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 	}
 	if (ItemTile* item = world.GetItemTile(pos))
 	{
+		world.updateQueueD.insert(newPos.CoordToEncoded());
 		world.ChangeItem(newPos, item->itemTile, 1);
 		world.ChangeItem(pos, item->itemTile, -1);
 	}
@@ -566,6 +569,7 @@ void ProgramData::CheckItemsMoved()
 
 void ProgramData::UpdateMap()
 {
+	world.updateQueueD.clear();
 	// Update all the logic tiles that were queued last tick
 	world.updateQueueA = MySet<uint64_t>(world.updateQueueC);
 	world.updateQueueC.clear();
@@ -592,13 +596,6 @@ void ProgramData::UpdateMap()
 		else
 			++iter;
 	}
-	for (uint64_t kv : world.updateQueueD)
-	{
-		if (LogicTile* logic = world.GetLogicTile(kv))
-		{
-			logic->DoItemLogic();
-		}
-	}
 	world.prevItemMovingTo = world.itemMovingTo;
 	world.itemMovingTo.clear();
 	world.robotMovingTo.clear();
@@ -607,6 +604,13 @@ void ProgramData::UpdateMap()
 	MoveBots();
 	CheckItemsMoved();
 	SwapPlatforms();
+	for (uint64_t kv : world.updateQueueD)
+	{
+		if (LogicTile* logic = world.GetLogicTile(kv))
+		{
+			logic->DoItemLogic();
+		}
+	}
 	++world.tick;
 }
 
