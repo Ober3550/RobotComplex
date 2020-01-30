@@ -537,9 +537,8 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 	}
 	if (ItemTile* item = world.GetItemTile(pos))
 	{
-		world.updateQueueD.insert(newPos.CoordToEncoded());
-		world.ChangeItem(newPos, item->itemTile, 1);
 		world.ChangeItem(pos, item->itemTile, -1);
+		world.ChangeItem(newPos, item->itemTile, 1);
 	}
 	world.nextItemPos.erase(pos.CoordToEncoded());
 }
@@ -569,7 +568,6 @@ void ProgramData::CheckItemsMoved()
 
 void ProgramData::UpdateMap()
 {
-	world.updateQueueD.clear();
 	// Update all the logic tiles that were queued last tick
 	world.updateQueueA = MySet<uint64_t>(world.updateQueueC);
 	world.updateQueueC.clear();
@@ -611,6 +609,7 @@ void ProgramData::UpdateMap()
 			logic->DoItemLogic();
 		}
 	}
+	world.updateQueueD.clear();
 	++world.tick;
 }
 

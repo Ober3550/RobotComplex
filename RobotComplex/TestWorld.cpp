@@ -23,11 +23,13 @@ void CreateTestWorld2()
 	world.GenerateChunk(Pos{ 0,0 });
 	world.GenerateChunk(Pos{ -1,0 });
 	Robot robot;
+	robot.stopped = true;
 	robot.facing = north;
 	robot.pos = { -3,7 };
 	world.robots.insert({ robot.pos.CoordToEncoded(), robot });
 
 	Robot robot2;
+	robot2.stopped = true;
 	robot2.facing = east;
 	robot2.pos = { -5,5 };
 	world.robots.insert({ robot2.pos.CoordToEncoded(), robot2 });

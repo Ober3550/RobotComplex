@@ -104,7 +104,13 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		{
 			world.items.erase(itemPos);
 		}
-		world.updateQueueD.insert(pos.CoordToEncoded());
+		if (!world.updateQueueD.contains(pos.CoordToEncoded()))
+		{
+			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
+			{
+				logicTile->DoItemLogic();
+			}
+		}
 		return true;
 	}
 	else
@@ -115,7 +121,13 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 		newItem->itemTile = item;
 		newItem->quantity = quantity;
 		world.items[pos.CoordToEncoded()] = *newItem;
-		world.updateQueueD.insert(pos.CoordToEncoded());
+		if (!world.updateQueueD.contains(pos.CoordToEncoded()))
+		{
+			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
+			{
+				logicTile->DoItemLogic();
+			}
+		}
 		return true;
 	}
 }

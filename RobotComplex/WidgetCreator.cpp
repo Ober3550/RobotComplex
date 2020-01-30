@@ -586,7 +586,7 @@ void WidgetCreator::LeftMousePressed()
 						logicPlace->DoRobotLogic(robot);
 					}
 					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
-					logicPlace->DoItemLogic();
+					world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
 					world.updateQueueC.insert(logicPlace->pos.CoordToEncoded());										// Queue update for placed element
 					for (int i = 0; i < 4; i++)
 					{
