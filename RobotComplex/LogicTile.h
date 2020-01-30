@@ -9,6 +9,7 @@
 #include <iostream>
 #include <bitset>
 #include "SpriteVector.h"
+#include "MySet.h"
 
 class LogicTile {
 public:
@@ -23,7 +24,7 @@ public:
 	virtual void SignalEval(std::array<uint8_t, 4> neighbours);
 	virtual void DoWireLogic();
 	virtual void DoItemLogic() {};
-	virtual void DoRobotLogic(Robot* robotRef) {};
+	virtual void DoRobotLogic(Pos robotRef) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
 	virtual bool GetConnected(LogicTile* querier);
@@ -54,7 +55,7 @@ class DirectionalLogicTile : public LogicTile {
 	virtual bool GetConnected(LogicTile* querier);
 	virtual bool ReceivesSignal(LogicTile* querier);
 	virtual void DoItemLogic() {};
-	virtual void DoRobotLogic(Robot* robotRef) {};
+	virtual void DoRobotLogic(Pos robotRef) {};
 	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual bool IsSource() { return true; };
@@ -87,7 +88,7 @@ public:
 	Redirector(const Redirector* other) {
 		this->logictype = redirector;
 	}
-	void DoRobotLogic(Robot* robotRef);						// Redirects robots when stepped onto
+	void DoRobotLogic(Pos robotRef);						// Redirects robots when stepped onto
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip();
 	Redirector* Copy()
@@ -104,7 +105,7 @@ public:
 	static sf::Texture* texture;								// A textures for drawing
 	void DoWireLogic() {}									// Overwrite base method to not transfer signals
 	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
-	void DoRobotLogic(Robot* robotRef);						// Activates when a robot holding the correct item filter steps onto it
+	void DoRobotLogic(Pos robotRef);						// Activates when a robot holding the correct item filter steps onto it
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s){
 		this->facing = north;
 		LogicTile::DrawSprite(appendTo, x, y, s, this->texture);
@@ -165,18 +166,17 @@ public:
 	}
 };
 
-class Holder : public LogicTile {
+class Gate : public LogicTile {
 public:
-	Holder() { logictype = holder; };
+	Gate() { logictype = gate; };
 	static sf::Texture* texture;
-	Robot* robotRef;
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s) { LogicTile::DrawSprite(appendTo, x, y, s, this->texture); }
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	void DoWireLogic();
-	void DoRobotLogic(Robot* robotRef);
+	void DoRobotLogic(Pos robotRef);
 	std::string GetTooltip();
-	Holder* Copy()
+	Gate* Copy()
 	{
-		Holder* logicTile = new Holder();
+		Gate* logicTile = new Gate();
 		this->BaseCopy(logicTile);
 		return logicTile;
 	}
@@ -204,7 +204,7 @@ public:
 	Belt() { logictype = belt; };
 	static sf::Texture* texture;
 	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
-	void DoRobotLogic(Robot* robotRef);						// Activates when a robot holding the correct item filter steps onto it
+	void DoRobotLogic(Pos robotRef);						// Activates when a robot holding the correct item filter steps onto it
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	std::string GetTooltip() { return "This is a belt"; };
 	Belt* Copy()

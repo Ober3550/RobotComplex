@@ -214,7 +214,7 @@ void LoadPrototypes()
 void LoadLogicToHotbar()
 {
 	Redirector* redirect = new Redirector();
-	Holder* holder = new Holder();
+	Gate* gate = new Gate();
 	PressurePlate* pressureplate = new PressurePlate();
 	Wire* wire = new Wire();
 	Inverter* inverter = new Inverter();
@@ -224,7 +224,7 @@ void LoadLogicToHotbar()
 	
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(redirect);
-	program.hotbar.emplace_back(holder);
+	program.hotbar.emplace_back(gate);
 	program.hotbar.emplace_back(pressureplate);
 	program.hotbar.emplace_back(wire);
 	program.hotbar.emplace_back(inverter);

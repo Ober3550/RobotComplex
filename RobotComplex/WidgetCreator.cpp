@@ -322,6 +322,10 @@ void WidgetCreator::SetDefaultKeyMapping()
 		if (program.selectedRobot)
 		{
 			program.selectedRobot->stopped = false;
+			if (LogicTile* logic = world.GetLogicTile(program.selectedRobot->pos))
+			{
+				logic->DoRobotLogic(program.selectedRobot->pos);
+			}
 			program.selectedRobot = nullptr;
 		}
 	} });
@@ -536,6 +540,10 @@ void WidgetCreator::MouseMoved()
 					program.selectedRobot->stopped = true;
 			program.selectedRobot = robot;
 			program.selectedRobot->stopped = false;
+			if (LogicTile* logic = world.GetLogicTile(program.selectedRobot->pos))
+			{
+				logic->DoRobotLogic(program.selectedRobot->pos);
+			}
 		}
 		else
 		{
@@ -583,7 +591,7 @@ void WidgetCreator::LeftMousePressed()
 					logicPlace->pos = program.mouseHovering;
 					if (Robot* robot = world.GetRobot(program.mouseHovering))
 					{
-						logicPlace->DoRobotLogic(robot);
+						logicPlace->DoRobotLogic(robot->pos);
 					}
 					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
 					world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
@@ -621,6 +629,10 @@ void WidgetCreator::RightMousePressed()
 		if (Robot* robot = world.GetRobot(program.mouseHovering))
 		{
 			robot->stopped = false;
+			if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
+			{
+				logic->DoRobotLogic(program.mouseHovering);
+			}
 		}
 		for (int i = 0; i < 4; i++)
 		{

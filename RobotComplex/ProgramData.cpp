@@ -322,6 +322,7 @@ void ProgramData::DrawHotbar()
 
 		if (program.hotbar[i])
 		{
+			program.hotbar[i]->signal = GC::startSignalStrength;
 			program.hotbar[i]->facing = program.placeRotation;
 			program.hotbar[i]->colorClass = program.placeColor;
 			program.hotbar[i]->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f);
@@ -500,14 +501,14 @@ void ProgramData::SwapBots()
 			if (auto temp = world.logictiles.GetValue(newPos.CoordToEncoded()))
 			{
 				LogicTile* logicTile = *temp;
-				logicTile->DoRobotLogic(&world.robots[newPos.CoordToEncoded()]);
+				logicTile->DoRobotLogic(newPos);
 			}
 
 			// If the robot left a logic tile, update its logic
 			if (auto temp = world.logictiles.GetValue(pos.CoordToEncoded()))
 			{
 				LogicTile* logicTile = *temp;
-				logicTile->DoRobotLogic(nullptr);
+				logicTile->DoRobotLogic(Pos{ 0,0 });
 			}
 		}
 	}
@@ -576,6 +577,7 @@ void ProgramData::UpdateMap()
 		{
 			if (LogicTile* logic = world.GetLogicTile(kv))
 			{
+				world.updateQueueD.insert(kv);
 				logic->DoWireLogic();
 			}
 		}

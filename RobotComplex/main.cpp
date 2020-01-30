@@ -38,7 +38,7 @@ sf::Texture* Redirector::texture = LoadTexture("logic/redirector.png");
 sf::Texture* Inverter::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Booster::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
-sf::Texture* Holder::texture = LoadTexture("logic/holder.png");
+sf::Texture* Gate::texture = LoadTexture("logic/holder.png");
 sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
 sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
 

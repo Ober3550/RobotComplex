@@ -5,6 +5,7 @@
 #include "WorldChunk.h"
 #include "Pos.h"
 #include "WorldSave.h"
+#include <typeinfo>
 
 void WorldSave::GenerateChunk(Pos pos)
 {
@@ -138,6 +139,17 @@ bool WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int push
 	// If there is already a different item moving to the position specified don't continue
 	if (!world.itemMovingTo.contains(nextPos.CoordToEncoded()) && !world.prevItemMovingTo.contains(nextPos.CoordToEncoded()))
 	{
+		if (LogicTile* logic = world.GetLogicTile(nextPos))
+		{
+			if (logic->logictype == gate)
+			{
+				if (!logic->signal)
+				{
+					itemsMoving->clear();
+					return false;
+				}
+			}
+		}
 		ItemTile* prevItem = world.GetItemTile(prevPos);
 		if (pushesLeft == 0)
 		{

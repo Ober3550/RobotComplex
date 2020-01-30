@@ -33,8 +33,8 @@ LogicTile* LogicTile::Factory(uint16_t classType)
 		return new Counter();
 	case repeater:
 		return new Repeater();
-	case holder:
-		return new Holder();
+	case gate:
+		return new Gate();
 	}
 	return nullptr;
 }
@@ -204,11 +204,14 @@ std::string Wire::GetTooltip()
 {
 	return program.logicTooltips[0][0];
 }
-void Redirector::DoRobotLogic(Robot* robotRef)
+void Redirector::DoRobotLogic(Pos robotRef)
 {
-	if (robotRef && signal == 0)
+	if (!signal)
 	{
-		robotRef->SetFacing(this->facing);
+		if (Robot* robot = world.GetRobot(robotRef))
+		{
+			robot->SetFacing(this->facing);
+		}
 	}
 }
 std::string Redirector::GetTooltip()
@@ -242,9 +245,9 @@ void PressurePlate::DoItemLogic()
 		}
 	}
 }
-void PressurePlate::DoRobotLogic(Robot* robotRef)
+void PressurePlate::DoRobotLogic(Pos robotRef)
 {
-	if (robotRef)
+	if (Robot* robot = world.GetRobot(robotRef))
 	{
 		this->prevSignal = this->signal;
 		this->signal = GC::startSignalStrength;
@@ -311,29 +314,30 @@ std::string Repeater::GetTooltip()
 	return program.logicTooltips[5][0];
 }
 
-void Holder::DoRobotLogic(Robot* robotRef)
+void Gate::DoRobotLogic(Pos robotRef)
 {
-	this->robotRef = robotRef;
-	if (robotRef)
+	if (!signal)
 	{
-		if(!signal)
-		robotRef->stopped = true;
-	}
-}
-
-void Holder::DoWireLogic()
-{
-	LogicTile::DoWireLogic();
-	if (robotRef)
-	{
-		if (signal)
+		if (Robot* robot = world.GetRobot(robotRef.CoordToEncoded()))
 		{
-			robotRef->stopped = false;
+			robot->stopped = true;
 		}
 	}
 }
 
-std::string Holder::GetTooltip()
+void Gate::DoWireLogic()
+{
+	LogicTile::DoWireLogic();
+	if (signal)
+	{
+		if (Robot* robot = world.GetRobot(this->pos.CoordToEncoded()))
+		{
+			robot->stopped = false;
+		}
+	}
+}
+
+std::string Gate::GetTooltip()
 {
 	return program.logicTooltips[7][0];
 }
@@ -361,11 +365,14 @@ std::string Counter::GetTooltip()
 	return program.logicTooltips[8][0];
 }
 
-void Belt::DoRobotLogic(Robot* robotRef)
+void Belt::DoRobotLogic(Pos robotRef)
 {
-	if (robotRef && signal == 0)
+	if (!signal)
 	{
-		robotRef->SetFacing(this->facing);
+		if (Robot* robot = world.GetRobot(robotRef))
+		{
+			robot->SetFacing(this->facing);
+		}
 	}
 }
 
@@ -425,7 +432,6 @@ void WireBridge::SignalEval(std::array<uint8_t, 4> neighbours)
 		this->signal = 0;
 	else
 		signal = maxA > 0 ? maxA - 1 : 0;
-
 	if (this->signal2 > maxB)
 		this->signal2 = 0;
 	else

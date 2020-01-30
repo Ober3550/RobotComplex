@@ -418,3 +418,31 @@ void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	if (this->signal2 != 0)
 		DrawSignalStrength(appendTo, x + 5, y, s, this->signal2);
 }
+
+void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+{
+	// Main Sprite
+	sf::Sprite sprite;
+	sprite.setTexture(*texture);
+
+	uint8_t color = black;
+	if (this->signal)
+		color = colorClass;
+	uint8_t Red, Green, Blue;
+	Red = 255 * (color & 1);
+	Green = 255 * (color >> 1 & 1);
+	Blue = 255 * (color >> 2 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	float sprite_rotation = float(this->facing) * 90.f;
+	sprite.setRotation(sprite_rotation);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+
+	appendTo->emplace_back(sprite);
+
+	// Signal value
+	if (this->signal != 0)
+		DrawSignalStrength(appendTo, x, y, s, this->signal);
+}
