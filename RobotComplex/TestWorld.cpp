@@ -28,17 +28,7 @@ void CreateTestWorld2()
 	robot.pos = { -3,7 };
 	world.robots.insert({ robot.pos.CoordToEncoded(), robot });
 
-	Robot robot2;
-	robot2.stopped = true;
-	robot2.facing = east;
-	robot2.pos = { -5,5 };
-	world.robots.insert({ robot2.pos.CoordToEncoded(), robot2 });
-
 	ItemTile* tile = &world.items[Pos{ -3, 6 }.CoordToEncoded()];
-	tile->itemTile = 4;
-	tile->quantity = 1;
-
-	tile = &world.items[Pos{ -4, 5 }.CoordToEncoded()];
 	tile->itemTile = 4;
 	tile->quantity = 1;
 
@@ -46,9 +36,23 @@ void CreateTestWorld2()
 	{
 		for (int j = 0; j < 10; j++)
 		{
-			world.platforms[Pos{ -5 + i, - 5 + j }.CoordToEncoded()] = 10;
+			world.platforms[Pos{ -5 + i, -5 + j }.CoordToEncoded()] = 10;
 		}
 	}
+
+	/*
+	Robot robot2;
+	robot2.stopped = true;
+	robot2.facing = east;
+	robot2.pos = { -5,5 };
+	world.robots.insert({ robot2.pos.CoordToEncoded(), robot2 });
+
+	
+
+	tile = &world.items[Pos{ -4, 5 }.CoordToEncoded()];
+	tile->itemTile = 4;
+	tile->quantity = 1;
+
 	std::pair<bool, int> getItemNumber;
 	//std::vector<std::string> items = { "clay", , "copper_ore",   };
 
@@ -82,4 +86,5 @@ void CreateTestWorld2()
 			OutputDebugStringA(("Failed to place " + itemName + "\r\n").c_str());
 		}
 	}
+	*/
 }

@@ -26,7 +26,7 @@ sf::Color ProgramData::HSV2RGB(sf::Color input)
 	colorTable[4] = { x,0,c };
 	colorTable[5] = { c,0,x };
 	std::array<float, 3> color = colorTable[int(h / 60)];
-	return sf::Color((color[0] + m) * 256, (color[1] + m) * 256, (color[2] + m) * 256, input.a);
+	return sf::Color(uint8_t((color[0] + m) * 256), uint8_t((color[1] + m) * 256), uint8_t((color[2] + m) * 256), input.a);
 }
 
 void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
@@ -50,9 +50,9 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 {
 	if (uint16_t* platform = world.platforms.GetValue(encodedPos))
 	{
-		Pos pos = Pos::EncodedToCoord(encodedPos);
 		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
 		{
+			Pos pos = Pos::EncodedToCoord(encodedPos);
 			Pos newPos = pos.FacingPosition(*nextPos);
 			Pos difference = newPos - pos;
 			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
@@ -83,9 +83,9 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 	{
 		if (tile->itemTile >= ReservedItems::totalReserved)
 		{
-			Pos pos = Pos::EncodedToCoord(encodedPos);
 			if (auto nextPos = world.nextItemPos.GetValue(encodedPos))
 			{
+				Pos pos = Pos::EncodedToCoord(encodedPos);
 				Pos newPos = pos.FacingPosition(*nextPos);
 				Pos difference = newPos - pos;
 				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
@@ -96,6 +96,7 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 			}
 			if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
 			{
+				Pos pos = Pos::EncodedToCoord(encodedPos);
 				Pos newPos = pos.FacingPosition(*nextPos);
 				Pos difference = newPos - pos;
 				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
@@ -112,6 +113,17 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, float x, float y)
 {
 	if (LogicTile * logic = world.GetLogicTile(encodedPos))
 	{
+		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+		{
+			Pos pos = Pos::EncodedToCoord(encodedPos);
+			Pos newPos = pos.FacingPosition(*nextPos);
+			Pos difference = newPos - pos;
+			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+			if (step > 1.0f)
+				step = 1.0f;
+			x += int(float(difference.x) * float(GC::tileSize) * step);
+			y += int(float(difference.y) * float(GC::tileSize) * step);
+		}
 		logic->DrawTile(&program.logicSprites, x, y, 1.0f);
 	}
 }
@@ -274,7 +286,7 @@ void ProgramData::DrawTooltips()
 
 	if (GroundTile* ground = world.GetGroundTile(program.mouseHovering))
 	{
-		sprintf_s(buffer, "Ground Value: %d", *ground);
+		sprintf_s(buffer, "Ground Value: %d", ground->groundTile);
 		displayValue = buffer;
 		CreateText(program.mousePos.x, program.mousePos.y - 140, displayValue);
 	}

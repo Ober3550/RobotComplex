@@ -54,6 +54,11 @@ public:
 	WorldSave()
 	{
 		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
+		noiseRef->SetFractalOctaves(6);
+		noiseRef->SetFractalLacunarity(2);
+		noiseRef->SetFractalGain(0.5f);
+		noiseRef->SetAxisScales(0.4f,0.4f,0.4f);
+		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
 	}
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);
