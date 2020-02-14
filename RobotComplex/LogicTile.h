@@ -52,6 +52,7 @@ public:
 	}
 };
 class DirectionalLogicTile : public LogicTile {
+public:
 	virtual void DoWireLogic();								// Overrides wire logic transfer
 	virtual bool GetConnected(LogicTile* querier);
 	virtual bool ReceivesSignal(LogicTile* querier);
@@ -227,7 +228,6 @@ class WireBridge : public LogicTile {
 public:
 	uint8_t signal2 = 0;
 	WireBridge() { logictype = wirebridge; };
-	bool NeighbourConnects(LogicTile* querier) { return false; };
 	bool GetConnected(LogicTile* querier);
 	uint8_t GetSignal(LogicTile* querier);
 	void SignalEval(std::array<uint8_t, 4> neighbours);
@@ -236,6 +236,21 @@ public:
 	WireBridge* Copy()
 	{
 		WireBridge* logicTile = new WireBridge();
+		this->BaseCopy(logicTile);
+		return logicTile;
+	}
+};
+
+class Comparer : public DirectionalLogicTile {
+public:
+	Comparer() { logictype = comparer; };
+	static sf::Texture* texture;								// A textures for drawing
+	void SignalEval(std::array<uint8_t, 4> neighbours);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
+	std::string GetTooltip() { return "Comparer: output = 16 + input if behind = side"; };
+	Comparer* Copy()
+	{
+		Comparer* logicTile = new Comparer();
 		this->BaseCopy(logicTile);
 		return logicTile;
 	}

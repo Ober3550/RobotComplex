@@ -21,6 +21,6 @@ inverter
 booster
 counter
 repeater
-holder
+gate
 belt
 wirebridge

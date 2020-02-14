@@ -170,36 +170,33 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	sf::Sprite sprite;
 	float sprite_rotation;
 	sprite.setTexture(*Wire::texture);
-	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
-	uint8_t color = black;
-	if (!this->signal)
-		color = colorClass;
 	uint8_t Red, Green, Blue;
-	Red = 255 * (color & 1);
-	Green = 255 * (color >> 1 & 1);
-	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	uint8_t color;
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
+	sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
 
-	appendTo->emplace_back(sprite);
 	// Neighbour Sprites
 	for (uint8_t i = 0; i < 4; i++)
 	{
-		Pos lookingAt = this->pos.FacingPosition(Facing(i));
-		if (LogicTile* neighbour = world.GetLogicTile(lookingAt.CoordToEncoded()))
+		Facing lookingAt = Pos::RelativeFacing(this->facing, i);
+		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
-			if (neighbour->GetConnected(this))
+			color = black;
+			if (neighbour->signal)
+				color = neighbour->colorClass;
+			if (neighbour->ReceivesSignal(this) || this->ReceivesSignal(neighbour))
 			{
-				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
-
-				sprite_rotation = ((float)i) * (float)90.f;
+				Red = 255 * (color & 1);
+				Green = 255 * (color >> 1 & 1);
+				Blue = 255 * (color >> 2 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+				
+				sprite_rotation = ((float)lookingAt) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
-				sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
-				sprite.setScale(sf::Vector2f(s, s));
 
 				appendTo->emplace_back(sprite);
 			}
@@ -232,32 +229,53 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 
 void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
-	// Input Sprite
+	// Centre Sprite
 	sf::Sprite sprite;
-	sprite.setTexture(*texture);
+	float sprite_rotation;
+	sprite.setTexture(*Wire::texture);
+
+	uint8_t Red, Green, Blue;
+	uint8_t color;
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
 	sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
 
-	uint8_t color = black;
+	// Neighbour Sprites
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		Facing lookingAt = Pos::RelativeFacing(this->facing, i);
+		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
+		{
+			color = black;
+			if (neighbour->signal)
+				color = neighbour->colorClass;
+			if (neighbour->ReceivesSignal(this) || this->ReceivesSignal(neighbour))
+			{
+				Red = 255 * (color & 1);
+				Green = 255 * (color >> 1 & 1);
+				Blue = 255 * (color >> 2 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+
+				sprite_rotation = ((float)lookingAt) * (float)90.f;
+				sprite.setRotation(sprite_rotation);
+
+				appendTo->emplace_back(sprite);
+			}
+		}
+	}
+	// Centre Sprite
+	sprite.setTexture(*texture);
+	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
+
+	color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
-
-	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-	float sprite_rotation = float(this->facing) * 90.f;
-	sprite.setRotation(sprite_rotation);
-	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
-	sprite.setScale(sf::Vector2f(s, s));
-
-	appendTo->emplace_back(sprite);
-
-	// Output Sprite
-	sprite.setTexture(*texture);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
-	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
@@ -269,7 +287,70 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 
 	// Signal value
 	if (this->signal != 0)
-	DrawSignalStrength(appendTo, x, y, s, this->signal);
+		DrawSignalStrength(appendTo, x, y, s, this->signal);
+}
+
+void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+{
+	// Centre Sprite
+	sf::Sprite sprite;
+	float sprite_rotation;
+	sprite.setTexture(*Wire::texture);
+
+	uint8_t Red, Green, Blue;
+	uint8_t color;
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+	sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
+
+	// Neighbour Sprites
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		Facing lookingAt = Pos::RelativeFacing(this->facing, i);
+		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
+		{
+			color = black;
+			if (neighbour->signal)
+				color = neighbour->colorClass;
+			if (neighbour->ReceivesSignal(this) || this->ReceivesSignal(neighbour))
+			{
+				Red = 255 * (color & 1);
+				Green = 255 * (color >> 1 & 1);
+				Blue = 255 * (color >> 2 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+
+				sprite_rotation = ((float)lookingAt) * (float)90.f;
+				sprite.setRotation(sprite_rotation);
+
+				appendTo->emplace_back(sprite);
+			}
+		}
+	}
+	// Centre Sprite
+	sprite.setTexture(*texture);
+	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
+
+	color = black;
+	if (this->signal)
+		color = colorClass;
+	Red = 255 * (color & 1);
+	Green = 255 * (color >> 1 & 1);
+	Blue = 255 * (color >> 2 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite_rotation = float(this->facing) * 90.f;
+	sprite.setRotation(sprite_rotation);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+
+	appendTo->emplace_back(sprite);
+
+	// Signal value
+	if (this->signal != 0)
+		DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
 void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s)

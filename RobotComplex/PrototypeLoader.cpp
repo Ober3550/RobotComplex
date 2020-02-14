@@ -221,14 +221,16 @@ void LoadLogicToHotbar()
 	Booster* booster = new Booster();
 	Belt* belt = new Belt();
 	WireBridge* wireBridge = new WireBridge();
+	Comparer* comparer = new Comparer();
 	
 	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(redirect);
-	program.hotbar.emplace_back(gate);
-	program.hotbar.emplace_back(pressureplate);
+	//program.hotbar.emplace_back(redirect);
+	//program.hotbar.emplace_back(gate);
+	//program.hotbar.emplace_back(pressureplate);
 	program.hotbar.emplace_back(wire);
 	program.hotbar.emplace_back(inverter);
 	program.hotbar.emplace_back(booster);
-	program.hotbar.emplace_back(belt);
+	//program.hotbar.emplace_back(belt);
 	program.hotbar.emplace_back(wireBridge);
+	program.hotbar.emplace_back(comparer);
 }

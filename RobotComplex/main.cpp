@@ -38,6 +38,7 @@ sf::Texture* Redirector::texture = LoadTexture("logic/redirector.png");
 sf::Texture* Inverter::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Booster::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
+sf::Texture* Comparer::texture = LoadTexture("logic/inverter.png");
 sf::Texture* Gate::texture = LoadTexture("logic/holder.png");
 sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
 sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
@@ -99,8 +100,8 @@ int main()
 	sf::Thread MapUpdate(&UpdateWorld);
 
 	// Generate the window
-	program.windowWidth = 1920;
-	program.windowHeight = 1010;
+	program.windowWidth = 1366;
+	program.windowHeight = 748;
 	program.halfWindowWidth = program.windowWidth / 2;
 	program.halfWindowHeight = program.windowHeight / 2;
 	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma");
@@ -122,6 +123,7 @@ int main()
 	world = WorldSave();
 	CreateTestWorld2();
 	program.gamePaused = true;
+	bool windowFullScreen = false;
 
 	// Load Gui
 	initializeAgui(window);
@@ -143,6 +145,19 @@ int main()
 				gui->resizeToDisplay();
 			}
 			inputHandler->processEvent(event);
+			if (event.type == sf::Event::KeyPressed)
+			{
+				if (event.key.code == sf::Keyboard::F11)
+				{
+					windowFullScreen = !windowFullScreen;
+					//window.~RenderWindow();
+					if(windowFullScreen)
+						window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Fullscreen);
+					else
+						window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
+					window.setFramerateLimit(GC::FRAMERATE);
+				}
+			}
 			creator->UserInput(event);
 		}
 		creator->SetGuiVisibility();

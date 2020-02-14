@@ -295,6 +295,15 @@ void Booster::SignalEval(std::array<uint8_t, 4> neighbours)
 		this->signal = 0;
 }
 
+void Comparer::SignalEval(std::array<uint8_t, 4> neighbours)
+{
+	int b = std::max(neighbours[1], neighbours[3]);
+	if (neighbours[2] == b)
+		this->signal = MyMod(neighbours[2] + GC::startSignalStrength, GC::maxSignalStrength);
+	else
+		this->signal = 0;
+}
+
 std::string Booster::GetTooltip()
 {
 	return program.logicTooltips[4][0];
