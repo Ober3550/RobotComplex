@@ -188,7 +188,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 			color = black;
 			if (neighbour->signal)
 				color = neighbour->colorClass;
-			if (neighbour->ReceivesSignal(this) || this->ReceivesSignal(neighbour))
+			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);
@@ -251,7 +251,7 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 			color = black;
 			if (neighbour->signal)
 				color = neighbour->colorClass;
-			if (neighbour->ReceivesSignal(this) || this->ReceivesSignal(neighbour))
+			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);
@@ -314,7 +314,7 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 			color = black;
 			if (neighbour->signal)
 				color = neighbour->colorClass;
-			if (neighbour->ReceivesSignal(this) || this->ReceivesSignal(neighbour))
+			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);

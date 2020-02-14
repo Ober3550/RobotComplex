@@ -16,6 +16,19 @@
 
 LogicTile* LogicTile::Factory(uint16_t classType)
 {
+	/*
+	wire = 1,
+	pressureplate = 2,
+	redirector = 3,
+	inverter = 4,
+	booster = 5,
+	counter = 6,
+	repeater = 7,
+	gate = 8,
+	belt = 9,
+	wirebridge = 10,
+	comparer = 11
+	*/
 	LogicTypes newClass = LogicTypes(classType);
 	switch (newClass)
 	{
@@ -35,6 +48,12 @@ LogicTile* LogicTile::Factory(uint16_t classType)
 		return new Repeater();
 	case gate:
 		return new Gate();
+	case belt:
+		return new Belt();
+	case wirebridge:
+		return new WireBridge();
+	case comparer:
+		return new Comparer();
 	}
 	return nullptr;
 }
@@ -46,7 +65,7 @@ void LogicTile::Serialize(std::ofstream* writer)
 	writer->write((char*)&this->facing,		sizeof(Facing));
 	writer->write((char*)&this->prevSignal,	sizeof(uint8_t));
 	writer->write((char*)&this->signal,		sizeof(uint8_t));
-	//writer->write((char*)&this->colorClass,	sizeof(uint8_t));
+	writer->write((char*)&this->colorClass,	sizeof(uint8_t));
 }
 
 void LogicTile::Deserialize(std::ifstream* reader)
@@ -55,7 +74,7 @@ void LogicTile::Deserialize(std::ifstream* reader)
 	reader->read((char*)&this->facing,		sizeof(Facing));
 	reader->read((char*)&this->prevSignal,	sizeof(uint8_t));
 	reader->read((char*)&this->signal,		sizeof(uint8_t));
-	//reader->read((char*)&this->colorClass,	sizeof(uint8_t));
+	reader->read((char*)&this->colorClass,	sizeof(uint8_t));
 }
 
 void Redirector::Serialize(std::ofstream* writer)
@@ -91,7 +110,14 @@ bool LogicTile::GetConnected(LogicTile* querier)
 }
 bool DirectionalLogicTile::GetConnected(LogicTile* querier)
 {
-	return true;
+	if (querier)
+	{
+		if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
+			return true;
+		if (querier->colorClass == this->colorClass)
+			return true;
+	}
+	return false;
 }
 bool DirectionalLogicTile::ReceivesSignal(LogicTile* querier)
 {
@@ -177,7 +203,7 @@ void DirectionalLogicTile::DoWireLogic()
 	{
 		if (LogicTile* tile = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing, i))))
 		{
-			if (tile->GetConnected(this))
+			if (tile->GetConnected(this) && this->GetConnected(tile))
 				if(tile->ReceivesSignal(this))
 					neighbourSignals[i] = tile->GetSignal(this);
 		}
@@ -290,9 +316,11 @@ void Booster::SignalEval(std::array<uint8_t, 4> neighbours)
 {
 	int b = std::max(neighbours[1], neighbours[3]);
 	if (neighbours[2] > b)
-		this->signal = MyMod(neighbours[2] + GC::startSignalStrength, GC::maxSignalStrength);
+		this->signal = neighbours[2] + GC::startSignalStrength;
 	else
 		this->signal = 0;
+	if (this->signal > GC::maxSignalStrength)
+		this->signal = GC::maxSignalStrength;
 }
 
 void Comparer::SignalEval(std::array<uint8_t, 4> neighbours)
