@@ -268,7 +268,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
+				world.updateQueueC.insert({program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(), 1});
 			}
 		}
 	} });
@@ -283,7 +283,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
+				world.updateQueueC.insert({ program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(), 1 });
 			}
 		}
 	} });
@@ -309,7 +309,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			world.logictiles.erase(program.selectedLogicTile->pos.CoordToEncoded());
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert(program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded());
+				world.updateQueueC.insert({ program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 			}
 			program.selectedLogicTile = nullptr;
 		}
@@ -595,10 +595,10 @@ void WidgetCreator::LeftMousePressed()
 					}
 					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
 					world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
-					world.updateQueueC.insert(logicPlace->pos.CoordToEncoded());										// Queue update for placed element
+					world.updateQueueC.insert({ logicPlace->pos.CoordToEncoded(),1 });										// Queue update for placed element
 					for (int i = 0; i < 4; i++)
 					{
-						world.updateQueueC.insert(logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded());
+						world.updateQueueC.insert({ logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 					}
 					program.selectedLogicTile = logicPlace;
 				}
@@ -636,7 +636,7 @@ void WidgetCreator::RightMousePressed()
 		}
 		for (int i = 0; i < 4; i++)
 		{
-			world.updateQueueC.insert(program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded());
+			world.updateQueueC.insert({ program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 		}
 		program.selectedLogicTile = nullptr;
 	}

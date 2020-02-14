@@ -168,7 +168,8 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
-	sprite.setTexture(*texture);
+	float sprite_rotation;
+	sprite.setTexture(*Wire::texture);
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
 	uint8_t color = black;
@@ -181,16 +182,32 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-	float sprite_rotation = float(this->facing) * 90.f;
-	sprite.setRotation(sprite_rotation);
 	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	appendTo->emplace_back(sprite);
+	// Neighbour Sprites
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		Pos lookingAt = this->pos.FacingPosition(Facing(i));
+		if (LogicTile* neighbour = world.GetLogicTile(lookingAt.CoordToEncoded()))
+		{
+			if (neighbour->GetConnected(this))
+			{
+				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
 
-	// Output Sprite
+				sprite_rotation = ((float)i) * (float)90.f;
+				sprite.setRotation(sprite_rotation);
+				sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+				sprite.setScale(sf::Vector2f(s, s));
+
+				appendTo->emplace_back(sprite);
+			}
+		}
+	}
+	// Centre Sprite
 	sprite.setTexture(*texture);
-	sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
+	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
 	color = black;
 	if (this->signal)
@@ -198,7 +215,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));	
+	sprite.setColor(sf::Color(Red, Green, Blue, 255));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;

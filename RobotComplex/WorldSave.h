@@ -34,7 +34,7 @@ public:
 	MyMap<uint64_t, CraftingProcess> craftingQueue;
 	MySet<uint64_t> updateQueueA;	// Processing queue for update from Queue B
 	MySet<uint64_t> updateQueueB;	// Queue for current updates
-	MySet<uint64_t> updateQueueC;	// Queue for updates next tick
+	MyMap<uint64_t,int> updateQueueC;	// Queue for updates next ticks
 	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
 	uint64_t tick;
 	uint64_t seed = 0;

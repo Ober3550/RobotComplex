@@ -28,9 +28,10 @@ public:
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual LogicTile* Copy() = 0;
 	virtual bool GetConnected(LogicTile* querier);
-	virtual bool NeighbourConnects() { return true; };
+	virtual bool NeighbourConnects(LogicTile* querier) { return true; };
 	virtual bool IsSource() { return false; };
 	virtual bool ReceivesSignal(LogicTile* querier) { return true; };
+	virtual void QueueUpdate();
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
@@ -55,6 +56,13 @@ class DirectionalLogicTile : public LogicTile {
 	virtual bool GetConnected(LogicTile* querier);
 	virtual bool ReceivesSignal(LogicTile* querier);
 	virtual void DoItemLogic() {};
+	virtual bool NeighbourConnects(LogicTile* querier) {	// not sure if this function is useful
+		return true;
+		if (querier->pos == this->pos.FacingPosition(this->facing))
+			return false;
+		return true;
+	}
+	virtual void QueueUpdate();
 	virtual void DoRobotLogic(Pos robotRef) {};
 	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s) {};
 	virtual std::string GetTooltip() { return "base class"; };
@@ -219,7 +227,7 @@ class WireBridge : public LogicTile {
 public:
 	uint8_t signal2 = 0;
 	WireBridge() { logictype = wirebridge; };
-	bool NeighbourConnects() { return false; };
+	bool NeighbourConnects(LogicTile* querier) { return false; };
 	bool GetConnected(LogicTile* querier);
 	uint8_t GetSignal(LogicTile* querier);
 	void SignalEval(std::array<uint8_t, 4> neighbours);

@@ -101,6 +101,7 @@ bool DirectionalLogicTile::ReceivesSignal(LogicTile* querier)
 		return false;
 }
 void LogicTile::DoWireLogic() {
+	//Sleep(100);
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
 	std::array<LogicTile*, 4> neighbourTile = std::array<LogicTile*, 4>();
 	this->prevSignal = this->signal;
@@ -110,56 +111,47 @@ void LogicTile::DoWireLogic() {
 	{
 		if (neighbourTile[i] = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing, i))))
 		{
-			if (NeighbourConnects())
+			if (neighbourTile[i]->GetConnected(this))
 			{
-				if (neighbourTile[i]->GetConnected(this))
-				{
-					if (neighbourTile[i]->ReceivesSignal(this))
-						if (neighbourTile[i]->IsSource())
-							neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
-						else
-							neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
-				}
-				else
-				{
-					// If neighbour isn't connected to this element don't update it
-					neighbourTile[i] = nullptr;
-				}
+				if (neighbourTile[i]->ReceivesSignal(this))
+					if (neighbourTile[i]->IsSource())
+						neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
+					else
+						neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
 			}
-			else
+			if (this->GetConnected(neighbourTile[i]))
 			{
-				if (this->GetConnected(neighbourTile[i]))
-				{
-					if (neighbourTile[i]->ReceivesSignal(this))
-						if (neighbourTile[i]->IsSource())
-							neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
-						else
-							neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
-				}
-				else
-				{
-					// If neighbour isn't connected to this element don't update it
-					neighbourTile[i] = nullptr;
-				}
+				if (neighbourTile[i]->ReceivesSignal(this))
+					if (neighbourTile[i]->IsSource())
+						neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
+					else
+						neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
 			}
 		}
 	}
 
-	
 	SignalEval(neighbourSignals);
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
 		if (neighbourTile[i])
 		{
-			// Update neighbours
-			if (this->prevSignal != this->signal || (neighbourTile[i]->GetSignal(this) == 0 && this->GetSignal(neighbourTile[i]) > 0))
+			if (neighbourTile[i]->NeighbourConnects(this))
 			{
-				if (neighbourTile[i]->GetSignal(this) != 0 || this->GetSignal(neighbourTile[i]) != 0)
-					world.updateQueueB.insert({ neighbourTile[i]->pos.CoordToEncoded() });
+				// Update neighbours
+				if (this->prevSignal != this->signal || (neighbourTile[i]->GetSignal(this) == 0 && this->GetSignal(neighbourTile[i]) > 0))
+				{
+					//if (neighbourTile[i]->GetSignal(this) != 0 || this->GetSignal(neighbourTile[i]) != 0)
+					neighbourTile[i]->QueueUpdate();
+				}
 			}
 		}
 	}
+}
+
+void LogicTile::QueueUpdate()
+{
+	world.updateQueueB.insert({ this->pos.CoordToEncoded() });
 }
 
 // This tiles signal will be the max value of its neighbours - 1
@@ -178,6 +170,7 @@ void LogicTile::SignalEval(std::array<uint8_t, 4> neighbours)
 
 void DirectionalLogicTile::DoWireLogic()
 {
+	//Sleep(100);
 	// output, b1, a, b2
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
 	for (int i = 0; i < 4; i++)
@@ -196,9 +189,13 @@ void DirectionalLogicTile::DoWireLogic()
 		Pos tileFore = this->pos.FacingPosition(this->facing);
 		if (LogicTile* tileInfront = world.GetLogicTile(tileFore.CoordToEncoded()))
 		{
-			world.updateQueueC.insert(tileFore.CoordToEncoded());
+			tileInfront->QueueUpdate();
 		}
 	}
+}
+void DirectionalLogicTile::QueueUpdate()
+{
+	world.updateQueueC.insert({ this->pos.CoordToEncoded(),1 });
 }
 std::string Wire::GetTooltip()
 {

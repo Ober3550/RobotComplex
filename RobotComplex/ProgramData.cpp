@@ -262,7 +262,7 @@ void ProgramData::DrawTooltips()
 	{
 		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip());
 	}
-#ifdef DEBUG
+#ifndef DEBUG
 	char buffer[50];
 	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
 	std::string displayValue = buffer;
@@ -541,7 +541,7 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 {
 	Pos newPos = pos.FacingPosition(toward);
 	// If there's a item infront and they're also moving, move them first
-	if (auto platform = world.items.GetValue(newPos))
+	if (auto frontItem = world.items.GetValue(newPos))
 	{
 		if (auto moving = world.nextItemPos.GetValue(newPos))
 		{
@@ -550,6 +550,10 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 	}
 	if (ItemTile* item = world.GetItemTile(pos))
 	{
+		if (item->itemTile == 0)
+		{
+			assert(false);
+		}
 		world.ChangeItem(pos, item->itemTile, -1);
 		world.ChangeItem(newPos, item->itemTile, 1);
 	}
@@ -581,9 +585,21 @@ void ProgramData::CheckItemsMoved()
 
 void ProgramData::UpdateMap()
 {
-	// Update all the logic tiles that were queued last tick
-	world.updateQueueA = MySet<uint64_t>(world.updateQueueC);
-	world.updateQueueC.clear();
+	world.updateQueueA.clear();
+	// Update all the logic tiles that were queued to finish this tick
+	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
+	for (auto iter = world.updateQueueC.begin(); iter != world.updateQueueC.end(); )
+	{
+		iter->second--;
+		// Erase all 0 tick recipes from craftingQueue
+		if (iter->second == 0)
+		{
+			world.updateQueueA.insert({ iter->first });
+			iter = world.updateQueueC.erase(iter);
+		}
+		else
+			++iter;
+	}
 	do {
 		for (uint64_t kv : world.updateQueueA)
 		{
