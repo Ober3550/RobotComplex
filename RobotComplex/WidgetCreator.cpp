@@ -464,7 +464,8 @@ void WidgetCreator::UserInput(sf::Event input)
 	else if (input.type == sf::Event::MouseMoved)
 	{
 		sf::Vector2i tempPos = sf::Mouse::getPosition(*window);
-		program.mousePos = Pos{ tempPos.x - int(program.halfWindowWidth),tempPos.y - int(program.halfWindowHeight) };
+		//sf::Vector2f scaledPos = window->mapPixelToCoords(tempPos, program.worldView);
+		program.mousePos = Pos{ int(tempPos.x) - int(program.halfWindowWidth),int(tempPos.y) - int(program.halfWindowHeight) };
 		MouseMoved();
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			LeftMousePressed();

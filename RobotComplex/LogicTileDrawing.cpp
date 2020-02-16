@@ -186,7 +186,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->signal)
+			if (neighbour->signal || this->signal && i==0)
 				color = neighbour->colorClass;
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{

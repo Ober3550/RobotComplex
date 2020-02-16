@@ -114,6 +114,14 @@ bool DirectionalLogicTile::GetConnected(LogicTile* querier)
 	{
 		if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
 			return true;
+		if (querier->IsSource() )
+		{
+			if (querier->pos.FacingPosition(querier->facing) == this->pos)
+			{
+				return true;
+			}
+			return false;
+		}
 		if (querier->colorClass == this->colorClass)
 			return true;
 	}
