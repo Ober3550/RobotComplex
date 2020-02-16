@@ -536,14 +536,17 @@ void WidgetCreator::MouseMoved()
 		program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 		if (Robot * robot = world.GetRobot(program.mouseHovering.CoordToEncoded()))
 		{
-			if (program.selectedRobot)
-				if(program.selectedRobot != robot)
-					program.selectedRobot->stopped = true;
-			program.selectedRobot = robot;
-			program.selectedRobot->stopped = false;
-			if (LogicTile* logic = world.GetLogicTile(program.selectedRobot->pos))
+			if (robot != program.selectedRobot)
 			{
-				logic->DoRobotLogic(program.selectedRobot->pos);
+				if (program.selectedRobot)
+					if (program.selectedRobot != robot)
+						program.selectedRobot->stopped = true;
+				program.selectedRobot = robot;
+				program.selectedRobot->stopped = false;
+				if (LogicTile* logic = world.GetLogicTile(program.selectedRobot->pos))
+				{
+					logic->DoRobotLogic(program.selectedRobot->pos);
+				}
 			}
 		}
 		else

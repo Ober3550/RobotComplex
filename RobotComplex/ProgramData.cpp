@@ -262,7 +262,7 @@ void ProgramData::DrawTooltips()
 	{
 		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip());
 	}
-#ifndef DEBUG
+#ifdef DEBUG
 	char buffer[50];
 	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
 	std::string displayValue = buffer;
@@ -289,6 +289,13 @@ void ProgramData::DrawTooltips()
 		sprintf_s(buffer, "Ground Value: %d", ground->groundTile);
 		displayValue = buffer;
 		CreateText(program.mousePos.x, program.mousePos.y - 140, displayValue);
+	}
+
+	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
+	{
+		sprintf_s(buffer, "Logic Signal Strength: %d", logic->signal);
+		displayValue = buffer;
+		CreateText(program.mousePos.x, program.mousePos.y - 160, displayValue);
 	}
 #endif
 }
@@ -520,7 +527,7 @@ void ProgramData::SwapBots()
 			if (auto temp = world.logictiles.GetValue(pos.CoordToEncoded()))
 			{
 				LogicTile* logicTile = *temp;
-				logicTile->DoRobotLogic(Pos{ 0,0 });
+				logicTile->DoRobotLogic(pos);
 			}
 		}
 	}

@@ -31,6 +31,7 @@ public:
 	virtual bool NeighbourConnects(LogicTile* querier) { return true; };
 	virtual bool IsSource() { return false; };
 	virtual bool ReceivesSignal(LogicTile* querier) { return true; };
+	virtual bool ShowPowered(LogicTile* querier) { return (this->signal > 0); };
 	virtual void QueueUpdate();
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
@@ -115,11 +116,14 @@ public:
 	void DoWireLogic() {}									// Overwrite base method to not transfer signals
 	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
 	void DoRobotLogic(Pos robotRef);						// Activates when a robot holding the correct item filter steps onto it
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s){
-		this->facing = north;
-		LogicTile::DrawSprite(appendTo, x, y, s, this->texture);
+	bool GetConnected(LogicTile* querier)
+	{
+		if (this->colorClass == querier->colorClass)
+			return true;
+		return false;
 	}
 	std::string GetTooltip();
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	PressurePlate* Copy()
 	{
 		PressurePlate* logicTile = new PressurePlate();
@@ -136,6 +140,11 @@ public:
 	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	virtual bool IsConnected(Pos pos) { return true; };
+	bool ShowPowered(LogicTile* querier) {
+		if (this->pos.FacingPosition(this->facing) == querier->pos)
+			return (this->signal > 0);
+		return !(this->signal > 0); 
+	}
 	std::string GetTooltip();
 	Inverter* Copy()
 	{

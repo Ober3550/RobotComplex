@@ -257,7 +257,7 @@ void PressurePlate::DoItemLogic()
 	if (ItemTile * thisTile = world.GetItemTile(this->pos))
 	{
 		this->prevSignal = this->signal;
-		this->signal = GC::startSignalStrength;
+		this->signal = MyMod(thisTile->quantity, GC::maxSignalStrength);
 	}
 	else
 	{

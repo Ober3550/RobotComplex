@@ -89,6 +89,27 @@ void LogicTile::DrawSignalStrength(SpriteVector* appendTo, float x, float y, flo
 	}
 }
 
+void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s) {
+	this->facing = north;
+	sf::Sprite sprite;
+	sprite.setTexture(*texture);
+
+	uint8_t color = colorClass;
+	uint8_t Red, Green, Blue;
+	Red = 128 + 127 * (color & 1);
+	Green = 128 + 127 * (color >> 1 & 1);
+	Blue = 128 + 127 * (color >> 2 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	float sprite_rotation = float(this->facing) * 90.f;
+	sprite.setRotation(sprite_rotation);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+
+	appendTo->emplace_back(sprite);
+}
+
 void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 {
 	// Centre Sprite
@@ -186,7 +207,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->signal || this->signal && i==0)
+			if (neighbour->ShowPowered(this) || this->ShowPowered(neighbour))
 				color = neighbour->colorClass;
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
@@ -249,7 +270,7 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->signal)
+			if (neighbour->ShowPowered(this) || this->ShowPowered(neighbour))
 				color = neighbour->colorClass;
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
@@ -312,7 +333,7 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->signal)
+			if (neighbour->ShowPowered(this) || this->ShowPowered(neighbour))
 				color = neighbour->colorClass;
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
