@@ -31,7 +31,11 @@ public:
 	virtual bool NeighbourConnects(LogicTile* querier) { return true; };
 	virtual bool IsSource() { return false; };
 	virtual bool ReceivesSignal(LogicTile* querier) { return true; };
-	virtual bool ShowPowered(LogicTile* querier) { return (this->signal > 0); };
+	virtual uint8_t ShowPowered(LogicTile* querier) { 
+		if (this->signal)
+		return colorClass;
+		else return 0;
+	};
 	virtual void QueueUpdate();
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
@@ -140,10 +144,10 @@ public:
 	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
 	virtual bool IsConnected(Pos pos) { return true; };
-	bool ShowPowered(LogicTile* querier) {
-		if (this->pos.FacingPosition(this->facing) == querier->pos)
-			return (this->signal > 0);
-		return !(this->signal > 0); 
+	uint8_t ShowPowered(LogicTile* querier) {
+		if (this->pos.FacingPosition(this->facing) == querier->pos && this->signal || !this->signal)
+			return this->colorClass;
+		return 0; 
 	}
 	std::string GetTooltip();
 	Inverter* Copy()
@@ -241,6 +245,7 @@ public:
 	uint8_t GetSignal(LogicTile* querier);
 	void SignalEval(std::array<uint8_t, 4> neighbours);
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s);
+	uint8_t ShowPowered(LogicTile* querier);
 	std::string GetTooltip() { return "This is a wire bridge"; };
 	WireBridge* Copy()
 	{

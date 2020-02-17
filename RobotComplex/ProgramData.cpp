@@ -328,8 +328,11 @@ void ProgramData::DrawHotbar()
 	program.hotbarSlots.clear();
 	for (uint8_t i = 0; i < program.hotbarSize && i < program.hotbar.size(); ++i)
 	{
-		int x = int(i - (program.hotbarSize - 1) / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		int y = int(program.windowHeight / 2.f) - GC::hotbarSlotSize;
+		int temp = program.hotbarSize;
+		if (temp > 10)
+			temp = 10;
+		int x = int(MyMod(i,10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int y = int(program.windowHeight / 2.f) - (1+i/10) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		sf::RectangleShape hotbarSlot;
 		if(i == program.hotbarIndex)
 			hotbarSlot.setFillColor(sf::Color(200, 200, 200, 100));
@@ -612,7 +615,6 @@ void ProgramData::UpdateMap()
 		{
 			if (LogicTile* logic = world.GetLogicTile(kv))
 			{
-				world.updateQueueD.insert(kv);
 				logic->DoWireLogic();
 			}
 		}

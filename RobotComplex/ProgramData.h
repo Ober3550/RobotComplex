@@ -60,7 +60,7 @@ public:
 	Pos prevCameraPos = {0, 0};
 	Pos cameraPos = { 0, 0 };
 	int hotbarIndex = 0;
-	int hotbarSize = 9;
+	int hotbarSize = 20;
 	std::vector<LogicTile*> hotbar;
 	bool hoveringHotbar;
 	LogicTile* selectedLogicTile;

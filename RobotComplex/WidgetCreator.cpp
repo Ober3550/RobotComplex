@@ -7,6 +7,7 @@
 #include "FindInVector.h"
 #include "KeyNames.h"
 #include "GetFileNamesInFolder.h"
+#include "MyMod.h"
 
 class SimpleButtonListener : public agui::ButtonListener
 {
@@ -162,29 +163,8 @@ void WidgetCreator::SetGuiVisibility()
 }
 void WidgetCreator::SetDefaultKeyMapping()
 {
-	userActionOrder = {
-		"Menu step back",
-		"Move Forward",
-		"Turn Left",
-		"Turn Around",
-		"Turn Right",
-		"Rotate Clockwise",
-		"Rotate Anti-Clockwise",
-		"Copy Hovered",
-		"Remove Logic",
-		"Set Robot Auto",
-		"Change ColorClass",
-		"Hotbar 1",
-		"Hotbar 2",
-		"Hotbar 3",
-		"Hotbar 4",
-		"Hotbar 5",
-		"Hotbar 6",
-		"Hotbar 7",
-		"Hotbar 8",
-		"Hotbar 9"
-	};
 	sf::Event::KeyEvent keyPress;
+	userActionOrder.push_back( "Menu step back" );
 	userActions.insert({ "Menu step back",[&] {
 		if (!creator->guiStack.empty()) {
 			creator->guiStack.pop();
@@ -201,6 +181,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Menu step back" });
 
 	//W
+	userActionOrder.push_back("Move Forward");
 	userActions.insert({ "Move Forward",[&] {
 		if (program.selectedRobot)
 			{
@@ -216,6 +197,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Move Forward" });
 
 	//A
+	userActionOrder.push_back("Turn Left");
 	userActions.insert({ "Turn Left",[&] {
 		if (program.selectedRobot)
 		{
@@ -231,6 +213,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Turn Left" });
 
 	//S
+	userActionOrder.push_back("Turn Around");
 	userActions.insert({ "Turn Around",[&] {
 		if (program.selectedRobot)
 		{
@@ -246,6 +229,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Turn Around" });
 
 	//D
+	userActionOrder.push_back("Turn Right");
 	userActions.insert({ "Turn Right",[&] {
 		if (program.selectedRobot)
 		{
@@ -261,6 +245,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Turn Right" });
 
 	//R
+	userActionOrder.push_back("Rotate Clockwise");
 	userActions.insert({ "Rotate Clockwise",[&] {
 		program.placeRotation = Facing((int(program.placeRotation) + 1) & 3);
 		if (program.selectedLogicTile)
@@ -276,6 +261,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Rotate Clockwise" });
 
 	//R
+	userActionOrder.push_back("Rotate Anti-Clockwise");
 	userActions.insert({ "Rotate Anti-Clockwise",[&] {
 		program.placeRotation = Facing((int(program.placeRotation) - 1) & 3);
 		if (program.selectedLogicTile)
@@ -291,6 +277,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Rotate Anti-Clockwise" });
 
 	//Q
+	userActionOrder.push_back("Copy Hovered");
 	userActions.insert({ "Copy Hovered",[&] {
 		if (program.selectedLogicTile)
 		{
@@ -303,6 +290,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Copy Hovered" });
 
 	//Delete
+	userActionOrder.push_back("Remove Logic");
 	userActions.insert({ "Remove Logic",[&] {
 		if (program.selectedLogicTile)
 		{
@@ -318,6 +306,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Remove Logic" });
 
 	//X
+	userActionOrder.push_back("Set Robot Auto");
 	userActions.insert({ "Set Robot Auto",[&] {
 		if (program.selectedRobot)
 		{
@@ -333,6 +322,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 	actionMap.insert({ keyPress, "Set Robot Auto" });
 
 	//C
+	userActionOrder.push_back("Change ColorClass");
 	userActions.insert({ "Change ColorClass",[&] {
 		if (program.placeColor == 1)
 			program.placeColor = 4;
@@ -342,51 +332,13 @@ void WidgetCreator::SetDefaultKeyMapping()
 	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Change ColorClass" });
 
-	userActions.insert({ "Hotbar 1",[&] {
-		program.hotbarIndex = 0;
-	} });
-	keyPress = { sf::Keyboard::Num1, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 1" });
-	userActions.insert({ "Hotbar 2",[&] {
-		program.hotbarIndex = 1;
-	} });
-	keyPress = { sf::Keyboard::Num2, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 2" });
-	userActions.insert({ "Hotbar 3",[&] {
-		program.hotbarIndex = 2;
-	} });
-	keyPress = { sf::Keyboard::Num3, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 3" });
-	userActions.insert({ "Hotbar 4",[&] {
-		program.hotbarIndex = 3;
-	} });
-	keyPress = { sf::Keyboard::Num4, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 4" });
-	userActions.insert({ "Hotbar 5",[&] {
-		program.hotbarIndex = 4;
-	} });
-	keyPress = { sf::Keyboard::Num5, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 5" });
-	userActions.insert({ "Hotbar 6",[&] {
-		program.hotbarIndex = 5;
-	} });
-	keyPress = { sf::Keyboard::Num6, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 6" });
-	userActions.insert({ "Hotbar 7",[&] {
-		program.hotbarIndex = 6;
-	} });
-	keyPress = { sf::Keyboard::Num7, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 7" });
-	userActions.insert({ "Hotbar 8",[&] {
-		program.hotbarIndex = 7;
-	} });
-	keyPress = { sf::Keyboard::Num8, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 8" });
-	userActions.insert({ "Hotbar 9",[&] {
-		program.hotbarIndex = 8;
-	} });
-	keyPress = { sf::Keyboard::Num9, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Hotbar 9" });
+	for (int i = 0; i < 20; i++)
+	{
+		userActionOrder.push_back("Hotbar " + std::to_string(i + 1));
+		userActions.insert({ "Hotbar "+std::to_string(i+1),[i] {program.hotbarIndex = i; } });
+		keyPress = { sf::Keyboard::Key(int(sf::Keyboard::Num0) + MyMod(i+1,10)), /*alt*/ false, /*ctrl*/ false, /*shift*/ i>9, /*system*/ false };
+		actionMap.insert({ keyPress, "Hotbar "+std::to_string(i+1) });
+	}
 }
 
 void WidgetCreator::AddKeyMapFrame()

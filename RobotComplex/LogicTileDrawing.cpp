@@ -207,8 +207,10 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->ShowPowered(this) || this->ShowPowered(neighbour))
-				color = neighbour->colorClass;
+			if (neighbour->ShowPowered(this))
+				color |= neighbour->ShowPowered(this);
+			else
+				color |= this->ShowPowered(neighbour);
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
 				Red = 255 * (color & 1);
@@ -270,8 +272,10 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->ShowPowered(this) || this->ShowPowered(neighbour))
-				color = neighbour->colorClass;
+			if (neighbour->ShowPowered(this))
+				color |= neighbour->ShowPowered(this);
+			else
+				color |=  this->ShowPowered(neighbour);
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
 				Red = 255 * (color & 1);
@@ -333,8 +337,10 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->ShowPowered(this) || this->ShowPowered(neighbour))
-				color = neighbour->colorClass;
+			if (neighbour->ShowPowered(this))
+				color |= neighbour->ShowPowered(this);
+			else
+				color |= this->ShowPowered(neighbour);
 			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
 			{
 				Red = 255 * (color & 1);

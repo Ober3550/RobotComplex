@@ -175,6 +175,10 @@ void LogicTile::DoWireLogic() {
 				// Update neighbours
 				if (this->prevSignal != this->signal || (neighbourTile[i]->GetSignal(this) == 0 && this->GetSignal(neighbourTile[i]) > 0))
 				{
+					if (this->prevSignal > 0 && this->signal == 0)
+					{
+						world.updateQueueD.insert(this->pos.CoordToEncoded());
+					}
 					//if (neighbourTile[i]->GetSignal(this) != 0 || this->GetSignal(neighbourTile[i]) != 0)
 					neighbourTile[i]->QueueUpdate();
 				}
@@ -438,6 +442,20 @@ void Belt::DoItemLogic()
 	}
 }
 
+uint8_t WireBridge::ShowPowered(LogicTile* querier)
+{
+	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
+	{
+		if (this->signal)
+			return GC::colorClassA;
+	}
+	else
+	{
+		if(this->signal2)
+			return GC::colorClassB;
+	}
+}
+
 uint8_t WireBridge::GetSignal(LogicTile* querier)
 {
 	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
@@ -454,12 +472,12 @@ bool WireBridge::GetConnected(LogicTile* querier)
 {
 	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
 	{
-		if(querier->colorClass == GC::colorClassA)
+		if(querier->colorClass == GC::colorClassA || querier->IsSource())
 		return true;
 	}
 	else
 	{
-		if (querier->colorClass == GC::colorClassB)
+		if (querier->colorClass == GC::colorClassB || querier->IsSource())
 		return true;
 	}
 	return false;
