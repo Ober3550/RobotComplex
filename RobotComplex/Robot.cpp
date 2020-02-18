@@ -64,7 +64,7 @@ bool Robot::Move()
 	return false;
 }
 
-void Robot::DrawTile(int x, int y, float s)
+void Robot::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*robotTexture);
@@ -72,5 +72,5 @@ void Robot::DrawTile(int x, int y, float s)
 	sprite.setOrigin(16, 32);
 	sprite.setPosition(float(x + 16), float(y + 16));
 	sprite.setScale(sf::Vector2f(s, s));
-	program.robotSprites.emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 }

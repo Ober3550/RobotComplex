@@ -308,6 +308,7 @@
     <ClCompile Include="WorldSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Align.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationType.h" />
     <ClInclude Include="Constants.h" />
@@ -326,6 +327,7 @@
     <ClInclude Include="MyMap.h" />
     <ClInclude Include="MyMod.h" />
     <ClInclude Include="MySet.h" />
+    <ClInclude Include="ParentTile.h" />
     <ClInclude Include="Pos.h" />
     <ClInclude Include="ProgramData.h" />
     <ClInclude Include="PrototypeLoader.h" />

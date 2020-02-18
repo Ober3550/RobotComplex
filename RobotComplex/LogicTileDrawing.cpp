@@ -89,7 +89,7 @@ void LogicTile::DrawSignalStrength(SpriteVector* appendTo, float x, float y, flo
 	}
 }
 
-void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s) {
+void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal) {
 	this->facing = north;
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
@@ -110,7 +110,7 @@ void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s) 
 	appendTo->emplace_back(sprite);
 }
 
-void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -153,11 +153,11 @@ void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		}
 	}
 	// Signal value
-	if(this->signal!=0)
+	if(this->signal!=0 && showSignal)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -181,11 +181,11 @@ void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -207,7 +207,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->ShowPowered(this))
+			if (neighbour->ShowPowered(this) || i != 0)
 				color |= neighbour->ShowPowered(this);
 			else
 				color |= this->ShowPowered(neighbour);
@@ -217,7 +217,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 				Green = 255 * (color >> 1 & 1);
 				Blue = 255 * (color >> 2 & 1);
 				sprite.setColor(sf::Color(Red, Green, Blue, 255));
-				
+
 				sprite_rotation = ((float)lookingAt) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
 
@@ -246,11 +246,11 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
-	DrawSignalStrength(appendTo, x, y, s, this->signal);
+	if (this->signal != 0 && showSignal)
+		DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -272,7 +272,7 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->ShowPowered(this))
+			if (neighbour->ShowPowered(this) || i != 0)
 				color |= neighbour->ShowPowered(this);
 			else
 				color |=  this->ShowPowered(neighbour);
@@ -311,11 +311,11 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 		DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -337,7 +337,7 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
 		{
 			color = black;
-			if (neighbour->ShowPowered(this))
+			if (neighbour->ShowPowered(this) || i!=0)
 				color |= neighbour->ShowPowered(this);
 			else
 				color |= this->ShowPowered(neighbour);
@@ -376,11 +376,11 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 		DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Input Sprite
 	sf::Sprite sprite;
@@ -418,11 +418,11 @@ void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 	DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Baseplate
 	sf::Sprite sprite;
@@ -452,7 +452,7 @@ void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	program.textOverlay.emplace_back(counterValue);
 }
 
-void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -476,11 +476,11 @@ void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 		DrawSignalStrength(appendTo, x, y, s, this->signal);
 }
 
-void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -536,15 +536,15 @@ void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 		}
 	}
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 		DrawSignalStrength(appendTo, x - 5, y, s, this->signal);
 
 	// Signal value
-	if (this->signal2 != 0)
+	if (this->signal2 != 0 && showSignal)
 		DrawSignalStrength(appendTo, x + 5, y, s, this->signal2);
 }
 
-void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s)
+void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -568,6 +568,6 @@ void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s)
 	appendTo->emplace_back(sprite);
 
 	// Signal value
-	if (this->signal != 0)
+	if (this->signal != 0 && showSignal)
 		DrawSignalStrength(appendTo, x, y, s, this->signal);
 }

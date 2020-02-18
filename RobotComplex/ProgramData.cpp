@@ -10,6 +10,7 @@
 #include "CraftingProcess.h"
 #include "RedirectorColors.h"
 #include "Textures.h"
+#include <typeinfo>
 #include <cmath>
 
 sf::Color ProgramData::HSV2RGB(sf::Color input)
@@ -50,50 +51,8 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 {
 	if (uint16_t* platform = world.platforms.GetValue(encodedPos))
 	{
-		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+		if (!program.showDebugInfo)
 		{
-			Pos pos = Pos::EncodedToCoord(encodedPos);
-			Pos newPos = pos.FacingPosition(*nextPos);
-			Pos difference = newPos - pos;
-			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
-			if (step > 1.0f)
-				step = 1.0f;
-			x += int(float(difference.x) * float(GC::tileSize) * step);
-			y += int(float(difference.y) * float(GC::tileSize) * step);
-		}
-
-		sf::Sprite sprite;
-		sprite.setTexture(*platformTexture);
-		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-		sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
-		program.platformSprites.emplace_back(sprite);
-	}
-}
-void ProgramData::DrawItem(ItemTile item, float x, float y)
-{
-	sf::Sprite sprite;
-	sprite.setTexture(*itemTextures[item.itemTile]);
-	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
-	sprite.setPosition(x + 16.f, y + 16.f);
-	program.itemSprites.emplace_back(sprite);
-}
-void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
-{
-	if (ItemTile * tile = world.GetItemTile(encodedPos))
-	{
-		if (tile->itemTile >= ReservedItems::totalReserved)
-		{
-			if (auto nextPos = world.nextItemPos.GetValue(encodedPos))
-			{
-				Pos pos = Pos::EncodedToCoord(encodedPos);
-				Pos newPos = pos.FacingPosition(*nextPos);
-				Pos difference = newPos - pos;
-				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
-				if (step > 1.0f)
-					step = 1.0f;
-				x += int(float(difference.x) * float(GC::tileSize) * step);
-				y += int(float(difference.y) * float(GC::tileSize) * step);
-			}
 			if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
 			{
 				Pos pos = Pos::EncodedToCoord(encodedPos);
@@ -105,7 +64,55 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 				x += int(float(difference.x) * float(GC::tileSize) * step);
 				y += int(float(difference.y) * float(GC::tileSize) * step);
 			}
-			DrawItem(*tile, x, y);
+		}
+
+		sf::Sprite sprite;
+		sprite.setTexture(*platformTexture);
+		sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+		sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+		program.platformSprites.emplace_back(sprite);
+	}
+}
+void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float y)
+{
+	sf::Sprite sprite;
+	sprite.setTexture(*itemTextures[item.itemTile]);
+	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
+	sprite.setPosition(x + 16.f, y + 16.f);
+	appendTo->emplace_back(sprite);
+}
+void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
+{
+	if (ItemTile * tile = world.GetItemTile(encodedPos))
+	{
+		if (tile->itemTile >= ReservedItems::totalReserved)
+		{
+			if (!program.showDebugInfo)
+			{
+				if (auto nextPos = world.nextItemPos.GetValue(encodedPos))
+				{
+					Pos pos = Pos::EncodedToCoord(encodedPos);
+					Pos newPos = pos.FacingPosition(*nextPos);
+					Pos difference = newPos - pos;
+					float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+					if (step > 1.0f)
+						step = 1.0f;
+					x += int(float(difference.x) * float(GC::tileSize) * step);
+					y += int(float(difference.y) * float(GC::tileSize) * step);
+				}
+				if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+				{
+					Pos pos = Pos::EncodedToCoord(encodedPos);
+					Pos newPos = pos.FacingPosition(*nextPos);
+					Pos difference = newPos - pos;
+					float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+					if (step > 1.0f)
+						step = 1.0f;
+					x += int(float(difference.x) * float(GC::tileSize) * step);
+					y += int(float(difference.y) * float(GC::tileSize) * step);
+				}
+			}
+			DrawItem(&program.itemSprites,*tile, x, y);
 		}
 	}
 }
@@ -113,45 +120,51 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, float x, float y)
 {
 	if (LogicTile * logic = world.GetLogicTile(encodedPos))
 	{
-		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+		if (!program.showDebugInfo)
 		{
-			Pos pos = Pos::EncodedToCoord(encodedPos);
-			Pos newPos = pos.FacingPosition(*nextPos);
-			Pos difference = newPos - pos;
-			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
-			if (step > 1.0f)
-				step = 1.0f;
-			x += int(float(difference.x) * float(GC::tileSize) * step);
-			y += int(float(difference.y) * float(GC::tileSize) * step);
+			if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+			{
+				Pos pos = Pos::EncodedToCoord(encodedPos);
+				Pos newPos = pos.FacingPosition(*nextPos);
+				Pos difference = newPos - pos;
+				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+				if (step > 1.0f)
+					step = 1.0f;
+				x += int(float(difference.x) * float(GC::tileSize) * step);
+				y += int(float(difference.y) * float(GC::tileSize) * step);
+			}
 		}
-		logic->DrawTile(&program.logicSprites, x, y, 1.0f);
+		logic->DrawTile(&program.logicSprites, x, y, 1.0f, program.showSignalStrength);
 	}
 }
 void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 {
 	if (Robot* robot = world.GetRobot(encodedPos))
 	{
-		if (auto nextPos = world.nextRobotPos.GetValue(encodedPos))
+		if (!program.showDebugInfo)
 		{
-			Pos newPos = robot->pos.FacingPosition(*nextPos);
-			Pos difference = newPos - robot->pos;
-			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
-			if (step > 1.0f)
-				step = 1.0f;
-			x += float(difference.x) * float(GC::tileSize) * step;
-			y += float(difference.y) * float(GC::tileSize) * step;
+			if (auto nextPos = world.nextRobotPos.GetValue(encodedPos))
+			{
+				Pos newPos = robot->pos.FacingPosition(*nextPos);
+				Pos difference = newPos - robot->pos;
+				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+				if (step > 1.0f)
+					step = 1.0f;
+				x += float(difference.x) * float(GC::tileSize) * step;
+				y += float(difference.y) * float(GC::tileSize) * step;
+			}
+			if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
+			{
+				Pos newPos = robot->pos.FacingPosition(*nextPos);
+				Pos difference = newPos - robot->pos;
+				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
+				if (step > 1.0f)
+					step = 1.0f;
+				x += float(difference.x) * float(GC::tileSize) * step;
+				y += float(difference.y) * float(GC::tileSize) * step;
+			}
 		}
-		if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
-		{
-			Pos newPos = robot->pos.FacingPosition(*nextPos);
-			Pos difference = newPos - robot->pos;
-			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
-			if (step > 1.0f)
-				step = 1.0f;
-			x += float(difference.x) * float(GC::tileSize) * step;
-			y += float(difference.y) * float(GC::tileSize) * step;
-		}
-		robot->DrawTile(int(x), int(y), 1.0f);
+		robot->DrawTile(&program.robotSprites,int(x), int(y), 1.0f);
 	}
 }
 void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, float x, float y)
@@ -169,13 +182,13 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, float x, float y
 		craftTotal.setFillColor(sf::Color(50, 50, 50));
 		craftTotal.setSize(sf::Vector2f(float(GC::tileSize), float(craftbarHeight) / 2.f));
 		craftTotal.setPosition(loadingBarX, loadingBarY);
-		program.selectionBoxes.emplace_back(craftTotal);
+		program.scaledBoxes.emplace_back(craftTotal);
 
 		sf::RectangleShape craftPercent;
 		craftPercent.setFillColor(sf::Color(80, 140, 200));
 		craftPercent.setSize(sf::Vector2f((float(recipe->totalTicks - recipe->ticks) / float(recipe->totalTicks))*GC::tileSize, float(craftbarHeight) / 2.f));
 		craftPercent.setPosition(loadingBarX, loadingBarY);
-		program.selectionBoxes.emplace_back(craftPercent);
+		program.scaledBoxes.emplace_back(craftPercent);
 	}
 }
 void ProgramData::UpdateElementExists()
@@ -230,7 +243,7 @@ void ProgramData::RecreateSprites() {
 			if (program.redrawGround)
 				RecreateGroundSprites(tilePos, float(screenPos.x), float(screenPos.y));
 			if (elementExists.find(encodedPos) != elementExists.end()) {
-				RecreatePlatformSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+				//RecreatePlatformSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateLogicSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateRobotSprites(encodedPos, float(screenPos.x), float(screenPos.y));
@@ -246,7 +259,7 @@ void ProgramData::DrawUpdateCounter()
 	char buffer[50];
 	sprintf_s(buffer, "FPS/UPS: %.0f/%.0f", round(program.frameRate), round(program.updateRate));
 	std::string displayValue = buffer;
-	CreateText(int(program.halfWindowWidth) - 100, int(-program.halfWindowHeight) + 10, buffer);
+	CreateText(int(program.halfWindowWidth) - 10, int(-program.halfWindowHeight) + 10, buffer, Align::right);
 }
 void ProgramData::DrawTooltips()
 {
@@ -255,63 +268,29 @@ void ProgramData::DrawTooltips()
 		if (tile->itemTile > 2)
 		{
 			std::string quantity = std::to_string(tile->quantity);
-			CreateText(program.mousePos.x, program.mousePos.y - 20, program.itemTooltips[tile->itemTile] + " " + quantity);
+			CreateText(program.mousePos.x, program.mousePos.y - 20, program.itemTooltips[tile->itemTile] + " " + quantity, Align::centre);
 		}
 	}
 	else if (program.selectedLogicTile)
 	{
-		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip());
+		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip(), Align::centre);
 	}
-#ifdef DEBUG
-	char buffer[50];
-	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
-	std::string displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 40, displayValue);
-
-	sprintf_s(buffer, "Screen x/y: %d/%d", program.mousePos.x, program.mousePos.y);
-	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 60, displayValue);
-
-	sprintf_s(buffer, "Zoom/Scale: %.2f/%.2f", program.zoom, program.scale);
-	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 80, displayValue);
-
-	sprintf_s(buffer, "Camera x/y: %d/%d", program.cameraPos.x, program.cameraPos.y);
-	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 100, displayValue);
-
-	sprintf_s(buffer, "Tiles Rendered: %d", program.tilesRendered);
-	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 120, displayValue);
-
-	if (GroundTile* ground = world.GetGroundTile(program.mouseHovering))
+	if (program.showDebugInfo)
 	{
-		sprintf_s(buffer, "Ground Value: %d", ground->groundTile);
-		displayValue = buffer;
-		CreateText(program.mousePos.x, program.mousePos.y - 140, displayValue);
+		char buffer[50];
+		std::string displayValue;
 	}
-
-	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
-	{
-		sprintf_s(buffer, "Logic Signal Strength: %d", logic->signal);
-		displayValue = buffer;
-		CreateText(program.mousePos.x, program.mousePos.y - 160, displayValue);
-	}
-#endif
 }
-void ProgramData::DrawSelectedBox()
+void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos)
 {
-	if (program.selectedLogicTile && !program.hoveringHotbar)
-	{
-		sf::RectangleShape selectionBox;
-		selectionBox.setSize(sf::Vector2f(32, 32));
-		selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
-		selectionBox.setOutlineColor(sf::Color(255, 255, 0, 255));
-		selectionBox.setOutlineThickness(2);
-		Pos drawPos = program.mouseHovering * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
-		selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
-		program.selectionBoxes.emplace_back(selectionBox);
-	}
+	sf::RectangleShape selectionBox;
+	selectionBox.setSize(sf::Vector2f(32, 32));
+	selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
+	selectionBox.setOutlineColor(sf::Color(255, 255, 0, 255));
+	selectionBox.setOutlineThickness(2);
+	Pos drawPos = pos * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+	selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
+	appendTo->emplace_back(selectionBox);
 }
 void ProgramData::DrawCrosshair(sf::RenderWindow& window)
 {
@@ -342,16 +321,27 @@ void ProgramData::DrawHotbar()
 		hotbarSlot.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
 		program.hotbarSlots.emplace_back(hotbarSlot);
 
-		if (program.hotbar[i])
+		if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[i]))
 		{
-			program.hotbar[i]->signal = GC::startSignalStrength;
-			program.hotbar[i]->facing = program.placeRotation;
-			program.hotbar[i]->colorClass = program.placeColor;
-			program.hotbar[i]->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f);
+			logic->pos = Pos{ INT_MAX,INT_MAX };
+			logic->signal = GC::startSignalStrength;
+			logic->facing = program.placeRotation;
+			logic->colorClass = program.placeColor;
+			logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, false);
+		}
+		else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
+		{
+			robot->facing = program.placeRotation;
+			robot->DrawTile(&program.hotbarSprites,int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f);
+			//logic->pos = Pos{ INT_MAX,INT_MAX };
+		}
+		else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
+		{
+			DrawItem(&program.hotbarSprites, *item, int(x - GC::halfTileSize), int(y - GC::halfTileSize));
 		}
 	}
 }
-void ProgramData::CreateText(int x, int y, std::string input)
+void ProgramData::CreateText(int x, int y, std::string input, Align align)
 {
 	sf::Text text;
 	text.setString(input);
@@ -359,16 +349,35 @@ void ProgramData::CreateText(int x, int y, std::string input)
 	text.setFillColor(sf::Color::White);
 	text.setCharacterSize(14);
 	sf::FloatRect textRect = text.getLocalBounds();
-	text.setOrigin(textRect.width / 2, textRect.height / 2);
-	text.setPosition(float(x), float(y));
 
 	sf::RectangleShape backPlane;
 	backPlane.setSize(sf::Vector2f(textRect.width + GC::tooltipPadding, textRect.height + GC::tooltipPadding));
 	backPlane.setFillColor(sf::Color(0, 0, 0, 100));
-	backPlane.setOrigin(textRect.width / 2, textRect.height / 2);
 	backPlane.setPosition(float(x), float(y));
 
-	program.textBoxes.emplace_back(backPlane);
+	switch (align)
+	{
+	case centre:
+	{
+		text.setOrigin(textRect.width / 2, textRect.height / 2);
+		backPlane.setOrigin(textRect.width / 2, textRect.height / 2);
+	}break;
+	case left:
+	{
+		text.setOrigin(0, 0);
+		backPlane.setOrigin(0, 0);
+	}break;
+	case right:
+	{
+		text.setOrigin(textRect.width, textRect.height);
+		backPlane.setOrigin(textRect.width, textRect.height);
+	}break;
+	}
+	text.setPosition(float(x), float(y));
+
+	
+
+	program.unscaledBoxes.emplace_back(backPlane);
 	program.textOverlay.emplace_back(text);
 }
 void ProgramData::FindMovingRobot()
@@ -389,6 +398,73 @@ void ProgramData::FindMovingRobot()
 		}
 	}
 }
+void ProgramData::DrawDebugHUD()
+{
+	DrawUpdateCounter();
+	char buffer[50];
+	std::string displayValue;
+	int lineNum = 0;
+
+	sprintf_s(buffer, "Chunk Count: %d", world.worldChunks.size());
+	displayValue = buffer;
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	lineNum++;
+	
+	sprintf_s(buffer, "Platform Count: %d", world.platforms.size());
+	displayValue = buffer;
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	lineNum++;
+
+	sprintf_s(buffer, "Logic Count: %d", world.logictiles.size());
+	displayValue = buffer;
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	lineNum++;
+
+	sprintf_s(buffer, "Item Count: %d", world.items.size());
+	displayValue = buffer;
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	lineNum++;
+
+	sprintf_s(buffer, "Robot Count: %d", world.robots.size());
+	displayValue = buffer;
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20*lineNum, displayValue, Align::left);
+	lineNum++;
+
+	//Mouse Components
+	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 40, displayValue, Align::centre);
+
+	sprintf_s(buffer, "Screen x/y: %d/%d", program.mousePos.x, program.mousePos.y);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 60, displayValue, Align::centre);
+
+	sprintf_s(buffer, "Zoom/Scale: %.2f/%.2f", program.zoom, program.scale);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 80, displayValue, Align::centre);
+
+	sprintf_s(buffer, "Camera x/y: %d/%d", program.cameraPos.x, program.cameraPos.y);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 100, displayValue, Align::centre);
+
+	sprintf_s(buffer, "Tiles Rendered: %d", program.tilesRendered);
+	displayValue = buffer;
+	CreateText(program.mousePos.x, program.mousePos.y - 120, displayValue, Align::centre);
+
+	if (GroundTile* ground = world.GetGroundTile(program.mouseHovering))
+	{
+		sprintf_s(buffer, "Ground Value: %d", ground->groundTile);
+		displayValue = buffer;
+		CreateText(program.mousePos.x, program.mousePos.y - 140, displayValue, Align::centre);
+	}
+
+	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
+	{
+		sprintf_s(buffer, "Logic Signal Strength: %d", logic->signal);
+		displayValue = buffer;
+		CreateText(program.mousePos.x, program.mousePos.y - 160, displayValue, Align::centre);
+	}
+}
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	//if (!program.gamePaused)
 	//{
@@ -404,15 +480,19 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 			program.redrawGround = true;
 			program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
 			program.prevCameraPos = program.cameraPos;
+			// Recalculate the possition of the mouse and what the new selection is after moving
+			program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 		}
 		program.textOverlay.clear();
-		program.textBoxes.clear();
-		program.selectionBoxes.clear();
+		program.unscaledBoxes.clear();
+		program.scaledBoxes.clear();
 		RecreateSprites();
-		DrawUpdateCounter();
 		DrawTooltips();
 		DrawHotbar();
-		DrawSelectedBox();
+		if(program.selectedLogicTile && !program.hoveringHotbar)
+			DrawSelectedBox(&program.scaledBoxes,program.mouseHovering);
+		if (program.showDebugInfo)
+			DrawDebugHUD();
 	//}
 	window.setView(program.worldView);
 	program.groundSprites.draw(window);
@@ -421,7 +501,11 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	program.itemSprites.draw(window);
 	program.animationSprites.draw(window);
 	program.robotSprites.draw(window);
-	for (sf::RectangleShape sprite : program.selectionBoxes)
+	for (sf::RectangleShape sprite : program.scaledBoxes)
+	{
+		window.draw(sprite);
+	}
+	for (sf::RectangleShape sprite : program.scaledPersistentBoxes)
 	{
 		window.draw(sprite);
 	}
@@ -431,7 +515,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		window.draw(sprite);
 	}
 	program.hotbarSprites.draw(window);
-	for (sf::RectangleShape sprite : program.textBoxes)
+	for (sf::RectangleShape sprite : program.unscaledBoxes)
 	{
 		window.draw(sprite);
 	}
@@ -439,67 +523,75 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	{
 		window.draw(sprite);
 	}
-#ifdef DEBUG
-	//DrawCrosshair(window);
-#endif
 }
 
 void ProgramData::MovePlatform(Pos pos, Facing toward)
 {
+	if(program.showDebugInfo)
+		Sleep(100);
 	Pos newPos = pos.FacingPosition(toward);
-	// If there's a platform infront and they're also moving, move them first
-	if (uint16_t* platform = world.platforms.GetValue(newPos))
+	program.scaledPersistentBoxes.clear();
+	DrawSelectedBox(&program.scaledPersistentBoxes, pos);
+	DrawSelectedBox(&program.scaledPersistentBoxes, newPos);
+	if (LogicTile* logic = world.GetLogicTile(pos))
 	{
-		if (auto moving = world.nextPlatforms.GetValue(newPos))
-		{
-			MovePlatform(newPos, *moving);
+		// If there's a platform infront and they're also moving, move them first
+		if (LogicTile* platform = world.GetLogicTile(newPos))
+		{	
+			if (auto moving = world.nextPlatforms.GetValue(newPos))
+			{
+				MovePlatform(newPos, *moving);
+			}
 		}
-	}
-	if (LogicTile* elem = world.GetLogicTile(pos))
-	{
-		elem->pos = newPos;
-		world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
-		world.logictiles.erase(pos.CoordToEncoded());
-	}
-	if (ItemTile* elem = world.GetItemTile(pos.CoordToEncoded()))
-	{
-		if (ItemTile* elem = world.GetItemTile(newPos.CoordToEncoded()))
-		{
-			world.updateQueueD.insert(pos.CoordToEncoded());
-			world.updateQueueD.insert(newPos.CoordToEncoded());
-		}
-		else
-		{
-			world.updateQueueD.insert(newPos.CoordToEncoded());
-			world.items[newPos.CoordToEncoded()] = world.items[pos.CoordToEncoded()];
-			world.items.erase(pos.CoordToEncoded());
-		}
-	}
-	if (Robot* elem = world.GetRobot(pos.CoordToEncoded()))
-	{
-		elem->pos = newPos;
 		/*
-		if (auto moving = world.nextRobotPos.GetValue(pos.CoordToEncoded()))
+		if (LogicTile* elem = world.GetLogicTile(pos))
 		{
-			world.nextRobotPos.erase(pos.CoordToEncoded());
-			world.nextRobotPos.insert({ newPos.CoordToEncoded(),toward });
-		}*/
-		world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
-		world.robots.erase(pos.CoordToEncoded());
+			elem->pos = newPos;
+			world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
+			world.logictiles.erase(pos.CoordToEncoded());
+		}
+		*/
+		if (ItemTile* elem = world.GetItemTile(pos.CoordToEncoded()))
+		{
+			if (ItemTile* elem = world.GetItemTile(newPos.CoordToEncoded()))
+			{
+				world.updateQueueD.insert(pos.CoordToEncoded());
+				world.updateQueueD.insert(newPos.CoordToEncoded());
+			}
+			else
+			{
+				world.updateQueueD.insert(newPos.CoordToEncoded());
+				world.items[newPos.CoordToEncoded()] = world.items[pos.CoordToEncoded()];
+				world.items.erase(pos.CoordToEncoded());
+			}
+		}
+		if (Robot* elem = world.GetRobot(pos.CoordToEncoded()))
+		{
+			elem->pos = newPos;
+			/*
+			if (auto moving = world.nextRobotPos.GetValue(pos.CoordToEncoded()))
+			{
+				world.nextRobotPos.erase(pos.CoordToEncoded());
+				world.nextRobotPos.insert({ newPos.CoordToEncoded(),toward });
+			}*/
+			world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
+			world.robots.erase(pos.CoordToEncoded());
+		}
+		world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
+		world.logictiles[newPos.CoordToEncoded()]->pos = newPos;
+		world.logictiles.erase(pos.CoordToEncoded());
+		world.nextPlatforms.erase(pos.CoordToEncoded());
 	}
-	world.platforms[newPos.CoordToEncoded()] = world.platforms[pos.CoordToEncoded()];
-	world.platforms.erase(pos.CoordToEncoded());
-	world.nextPlatforms.erase(pos.CoordToEncoded());
 }
 
 void ProgramData::SwapPlatforms()
 {
-	
 	while(!world.nextPlatforms.empty())
 	{
 		auto value = world.nextPlatforms.begin();
 		MovePlatform(Pos::EncodedToCoord(value->first),value->second);
 	}
+	world.moving = false;
 }
 
 void ProgramData::SwapBots()
@@ -595,6 +687,7 @@ void ProgramData::CheckItemsMoved()
 
 void ProgramData::UpdateMap()
 {
+	world.platforms.clear();
 	world.updateQueueA.clear();
 	// Update all the logic tiles that were queued to finish this tick
 	// Decrease the number of ticks for each active recipe and complete recipes that reach 0

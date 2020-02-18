@@ -91,9 +91,9 @@ void LoadPrototypes()
 		}
 		program.itemTooltips.emplace_back(temp);
 	}
-	for (const std::string& text : program.itemPrototypes)
+	for (int i=0;i<program.regItemsEnd;i++)
 	{
-		itemTextures.emplace_back(LoadTexture("items/" + text + ".png"));
+		itemTextures.emplace_back(LoadTexture("items/" + program.itemPrototypes[i] + ".png"));
 	}
 
 	//Logic Tooltips
@@ -107,16 +107,18 @@ void LoadPrototypes()
 	program.logicTooltips.emplace_back(logicTypeTooltips);	// Memory
 	program.logicTooltips.emplace_back(logicTypeTooltips);	// Holder
 	program.logicTooltips.emplace_back(logicTypeTooltips);	// Counter
+	program.logicTooltips.emplace_back(logicTypeTooltips);	// Comparer
 	program.logicTooltips[0].emplace_back("Wire transfers signals");
 	program.logicTooltips[1].emplace_back("Does nothing when powered");
 	program.logicTooltips[1].emplace_back("Redirects the robot");
 	program.logicTooltips[2].emplace_back("Creates signal when robot or item ontop");
-	program.logicTooltips[3].emplace_back("Inverter: output = 16 - behind signal + side signal");
-	program.logicTooltips[4].emplace_back("Booster: output = 16 + behind if greater than side signal");
+	program.logicTooltips[3].emplace_back("Inverter: output = 16 - behind + side");
+	program.logicTooltips[4].emplace_back("Booster: output = 16 + behind if: behind > side");
 	program.logicTooltips[5].emplace_back("Gives out same signal as input");
 	program.logicTooltips[6].emplace_back("Stores 16 different values that cycle when input rises to high");
 	program.logicTooltips[7].emplace_back("Catches robots and releases when powered");
 	program.logicTooltips[8].emplace_back("Counts up to the max value then resets");
+	program.logicTooltips[9].emplace_back("Comparer: output = 16 + input if: behind = side");
 
 	// Animation prototypes
 	std::vector<std::string> animationPrototypes;
@@ -222,6 +224,10 @@ void LoadLogicToHotbar()
 	Belt* belt = new Belt();
 	WireBridge* wireBridge = new WireBridge();
 	Comparer* comparer = new Comparer();
+	Robot* robot = new Robot();
+	ItemTile* item = new ItemTile();
+	item->itemTile = 4;
+	item->quantity = 1;
 	
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(redirect);
@@ -233,8 +239,8 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(inverter);
 	program.hotbar.emplace_back(booster);
 	program.hotbar.emplace_back(comparer);
-	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(nullptr);
+	program.hotbar.emplace_back(robot);
+	program.hotbar.emplace_back(item);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);

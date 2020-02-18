@@ -189,6 +189,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 			}
 			else
 			{
+			if(!world.moving)
 				world.MovePlatform(program.mouseHovering,north);
 				program.cameraPos.y -= int(GC::cameraSpeed * program.zoom);
 			}
@@ -205,6 +206,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
+			if (!world.moving)
 			world.MovePlatform(program.mouseHovering,west);
 			program.cameraPos.x -= int(GC::cameraSpeed * program.zoom);
 		}
@@ -221,6 +223,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
+			if (!world.moving)
 			world.MovePlatform(program.mouseHovering,south);
 			program.cameraPos.y += int(GC::cameraSpeed * program.zoom);
 		}
@@ -237,6 +240,7 @@ void WidgetCreator::SetDefaultKeyMapping()
 		}
 		else
 		{
+			if (!world.moving)
 			world.MovePlatform(program.mouseHovering,east);
 			program.cameraPos.x += int(GC::cameraSpeed * program.zoom);
 		}
@@ -247,14 +251,20 @@ void WidgetCreator::SetDefaultKeyMapping()
 	//R
 	userActionOrder.push_back("Rotate Clockwise");
 	userActions.insert({ "Rotate Clockwise",[&] {
-		program.placeRotation = Facing((int(program.placeRotation) + 1) & 3);
+		
 		if (program.selectedLogicTile)
 		{
+			program.placeRotation = program.selectedLogicTile->facing;
+			program.placeRotation = Pos::RelativeFacing(program.placeRotation,1);
 			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
 				world.updateQueueC.insert({program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(), 1});
 			}
+		}
+		else
+		{
+			program.placeRotation = Pos::RelativeFacing(program.placeRotation,1);
 		}
 	} });
 	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
@@ -263,15 +273,20 @@ void WidgetCreator::SetDefaultKeyMapping()
 	//R
 	userActionOrder.push_back("Rotate Anti-Clockwise");
 	userActions.insert({ "Rotate Anti-Clockwise",[&] {
-		program.placeRotation = Facing((int(program.placeRotation) - 1) & 3);
 		if (program.selectedLogicTile)
 		{
+			program.placeRotation = program.selectedLogicTile->facing;
+			program.placeRotation = Pos::RelativeFacing(program.placeRotation, -1);
 			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
 				world.updateQueueC.insert({ program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(), 1 });
 			}
 		}
+		else
+		{
+			program.placeRotation = Pos::RelativeFacing(program.placeRotation, -1);
+ }
 	} });
 	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ true, /*system*/ false };
 	actionMap.insert({ keyPress, "Rotate Anti-Clockwise" });
@@ -331,6 +346,22 @@ void WidgetCreator::SetDefaultKeyMapping()
 	} });
 	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Change ColorClass" });
+
+	//Alt
+	userActionOrder.push_back("Show Detailed Info");
+	userActions.insert({ "Show Detailed Info",[&] {
+		program.showSignalStrength = !program.showSignalStrength;
+	} });
+	keyPress = { sf::Keyboard::LAlt, /*alt*/ true, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Show Detailed Info" });
+
+	//F3
+	userActionOrder.push_back("Show Debug Info");
+	userActions.insert({ "Show Debug Info",[&] {
+		program.showDebugInfo = !program.showDebugInfo;
+	} });
+	keyPress = { sf::Keyboard::F3, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Show Debug Info" });
 
 	for (int i = 0; i < 20; i++)
 	{
@@ -511,7 +542,7 @@ void WidgetCreator::MouseMoved()
 				sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
 				if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
 				{
-					program.selectedLogicTile = program.hotbar[i];
+					//program.selectedLogicTile = program.hotbar[i];
 					program.hoveringHotbar = true;
 					if (program.selectedLogicTile)
 						foundLogic = true;
@@ -543,20 +574,34 @@ void WidgetCreator::LeftMousePressed()
 			{
 				if (program.hotbar[program.hotbarIndex])
 				{
-					LogicTile* logicPlace = program.hotbar[program.hotbarIndex]->Copy();
-					logicPlace->pos = program.mouseHovering;
-					if (Robot* robot = world.GetRobot(program.mouseHovering))
+					if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
 					{
-						logicPlace->DoRobotLogic(robot->pos);
+						LogicTile* logicPlace = logic->Copy();
+						logicPlace->pos = program.mouseHovering;
+						if (Robot* robot = world.GetRobot(program.mouseHovering))
+						{
+							logicPlace->DoRobotLogic(robot->pos);
+						}
+						world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
+						world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
+						world.updateQueueC.insert({ logicPlace->pos.CoordToEncoded(),1 });										// Queue update for placed element
+						for (int i = 0; i < 4; i++)
+						{
+							world.updateQueueC.insert({ logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+						}
+						program.selectedLogicTile = logicPlace;
 					}
-					world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
-					world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
-					world.updateQueueC.insert({ logicPlace->pos.CoordToEncoded(),1 });										// Queue update for placed element
-					for (int i = 0; i < 4; i++)
+					else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[program.hotbarIndex]))
 					{
-						world.updateQueueC.insert({ logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+						Robot* newRobot = robot->Copy();
+						newRobot->pos = program.mouseHovering;
+						newRobot->stopped = true;
+						world.robots.insert({ newRobot->pos.CoordToEncoded(),*newRobot });
 					}
-					program.selectedLogicTile = logicPlace;
+					else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[program.hotbarIndex]))
+					{
+						world.ChangeItem(program.mouseHovering, item->itemTile, 1);
+					}
 				}
 				else
 				{

@@ -36,9 +36,9 @@ sf::Texture* Wire::texture = LoadTexture("logic/wire.png");
 sf::Texture* PressurePlate::texture = LoadTexture("logic/pressureplate.png");
 sf::Texture* Redirector::texture = LoadTexture("logic/redirector.png");
 sf::Texture* Inverter::texture = LoadTexture("logic/inverter.png");
-sf::Texture* Booster::texture = LoadTexture("logic/inverter.png");
+sf::Texture* Booster::texture = LoadTexture("logic/booster.png");
 sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
-sf::Texture* Comparer::texture = LoadTexture("logic/inverter.png");
+sf::Texture* Comparer::texture = LoadTexture("logic/comparer.png");
 sf::Texture* Gate::texture = LoadTexture("logic/holder.png");
 sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
 sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
@@ -79,13 +79,15 @@ void UpdateWorld()
 {
 	while (program.running) {
 		clock_t beginUpdate = clock();
-		//program.worldMutex.lock();
+		if(!program.showDebugInfo)
+		program.worldMutex.lock();
 		if (!program.gamePaused)
 		{
 			program.framesSinceTick = 0;
 			program.UpdateMap();
 		}
-		//program.worldMutex.unlock();
+		if (!program.showDebugInfo)
+		program.worldMutex.unlock();
 		clock_t updateTime = clock();
 		int padTime = int(CLOCKS_PER_SEC / float(GC::UPDATERATE)) + beginUpdate - updateTime;
 		if (padTime > 0)
@@ -165,11 +167,13 @@ int main()
 		creator->SetGuiVisibility();
 		window.clear();
 		clock_t beginUpdate = clock();
-		//program.worldMutex.lock();
+		if (!program.showDebugInfo)
+		program.worldMutex.lock();
 		if(!program.gamePaused)
 			program.framesSinceTick++;
 		program.DrawGameState(window);
-		//program.worldMutex.unlock();
+		if (!program.showDebugInfo)
+		program.worldMutex.unlock();
 		gui->logic();
 		gui->render();
 		window.display();

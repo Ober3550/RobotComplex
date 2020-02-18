@@ -13,6 +13,7 @@
 #include "ItemTile.h"
 #include "SpriteVector.h"
 #include "MySet.h"
+#include "Align.h"
 
 class ProgramData {
 public:
@@ -34,12 +35,13 @@ public:
 	SpriteVector platformSprites;
 	SpriteVector itemSprites;
 	SpriteVector logicSprites;
-	std::vector<sf::RectangleShape> selectionBoxes;
+	std::vector<sf::RectangleShape> scaledBoxes;
+	std::vector<sf::RectangleShape> scaledPersistentBoxes;
 	SpriteVector robotSprites;
 	SpriteVector animationSprites;
 	SpriteVector hotbarSprites;
 	std::vector<sf::RectangleShape> hotbarSlots;
-	std::vector<sf::RectangleShape> textBoxes;
+	std::vector<sf::RectangleShape> unscaledBoxes;
 	std::vector<sf::Text> textOverlay;
 	MySet<uint64_t> elementExists;
 
@@ -61,12 +63,14 @@ public:
 	Pos cameraPos = { 0, 0 };
 	int hotbarIndex = 0;
 	int hotbarSize = 20;
-	std::vector<LogicTile*> hotbar;
+	std::vector<ParentTile*> hotbar;
 	bool hoveringHotbar;
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
 	Facing placeRotation;
 	uint8_t placeColor = 1;
+	bool showSignalStrength = true;
+	bool showDebugInfo = false;
 	
 	std::string selectedSave = "";
 	bool running = true;
@@ -81,21 +85,22 @@ public:
 	int framesSinceTick = 0;
 
 	void RecreateGroundSprites(Pos tilePos, float x, float y);
-	void DrawItem(ItemTile item, float x, float y);
+	void DrawItem(SpriteVector* appendTo, ItemTile item, float x, float y);
 	void RecreatePlatformSprites(uint64_t encodedPos, float x, float y);
 	void RecreateItemSprites(uint64_t encodedPos, float x, float y);
 	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);
 	void RecreateRobotSprites(uint64_t encodedPos, float x, float y);
 	void RecreateAnimationSprites(uint64_t encodedPos, float x, float y);
-	void CreateText(int x, int y, std::string text);
+	void CreateText(int x, int y, std::string text, Align align);
 	void RecreateSprites();
 	void UpdateElementExists();
 	
 	sf::Color HSV2RGB(sf::Color);
-	void DrawSelectedBox();
+	void DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos);
 	void DrawUpdateCounter();
 	void DrawTooltips();
 	void DrawHotbar();
+	void DrawDebugHUD();
 	void DrawGameState(sf::RenderWindow& window);
 	void DrawCrosshair(sf::RenderWindow& window);
 	void FindMovingRobot();

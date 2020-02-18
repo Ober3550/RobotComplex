@@ -204,19 +204,21 @@ bool WorldSave::CheckMovePlatform(Pos pos, Facing toward)
 	// Check next ground position (also activates chunk generation outside of camera view)
 	if (GroundTile* ground = world.GetGroundTile(nextPos))
 	{
-		if (uint16_t* currentPlatform = world.platforms.GetValue(pos.CoordToEncoded()))
+		if (LogicTile* currentPlatform = world.GetLogicTile(pos.CoordToEncoded()))
 		{
 			// If this platform is moving to a position that another is already moving to exit
 			if (!world.platformMovingTo.contains(nextPos.CoordToEncoded()))
 			{
 				// Add this current platform element to the connected set
 				world.connectedPlatform.insert(pos.CoordToEncoded());
-				if (uint16_t* nextPlatform = world.platforms.GetValue(nextPos.CoordToEncoded()))
+				if (LogicTile* nextPlatform = world.GetLogicTile(nextPos.CoordToEncoded()))
 				{
-					if (*currentPlatform != *nextPlatform)
+					/*
+					if (currentPlatform != nextPlatform)
 					{
 						return false;
 					}
+					*/
 				}
 				for (int i = 0; i < 4; i++)
 				{
@@ -240,6 +242,7 @@ bool WorldSave::CheckMovePlatform(Pos pos, Facing toward)
 
 void WorldSave::MovePlatform(Pos pos, Facing toward)
 {
+	world.moving = true;
 	world.connectedPlatform.clear();
 	if (CheckMovePlatform(pos, toward))
 	{

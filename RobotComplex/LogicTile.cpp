@@ -116,7 +116,7 @@ bool DirectionalLogicTile::GetConnected(LogicTile* querier)
 			return true;
 		if (querier->IsSource() )
 		{
-			if (querier->pos.FacingPosition(querier->facing) == this->pos)
+			if (querier->ReceivesSignal(this))
 			{
 				return true;
 			}
@@ -145,15 +145,7 @@ void LogicTile::DoWireLogic() {
 	{
 		if (neighbourTile[i] = world.GetLogicTile(this->pos.FacingPosition(Pos::RelativeFacing(this->facing, i))))
 		{
-			if (neighbourTile[i]->GetConnected(this))
-			{
-				if (neighbourTile[i]->ReceivesSignal(this))
-					if (neighbourTile[i]->IsSource())
-						neighbourSignals[i] = neighbourTile[i]->GetSignal(this) + 1;
-					else
-						neighbourSignals[i] = neighbourTile[i]->GetSignal(this);
-			}
-			if (this->GetConnected(neighbourTile[i]))
+			if (neighbourTile[i]->GetConnected(this) || this->GetConnected(neighbourTile[i]))
 			{
 				if (neighbourTile[i]->ReceivesSignal(this))
 					if (neighbourTile[i]->IsSource())
@@ -342,6 +334,11 @@ void Comparer::SignalEval(std::array<uint8_t, 4> neighbours)
 		this->signal = MyMod(neighbours[2] + GC::startSignalStrength, GC::maxSignalStrength);
 	else
 		this->signal = 0;
+}
+
+std::string Comparer::GetTooltip()
+{
+	return program.logicTooltips[9][0];
 }
 
 std::string Booster::GetTooltip()

@@ -15,7 +15,7 @@ void WorldSave::Serialize(std::string filename)
 	if (program.selectedRobot)
 		program.selectedRobot->stopped = true;
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
-	platforms.Serialize("saves/" + filename + "/platforms.bin");
+	//platforms.Serialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Serialize("saves/" + filename + "/platformsNext.bin");
 	items.Serialize("saves/" + filename + "/items.bin");
 	nextItemPos.Serialize("saves/" + filename + "/itemsNext.bin");
@@ -34,7 +34,7 @@ void WorldSave::Deserialize(std::string filename)
 	this->clear();
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
-	platforms.Deserialize("saves/" + filename + "/platforms.bin");
+	//platforms.Deserialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Deserialize("saves/" + filename + "/platformsNext.bin");
 	items.Deserialize("saves/" + filename + "/items.bin", world.oldItemNewItem);
 	nextItemPos.Deserialize("saves/" + filename + "/itemsNext.bin");

@@ -424,6 +424,12 @@
     <ClInclude Include="SpriteVector.h">
       <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
+    <ClInclude Include="Align.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="ParentTile.h">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm">

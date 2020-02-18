@@ -36,6 +36,7 @@ public:
 	MySet<uint64_t> updateQueueB;	// Queue for current updates
 	MyMap<uint64_t,int> updateQueueC;	// Queue for updates next ticks
 	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
+	bool moving = false;
 	uint64_t tick;
 	uint64_t seed = 0;
 	// Variables for keeping elements and data structure organised between versions/changes
