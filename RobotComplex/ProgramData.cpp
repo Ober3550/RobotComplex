@@ -584,14 +584,6 @@ void ProgramData::MovePlatform(Pos pos, Facing toward)
 				MovePlatform(newPos, *moving);
 			}
 		}
-		/*
-		if (LogicTile* elem = world.GetLogicTile(pos))
-		{
-			elem->pos = newPos;
-			world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
-			world.logictiles.erase(pos.CoordToEncoded());
-		}
-		*/
 		if (ItemTile* elem = world.GetItemTile(pos.CoordToEncoded()))
 		{
 			if (ItemTile* elem = world.GetItemTile(newPos.CoordToEncoded()))
@@ -617,6 +609,12 @@ void ProgramData::MovePlatform(Pos pos, Facing toward)
 			}*/
 			world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
 			world.robots.erase(pos.CoordToEncoded());
+		}
+		//Get value doesn't create a new instance if the value isn't there
+		if (int* update = world.updateQueueC.GetValue(pos.CoordToEncoded()))
+		{
+			world.updateQueueC[newPos.CoordToEncoded()] = world.updateQueueC[pos.CoordToEncoded()];
+			world.updateQueueC.erase(pos.CoordToEncoded());
 		}
 		world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
 		world.logictiles[newPos.CoordToEncoded()]->pos = newPos;
