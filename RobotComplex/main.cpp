@@ -157,9 +157,21 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 
 	program.redrawGround = true;
 
-	if(creator)
+	// Copy the gui stack (state) before deleting and reinitializing it
+
+	if (creator)
+	{
 		creator->~WidgetCreator();
-	creator = new WidgetCreator(gui, &window);
+		creator = new WidgetCreator(gui, &window);
+		if (!program.gamePaused) {
+			creator->guiStack.pop();
+		}
+	}
+	else
+	{
+		creator = new WidgetCreator(gui, &window);
+	}
+	
 	window.setView(program.worldView);
 	window.setFramerateLimit(GC::FRAMERATE);
 
