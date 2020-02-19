@@ -96,7 +96,7 @@ public:
 	void RecreateRobotSprites(uint64_t encodedPos, float x, float y);
 	void RecreateAnimationSprites(uint64_t encodedPos, float x, float y);
 	void CreateSmallText(SpriteVector* appendTo, std::string text, float x, float y, float s, Align a);
-	void CreateText(int x, int y, std::string text, Align align);
+	void CreateText(float x, float y, std::string text, Align align);
 	void RecreateSprites();
 	void UpdateElementExists();
 	

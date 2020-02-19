@@ -259,7 +259,7 @@ void ProgramData::DrawUpdateCounter()
 	char buffer[50];
 	sprintf_s(buffer, "FPS/UPS: %.0f/%.0f", round(program.frameRate), round(program.updateRate));
 	std::string displayValue = buffer;
-	CreateText(int(program.halfWindowWidth) - 10, int(-program.halfWindowHeight) + 10, buffer, Align::right);
+	CreateText(program.halfWindowWidth - 10, -program.halfWindowHeight + 10, buffer, Align::right);
 }
 void ProgramData::DrawTooltips()
 {
@@ -268,12 +268,16 @@ void ProgramData::DrawTooltips()
 		if (tile->itemTile > 2)
 		{
 			std::string quantity = std::to_string(tile->quantity);
-			CreateText(program.mousePos.x, program.mousePos.y - 20, tile->GetTooltip() + " " + quantity, Align::centre);
+			CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), tile->GetTooltip() + " " + quantity, Align::centre);
 		}
 	}
 	else if (program.selectedHotbar)
 	{
-		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedHotbar->GetTooltip(), Align::centre);
+		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedHotbar->GetTooltip(), Align::centre);
+	}
+	else if (program.selectedLogicTile)
+	{
+		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedLogicTile->GetTooltip(), Align::centre);
 	}
 }
 void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos)
@@ -333,11 +337,11 @@ void ProgramData::DrawHotbar()
 		{
 			DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize));
 			if(item->quantity > 1)
-			CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), x, y, 2, Align::right);
+			CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), float(x), float(y), 2.f, Align::right);
 		}
 	}
 }
-void ProgramData::CreateText(int x, int y, std::string input, Align align)
+void ProgramData::CreateText(float x, float y, std::string input, Align align)
 {
 	sf::Text text;
 	text.setString(input);
@@ -349,7 +353,7 @@ void ProgramData::CreateText(int x, int y, std::string input, Align align)
 	sf::RectangleShape backPlane;
 	backPlane.setSize(sf::Vector2f(textRect.width + GC::tooltipPadding, textRect.height + GC::tooltipPadding));
 	backPlane.setFillColor(sf::Color(0, 0, 0, 100));
-	backPlane.setPosition(float(x), float(y));
+	backPlane.setPosition(x, y);
 
 	switch (align)
 	{
@@ -369,13 +373,14 @@ void ProgramData::CreateText(int x, int y, std::string input, Align align)
 		backPlane.setOrigin(textRect.width, textRect.height);
 	}break;
 	}
-	text.setPosition(float(x), float(y));
+	text.setPosition(x, y);
 
 	
 
 	program.unscaledBoxes.emplace_back(backPlane);
 	program.textOverlay.emplace_back(text);
 }
+
 void ProgramData::CreateSmallText(SpriteVector* appendTo, std::string text, float x, float y, float s, Align align)
 {
 	sf::Sprite sprite;
@@ -430,7 +435,7 @@ void ProgramData::DrawDebugHUD()
 	DrawUpdateCounter();
 	char buffer[50];
 	std::string displayValue;
-	int lineNum = 0;
+	float lineNum = 0;
 	float lineSpace = 20.f;
 
 	sprintf_s(buffer, "Chunk Count: %d", world.worldChunks.size());
@@ -462,34 +467,34 @@ void ProgramData::DrawDebugHUD()
 	//Mouse Components
 	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 	lineNum++;
 
 	sprintf_s(buffer, "Screen x/y: %d/%d", program.mousePos.x, program.mousePos.y);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 	lineNum++;
 
 	sprintf_s(buffer, "Zoom/Scale: %.2f/%.2f", program.zoom, program.scale);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 	lineNum++;
 
 	sprintf_s(buffer, "Camera x/y: %d/%d", program.cameraPos.x, program.cameraPos.y);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 	lineNum++;
 
 	sprintf_s(buffer, "Tiles Rendered: %d", program.tilesRendered);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 	lineNum++;
 
 	if (GroundTile* ground = world.GetGroundTile(program.mouseHovering))
 	{
 		sprintf_s(buffer, "Ground Value: %d", ground->groundTile);
 		displayValue = buffer;
-		CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+		CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 		lineNum++;
 	}
 
@@ -497,7 +502,7 @@ void ProgramData::DrawDebugHUD()
 	{
 		sprintf_s(buffer, "Logic Signal Strength: %d", logic->signal);
 		displayValue = buffer;
-		CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+		CreateText(float(program.mousePos.x), program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
 		lineNum++;
 	}
 }

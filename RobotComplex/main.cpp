@@ -116,12 +116,12 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 	{
 		// Find the max window size for when going from fullscreen to windowed
 		if (displaySize.getWidth() > program.windowedWidth)
-			program.windowedWidth = displaySize.getWidth();
+			program.windowedWidth = float(displaySize.getWidth());
 		if (displaySize.getHeight() > program.windowedHeight)
-			program.windowedHeight = displaySize.getHeight();
+			program.windowedHeight = float(displaySize.getHeight());
 
-		program.windowWidth = displaySize.getWidth();
-		program.windowHeight = displaySize.getHeight();
+		program.windowWidth = float(displaySize.getWidth());
+		program.windowHeight = float(displaySize.getHeight());
 		program.halfWindowWidth = program.windowWidth / 2;
 		program.halfWindowHeight = program.windowHeight / 2;
 		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
@@ -141,8 +141,8 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 	if (windowFullScreen)
 	{
 		window.create(sf::VideoMode(int(sf::VideoMode::getDesktopMode().width), int(sf::VideoMode::getDesktopMode().height)), "Terraforma", sf::Style::Fullscreen);
-		program.windowWidth = sf::VideoMode::getDesktopMode().width;
-		program.windowHeight = sf::VideoMode::getDesktopMode().height;
+		program.windowWidth = float(sf::VideoMode::getDesktopMode().width);
+		program.windowHeight = float(sf::VideoMode::getDesktopMode().height);
 		program.halfWindowWidth = program.windowWidth / 2;
 		program.halfWindowHeight = program.windowHeight / 2;
 	}		
