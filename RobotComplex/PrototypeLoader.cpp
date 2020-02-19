@@ -225,11 +225,22 @@ void LoadLogicToHotbar()
 	WireBridge* wireBridge = new WireBridge();
 	Comparer* comparer = new Comparer();
 	Robot* robot = new Robot();
-	ItemTile* item = new ItemTile();
-	item->itemTile = 4;
-	item->quantity = 1;
-	
-	program.hotbar.emplace_back(nullptr);
+	ItemTile* item = new ItemTile(4);
+	ItemTile* item2 = new ItemTile(3);
+
+	int godQuantity = 200;
+	redirect->quantity = godQuantity;
+	gate->quantity = godQuantity;
+	pressureplate->quantity = godQuantity;
+	wire->quantity = godQuantity;
+	inverter->quantity = godQuantity;
+	booster->quantity = godQuantity;
+	belt->quantity = godQuantity;
+	wireBridge->quantity = godQuantity;
+	comparer->quantity = godQuantity;
+	item->quantity = godQuantity;
+	item2->quantity = godQuantity;
+
 	program.hotbar.emplace_back(redirect);
 	program.hotbar.emplace_back(belt);
 	program.hotbar.emplace_back(pressureplate);
@@ -241,6 +252,7 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(comparer);
 	program.hotbar.emplace_back(robot);
 	program.hotbar.emplace_back(item);
+	program.hotbar.emplace_back(item2);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);

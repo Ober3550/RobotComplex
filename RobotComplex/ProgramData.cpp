@@ -134,7 +134,7 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, float x, float y)
 				y += int(float(difference.y) * float(GC::tileSize) * step);
 			}
 		}
-		logic->DrawTile(&program.logicSprites, x, y, 1.0f, program.showSignalStrength);
+		logic->DrawTile(&program.logicSprites, x, y, 1.0f, uint8_t(program.showSignalStrength));
 	}
 }
 void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
@@ -268,17 +268,12 @@ void ProgramData::DrawTooltips()
 		if (tile->itemTile > 2)
 		{
 			std::string quantity = std::to_string(tile->quantity);
-			CreateText(program.mousePos.x, program.mousePos.y - 20, program.itemTooltips[tile->itemTile] + " " + quantity, Align::centre);
+			CreateText(program.mousePos.x, program.mousePos.y - 20, tile->GetTooltip() + " " + quantity, Align::centre);
 		}
 	}
-	else if (program.selectedLogicTile)
+	else if (program.selectedHotbar)
 	{
-		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedLogicTile->GetTooltip(), Align::centre);
-	}
-	if (program.showDebugInfo)
-	{
-		char buffer[50];
-		std::string displayValue;
+		CreateText(program.mousePos.x, program.mousePos.y - 20, program.selectedHotbar->GetTooltip(), Align::centre);
 	}
 }
 void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos)
@@ -327,17 +322,18 @@ void ProgramData::DrawHotbar()
 			logic->signal = GC::startSignalStrength;
 			logic->facing = program.placeRotation;
 			logic->colorClass = program.placeColor;
-			logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, false);
+			logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, 2);
 		}
 		else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
 		{
 			robot->facing = program.placeRotation;
 			robot->DrawTile(&program.hotbarSprites,int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f);
-			//logic->pos = Pos{ INT_MAX,INT_MAX };
 		}
 		else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
 		{
-			DrawItem(&program.hotbarSprites, *item, int(x - GC::halfTileSize), int(y - GC::halfTileSize));
+			DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize));
+			if(item->quantity > 1)
+			CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), x, y, 2, Align::right);
 		}
 	}
 }
@@ -380,6 +376,37 @@ void ProgramData::CreateText(int x, int y, std::string input, Align align)
 	program.unscaledBoxes.emplace_back(backPlane);
 	program.textOverlay.emplace_back(text);
 }
+void ProgramData::CreateSmallText(SpriteVector* appendTo, std::string text, float x, float y, float s, Align align)
+{
+	sf::Sprite sprite;
+	sprite.setTexture(*font);
+	for (int i = 0; i < (int)text.length(); i++)
+	{
+		float adjustLeft;
+		switch (align)
+		{
+		case centre:
+		{
+			sprite.setOrigin(1.5, 2.5);
+			adjustLeft = (float(text.length() - 1) / 2.f) * 4;
+		}break;
+		case left:
+		{
+			sprite.setOrigin(0, 0);
+			adjustLeft = 0;
+		}break;
+		case right:
+		{
+			sprite.setOrigin(3, 5);
+			adjustLeft = (float(text.length() - 1)) * 4;
+		}break;
+		}
+		sprite.setTextureRect(program.fontMap[text[i]]);
+		sprite.setPosition(float(x + float(GC::halfTileSize - s * adjustLeft + s * i * 4)), float(y + GC::halfTileSize));
+		sprite.setScale(sf::Vector2f(s, s));
+		appendTo->emplace_back(sprite);
+	}
+}
 void ProgramData::FindMovingRobot()
 {
 	if (program.selectedRobot)
@@ -404,65 +431,74 @@ void ProgramData::DrawDebugHUD()
 	char buffer[50];
 	std::string displayValue;
 	int lineNum = 0;
+	float lineSpace = 20.f;
 
 	sprintf_s(buffer, "Chunk Count: %d", world.worldChunks.size());
 	displayValue = buffer;
-	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
 	
 	sprintf_s(buffer, "Platform Count: %d", world.platforms.size());
 	displayValue = buffer;
-	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
 
 	sprintf_s(buffer, "Logic Count: %d", world.logictiles.size());
 	displayValue = buffer;
-	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
 
 	sprintf_s(buffer, "Item Count: %d", world.items.size());
 	displayValue = buffer;
-	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20 * lineNum, displayValue, Align::left);
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
 
 	sprintf_s(buffer, "Robot Count: %d", world.robots.size());
 	displayValue = buffer;
-	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + 20*lineNum, displayValue, Align::left);
+	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
 
+	lineNum = 0;
 	//Mouse Components
 	sprintf_s(buffer, "Map x/y: %d/%d", program.mouseHovering.x, program.mouseHovering.y);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 40, displayValue, Align::centre);
+	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	lineNum++;
 
 	sprintf_s(buffer, "Screen x/y: %d/%d", program.mousePos.x, program.mousePos.y);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 60, displayValue, Align::centre);
+	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	lineNum++;
 
 	sprintf_s(buffer, "Zoom/Scale: %.2f/%.2f", program.zoom, program.scale);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 80, displayValue, Align::centre);
+	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	lineNum++;
 
 	sprintf_s(buffer, "Camera x/y: %d/%d", program.cameraPos.x, program.cameraPos.y);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 100, displayValue, Align::centre);
+	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	lineNum++;
 
 	sprintf_s(buffer, "Tiles Rendered: %d", program.tilesRendered);
 	displayValue = buffer;
-	CreateText(program.mousePos.x, program.mousePos.y - 120, displayValue, Align::centre);
+	CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+	lineNum++;
 
 	if (GroundTile* ground = world.GetGroundTile(program.mouseHovering))
 	{
 		sprintf_s(buffer, "Ground Value: %d", ground->groundTile);
 		displayValue = buffer;
-		CreateText(program.mousePos.x, program.mousePos.y - 140, displayValue, Align::centre);
+		CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+		lineNum++;
 	}
 
 	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
 	{
 		sprintf_s(buffer, "Logic Signal Strength: %d", logic->signal);
 		displayValue = buffer;
-		CreateText(program.mousePos.x, program.mousePos.y - 160, displayValue, Align::centre);
+		CreateText(program.mousePos.x, program.mousePos.y - lineSpace * lineNum, displayValue, Align::centre);
+		lineNum++;
 	}
 }
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
@@ -658,6 +694,7 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 		}
 		world.ChangeItem(pos, item->itemTile, -1);
 		world.ChangeItem(newPos, item->itemTile, 1);
+		world.itemPrevMoved.insert(newPos.CoordToEncoded());
 	}
 	world.nextItemPos.erase(pos.CoordToEncoded());
 }

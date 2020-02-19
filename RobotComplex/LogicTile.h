@@ -20,6 +20,7 @@ public:
 	uint8_t prevSignal;						// 1 byte
 	uint8_t signal;							// 1 byte
 	uint8_t colorClass;						// xxxxxBGR 8 color byte
+	uint8_t quantity = 1;						// quantity for crafting multiple on the same tile
 	static sf::Texture* texture;			// Empty texture
 	virtual uint8_t GetSignal(LogicTile* querier) { return this->signal; };
 	virtual void SignalEval(std::array<uint8_t, 4> neighbours);
@@ -42,11 +43,12 @@ public:
 	virtual void Deserialize(std::ifstream*);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
 
-	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal) {};
+	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags) {};
 	void DrawSprite(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture);
 	void DrawSprite(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect);
 	void DrawSpriteFromProperties(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse);
-	void DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal);
+	void DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal, uint8_t flags);
+	void DrawQuantity(SpriteVector* appendTo, float x, float y, float s, int quantity, uint8_t flags);
 	static LogicTile* Factory(uint16_t classType);
 	LogicTile()
 	{
@@ -55,6 +57,7 @@ public:
 		this->prevSignal = -1;
 		this->signal = 0;
 		this->colorClass = 1;
+		this->quantity = 1;
 	}
 	void dummy(bool) {  };
 };
@@ -72,7 +75,7 @@ public:
 	}
 	virtual void QueueUpdate();
 	virtual void DoRobotLogic(Pos robotRef) {};
-	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal) {};
+	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags) {};
 	virtual std::string GetTooltip() { return "base class"; };
 	virtual bool IsSource() { return true; };
 	virtual bool ReceivesSignal(Facing toward) { if (toward == this->facing) return true; else return false; };
@@ -83,7 +86,7 @@ class Wire : public LogicTile {
 public:
 	Wire() { logictype = wire; };
 	static sf::Texture* texture;								// A textures for drawing
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
 	Wire* Copy()
 	{
@@ -105,7 +108,7 @@ public:
 		this->logictype = redirector;
 	}
 	void DoRobotLogic(Pos robotRef);						// Redirects robots when stepped onto
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
 	Redirector* Copy()
 	{
@@ -135,7 +138,7 @@ public:
 		return false;
 	}
 	std::string GetTooltip();
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	PressurePlate* Copy()
 	{
 		PressurePlate* logicTile = new PressurePlate();
@@ -150,7 +153,7 @@ public:
 	Inverter() { logictype = inverter; };
 	static sf::Texture* texture;								// A textures for drawing
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	virtual bool IsConnected(Pos pos) { return true; };
 	uint8_t ShowPowered(LogicTile* querier) {
 		if (this->pos.FacingPosition(this->facing) == querier->pos)
@@ -177,7 +180,7 @@ public:
 	Booster() { logictype = booster; };
 	static sf::Texture* texture;								// A textures for drawing
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
 	Booster* Copy()
 	{
@@ -192,7 +195,7 @@ public:
 	Repeater() { logictype = repeater; };
 	static sf::Texture* texture;								// A textures for drawing
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
 	Repeater* Copy()
 	{
@@ -206,7 +209,7 @@ class Gate : public LogicTile {
 public:
 	Gate() { logictype = gate; };
 	static sf::Texture* texture;
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	void DoWireLogic();
 	void DoRobotLogic(Pos robotRef);
 	std::string GetTooltip();
@@ -225,7 +228,7 @@ public:
 	uint8_t inputSignal = 0;
 	uint8_t maxSignal = GC::startSignalStrength;
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
 	Counter* Copy()
 	{
@@ -241,7 +244,7 @@ public:
 	static sf::Texture* texture;
 	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
 	void DoRobotLogic(Pos robotRef);						// Activates when a robot holding the correct item filter steps onto it
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip() { return "This is a belt"; };
 	Belt* Copy()
 	{
@@ -258,7 +261,7 @@ public:
 	bool GetConnected(LogicTile* querier);
 	uint8_t GetSignal(LogicTile* querier);
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	uint8_t ShowPowered(LogicTile* querier);
 	std::string GetTooltip() { return "This is a wire bridge"; };
 	WireBridge* Copy()
@@ -274,7 +277,7 @@ public:
 	Comparer() { logictype = comparer; };
 	static sf::Texture* texture;								// A textures for drawing
 	void SignalEval(std::array<uint8_t, 4> neighbours);
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, bool showSignal);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
 	Comparer* Copy()
 	{

@@ -294,6 +294,7 @@
     <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse41.cpp" />
     <ClCompile Include="FileLength.cpp" />
     <ClCompile Include="GetFileNamesInFolder.cpp" />
+    <ClCompile Include="ItemTile.cpp" />
     <ClCompile Include="LogicTile.cpp" />
     <ClCompile Include="LogicTileDrawing.cpp" />
     <ClCompile Include="main.cpp" />

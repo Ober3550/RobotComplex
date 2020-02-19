@@ -60,13 +60,15 @@ public:
 	sf::View hudView;
 
 	Pos mousePos;
+	Pos prevMouseHovering;
 	Pos mouseHovering;
 	Pos prevCameraPos = {0, 0};
 	Pos cameraPos = { 0, 0 };
 	int hotbarIndex = 0;
 	int hotbarSize = 20;
 	std::vector<ParentTile*> hotbar;
-	bool hoveringHotbar;
+	int hoveringHotbar;
+	ParentTile* selectedHotbar;
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
 	Facing placeRotation;
@@ -93,6 +95,7 @@ public:
 	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);
 	void RecreateRobotSprites(uint64_t encodedPos, float x, float y);
 	void RecreateAnimationSprites(uint64_t encodedPos, float x, float y);
+	void CreateSmallText(SpriteVector* appendTo, std::string text, float x, float y, float s, Align a);
 	void CreateText(int x, int y, std::string text, Align align);
 	void RecreateSprites();
 	void UpdateElementExists();

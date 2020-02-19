@@ -24,7 +24,8 @@ int CraftingClass::CheckCrafting(Pos pos)
 				{
 					if (LogicTile* logic = world.GetLogicTile(checkPos.CoordToEncoded()))
 					{
-						return failed;
+						if(logic->quantity == UINT8_MAX)
+							return failed;
 					}
 				}
 				else
@@ -101,10 +102,17 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 					// If item number isn't an item create a different item in the world
 					if (recipeComp.itemTile >= program.regItemsEnd)
 					{
-						LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd + 1);
-						LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
-						logicPlace->pos = alterPos;
-						world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });
+						if (LogicTile* logic = world.GetLogicTile(alterPos.CoordToEncoded()))
+						{
+							logic->quantity++;
+						}
+						else
+						{
+							LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd + 1);
+							LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
+							logicPlace->pos = alterPos;
+							world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });
+						}
 					}
 					else
 					{

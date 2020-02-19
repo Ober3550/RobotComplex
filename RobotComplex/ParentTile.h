@@ -1,6 +1,9 @@
 #pragma once
+#include <string>
 class ParentTile
 {
 public:
-	virtual void dummy() {  };
+	virtual std::string GetTooltip() {
+		return "";
+	}
 };

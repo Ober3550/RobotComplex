@@ -326,6 +326,9 @@
     <ClCompile Include="Agui\src\Agui\Clipboard\WinClipboard.cpp">
       <Filter>Header Files\Agui</Filter>
     </ClCompile>
+    <ClCompile Include="ItemTile.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h">

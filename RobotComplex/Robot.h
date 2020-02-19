@@ -22,5 +22,8 @@ public:
 		newRobot->stopped = this->stopped;
 		return newRobot;
 	}
-	void dummy(int) {  };
+	std::string GetTooltip()
+	{
+		return "This is a Robot";
+	}
 };
