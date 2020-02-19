@@ -227,10 +227,10 @@ void ProgramData::RecreateSprites() {
 	program.logicSprites.clear();
 	program.robotSprites.clear();
 	program.animationSprites.clear();
-	int begY = int((-program.halfWindowHeight / (GC::tileSize / program.zoom)) - 2 + (cameraPos.y >> GC::tileShift));
-	int endY = int(program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift) + 2);
-	int begX = int((-program.halfWindowWidth / (GC::tileSize / program.zoom)) - 2 + (cameraPos.x >> GC::tileShift));
-	int endX = int(program.halfWindowWidth / (GC::tileSize / program.zoom) + (cameraPos.x >> GC::tileShift) + 2);
+	int begY = int((-program.halfWindowHeight / (GC::tileSize / program.zoom)) + (cameraPos.y >> GC::tileShift)) - 4;
+	int endY = int(program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift)) + 4;
+	int begX = int((-program.halfWindowWidth / (GC::tileSize / program.zoom)) + (cameraPos.x >> GC::tileShift)) - 4;
+	int endX = int(program.halfWindowWidth / (GC::tileSize / program.zoom) + (cameraPos.x >> GC::tileShift)) + 4;
 	program.tilesRendered = (endY - begY) * (endX - begX);
 	UpdateElementExists();
 	for (int y = begY; y < endY; y++)

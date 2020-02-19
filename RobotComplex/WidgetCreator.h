@@ -63,6 +63,12 @@ public:
 	int actionBindButtonIndex = 0;
 
 	WidgetCreator(agui::Gui *guiInstance, sf::RenderWindow* window);
+	~WidgetCreator()
+	{
+		mGui->remove(&mainFrame);
+		mGui->remove(&saveFrame);
+		mGui->remove(&keyFrame);
+	}
 	void AddMainFrame();
 	void AddSaveFrame();
 	void SetGuiVisibility();

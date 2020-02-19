@@ -47,6 +47,7 @@ ProgramData program;
 WorldSave world;
 WorldSave test;
 WidgetCreator* creator;
+bool maximize = true;
 constexpr uint8_t FRAMERATE = 60;
 constexpr uint8_t UPDATERATE = 20;
 
@@ -97,18 +98,54 @@ void UpdateWorld()
 	}
 }
 
-int main()
+void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreateWindow)
 {
-	sf::Thread MapUpdate(&UpdateWorld);
+	if (maximize || recreateWindow && !windowFullScreen)
+	{
+		sf::WindowHandle windowHandle = window.getSystemHandle();
+		ShowWindow(windowHandle, SW_MAXIMIZE);
+	}
 
-	// Generate the window
-	//program.windowWidth = 1366;
-	//program.windowHeight = 748;
-	program.windowWidth = 1920;
-	program.windowHeight = 1010;
-	program.halfWindowWidth = program.windowWidth / 2;
-	program.halfWindowHeight = program.windowHeight / 2;
-	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma");
+	agui::Dimension displaySize;
+	if (auto display = gui->getGraphics())
+	{
+		displaySize = gui->getGraphics()->getDisplaySize();
+	}
+
+	if (program.windowWidth != displaySize.getWidth() || program.windowHeight != displaySize.getHeight())
+	{
+		// Find the max window size for when going from fullscreen to windowed
+		if (displaySize.getWidth() > program.windowedWidth)
+			program.windowedWidth = displaySize.getWidth();
+		if (displaySize.getHeight() > program.windowedHeight)
+			program.windowedHeight = displaySize.getHeight();
+
+		program.windowWidth = displaySize.getWidth();
+		program.windowHeight = displaySize.getHeight();
+		program.halfWindowWidth = program.windowWidth / 2;
+		program.halfWindowHeight = program.windowHeight / 2;
+		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
+
+		if (program.windowedWidth == program.windowWidth && program.windowedHeight == program.windowHeight)
+			maximize = true;
+	}
+	if (recreateWindow && !windowFullScreen)
+	{
+		program.windowWidth = program.windowedWidth;
+		program.windowHeight = program.windowedHeight;
+		program.halfWindowWidth = program.windowWidth / 2;
+		program.halfWindowHeight = program.windowHeight / 2;
+		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
+		maximize = true;
+	}
+	if (windowFullScreen)
+	{
+		window.create(sf::VideoMode(int(sf::VideoMode::getDesktopMode().width), int(sf::VideoMode::getDesktopMode().height)), "Terraforma", sf::Style::Fullscreen);
+		program.windowWidth = sf::VideoMode::getDesktopMode().width;
+		program.windowHeight = sf::VideoMode::getDesktopMode().height;
+		program.halfWindowWidth = program.windowWidth / 2;
+		program.halfWindowHeight = program.windowHeight / 2;
+	}		
 
 	program.worldView = sf::View();
 	program.worldView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
@@ -118,8 +155,29 @@ int main()
 	program.hudView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
 	program.hudView.setCenter(0, 0);
 
+	program.redrawGround = true;
+
+	if(creator)
+		creator->~WidgetCreator();
+	creator = new WidgetCreator(gui, &window);
 	window.setView(program.worldView);
 	window.setFramerateLimit(GC::FRAMERATE);
+
+	if (recreateWindow || maximize)
+	{
+		sf::WindowHandle windowHandle = window.getSystemHandle();
+		ShowWindow(windowHandle, SW_MAXIMIZE);
+		maximize = false;
+	}
+}
+
+int main()
+{
+	sf::Thread MapUpdate(&UpdateWorld);
+
+	// Generate the window
+	program.windowWidth = 1366;
+	program.windowHeight = 748;	
 
 	// Load program
 	LoadPrototypes();
@@ -130,10 +188,14 @@ int main()
 	bool windowFullScreen = false;
 
 	// Load Gui
+	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma");
+	sf::WindowHandle windowHandle = window.getSystemHandle();
+	ShowWindow(windowHandle, SW_MAXIMIZE);
+	maximize = true;
 	initializeAgui(window);
-	creator = new WidgetCreator(gui, &window);
 	MapUpdate.launch();
 	program.running = true;
+
 	while (window.isOpen() && program.running)
 	{
 		sf::Event event;
@@ -145,6 +207,7 @@ int main()
 			}
 			else if (event.type == sf::Event::Resized)
 			{
+				ResizeWindow(window, windowFullScreen,false);
 				// adjust the viewport when the window is resized
 				gui->resizeToDisplay();
 			}
@@ -154,12 +217,7 @@ int main()
 				if (event.key.code == sf::Keyboard::F11)
 				{
 					windowFullScreen = !windowFullScreen;
-					//window.~RenderWindow();
-					if(windowFullScreen)
-						window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Fullscreen);
-					else
-						window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
-					window.setFramerateLimit(GC::FRAMERATE);
+					ResizeWindow(window, windowFullScreen,true);
 				}
 			}
 			creator->UserInput(event);

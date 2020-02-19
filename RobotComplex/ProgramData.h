@@ -45,6 +45,8 @@ public:
 	std::vector<sf::Text> textOverlay;
 	MySet<uint64_t> elementExists;
 
+	float windowedWidth;
+	float windowedHeight;
 	float windowWidth;
 	float halfWindowWidth;
 	float windowHeight;
