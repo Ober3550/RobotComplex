@@ -16,4 +16,6 @@ struct ItemTile : public ParentTile
 		this->quantity = 1;
 	}
 	std::string GetTooltip();
+	virtual void Serialize(std::ofstream*);
+	virtual void Deserialize(std::ifstream*);
 };

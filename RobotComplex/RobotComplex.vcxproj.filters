@@ -329,6 +329,9 @@
     <ClCompile Include="ItemTile.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
+    <ClCompile Include="ParentTile.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h">
@@ -432,6 +435,15 @@
     </ClInclude>
     <ClInclude Include="ParentTile.h">
       <Filter>Header Files\WorldElements</Filter>
+    </ClInclude>
+    <ClInclude Include="MyVector.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="GetFileLength.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementTypes.h">
+      <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

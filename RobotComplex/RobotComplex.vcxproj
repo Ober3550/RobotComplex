@@ -299,6 +299,7 @@
     <ClCompile Include="LogicTileDrawing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyMod.cpp" />
+    <ClCompile Include="ParentTile.cpp" />
     <ClCompile Include="Pos.cpp" />
     <ClCompile Include="ProgramData.cpp" />
     <ClCompile Include="PrototypeLoader.cpp" />
@@ -316,10 +317,12 @@
     <ClInclude Include="CraftingClass.h" />
     <ClInclude Include="CraftingProcess.h" />
     <ClInclude Include="CraftingSuccess.h" />
+    <ClInclude Include="ElementTypes.h" />
     <ClInclude Include="Facing.h" />
     <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h" />
     <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD_internal.h" />
     <ClInclude Include="FindInVector.h" />
+    <ClInclude Include="GetFileLength.h" />
     <ClInclude Include="GetFileNamesInFolder.h" />
     <ClInclude Include="ItemTile.h" />
     <ClInclude Include="KeyNames.h" />
@@ -328,6 +331,7 @@
     <ClInclude Include="MyMap.h" />
     <ClInclude Include="MyMod.h" />
     <ClInclude Include="MySet.h" />
+    <ClInclude Include="MyVector.h" />
     <ClInclude Include="ParentTile.h" />
     <ClInclude Include="Pos.h" />
     <ClInclude Include="ProgramData.h" />

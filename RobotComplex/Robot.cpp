@@ -74,3 +74,16 @@ void Robot::DrawTile(SpriteVector* appendTo, int x, int y, float s)
 	sprite.setScale(sf::Vector2f(s, s));
 	appendTo->emplace_back(sprite);
 }
+
+void Robot::Serialize(std::ofstream* writer)
+{
+	writer->write((char*)&this->pos, sizeof(Pos));
+	writer->write((char*)&this->facing, sizeof(Facing));
+	writer->write((char*)&this->stopped, sizeof(bool));
+}
+void Robot::Deserialize(std::ifstream* reader)
+{
+	reader->read((char*)&this->pos, sizeof(Pos));
+	reader->read((char*)&this->facing, sizeof(Facing));
+	reader->read((char*)&this->stopped, sizeof(bool));
+}

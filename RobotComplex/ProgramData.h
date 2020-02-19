@@ -14,6 +14,7 @@
 #include "SpriteVector.h"
 #include "MySet.h"
 #include "Align.h"
+#include "MyVector.h"
 
 class ProgramData {
 public:
@@ -66,7 +67,7 @@ public:
 	Pos cameraPos = { 0, 0 };
 	int hotbarIndex = 0;
 	int hotbarSize = 20;
-	std::vector<ParentTile*> hotbar;
+	MyVector<ParentTile*> hotbar;
 	int hoveringHotbar;
 	ParentTile* selectedHotbar;
 	LogicTile* selectedLogicTile;

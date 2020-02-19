@@ -66,6 +66,7 @@ void LogicTile::Serialize(std::ofstream* writer)
 	writer->write((char*)&this->prevSignal,	sizeof(uint8_t));
 	writer->write((char*)&this->signal,		sizeof(uint8_t));
 	writer->write((char*)&this->colorClass,	sizeof(uint8_t));
+	writer->write((char*)&this->quantity,	sizeof(uint8_t));
 }
 
 void LogicTile::Deserialize(std::ifstream* reader)
@@ -75,6 +76,7 @@ void LogicTile::Deserialize(std::ifstream* reader)
 	reader->read((char*)&this->prevSignal,	sizeof(uint8_t));
 	reader->read((char*)&this->signal,		sizeof(uint8_t));
 	reader->read((char*)&this->colorClass,	sizeof(uint8_t));
+	reader->read((char*)&this->quantity,	sizeof(uint8_t));
 }
 
 void Redirector::Serialize(std::ofstream* writer)

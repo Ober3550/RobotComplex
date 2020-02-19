@@ -28,6 +28,7 @@ void WorldSave::Serialize(std::string filename)
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 	SerializeItemNames("saves/" + filename + "/itemNames.txt");
 	SerializeMisc("saves/" + filename + "/misc.txt");
+	program.hotbar.Serialize("saves/" + filename + "/inventory.txt");
 }
 void WorldSave::Deserialize(std::string filename)
 {
@@ -46,6 +47,7 @@ void WorldSave::Deserialize(std::string filename)
 	updateQueueD.Deserialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
+	program.hotbar.Deserialize("saves/" + filename + "/inventory.txt");
 }
 
 void WorldSave::SerializeItemNames(std::string filename)

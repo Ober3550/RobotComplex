@@ -12,10 +12,9 @@
 #include "CraftingProcess.h"
 #include "Pos.h"
 #include "ItemTile.h"
+#include "GetFileLength.h"
 #ifndef __MYMAP_H__
 #define __MYMAP_H__
-
-off_t GetFileLength(std::string const& filename);
 
 template <typename keyType, typename valueType>
 class MyMap : public std::unordered_map<keyType, valueType>

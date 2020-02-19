@@ -72,24 +72,6 @@ public:
 	void Deserialize(std::string filename);
 	void DeserializeItemNames(std::string filename);
 	void DeserializeMisc(std::string filename);
-	void clear()
-	{
-		platforms.clear();
-		nextPlatforms.clear();
-		items.clear();
-		nextItemPos.clear();
-		itemPrevMoved.clear();
-		robots.clear();
-		nextRobotPos.clear();
-		logictiles.clear();
-		worldChunks.clear();
-		craftingQueue.clear();
-		updateQueueA.clear();
-		updateQueueB.clear();
-		updateQueueC.clear();
-		updateQueueD.clear();
-		tick = 0;
-		seed = 0;
-	}
+	void clear();
 };
 extern WorldSave world;

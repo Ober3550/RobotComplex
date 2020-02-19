@@ -26,4 +26,6 @@ public:
 	{
 		return "This is a Robot";
 	}
+	virtual void Serialize(std::ofstream*);
+	virtual void Deserialize(std::ifstream*);
 };

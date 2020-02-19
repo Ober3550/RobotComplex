@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <vector>
 static const std::vector<std::string> logicTypes =
 {
 	"wire",
