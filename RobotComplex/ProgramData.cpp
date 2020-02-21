@@ -799,11 +799,14 @@ void ProgramData::DrawAlignment()
 				drawLine = true;
 			rotation = program.selectedLogicTile->facing;
 		}
-		if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
+		if (program.hotbarIndex != -1)
 		{
-			if (hotbarLogic->ShowAlign())
-				drawLine = true;
-			rotation = hotbarLogic->facing;
+			if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
+			{
+				if (hotbarLogic->ShowAlign())
+					drawLine = true;
+				rotation = hotbarLogic->facing;
+			}
 		}
 		if (drawLine)
 		{
