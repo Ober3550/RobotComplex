@@ -62,30 +62,50 @@ void LogicTile::Serialize(std::ofstream* writer)
 {
 	writer->write((char*)&this->logictype,	sizeof(LogicTypes));
 	writer->write((char*)&this->pos,		sizeof(Pos));
-	writer->write((char*)&this->facing,		sizeof(Facing));
-	writer->write((char*)&this->prevSignal,	sizeof(uint8_t));
-	writer->write((char*)&this->signal,		sizeof(uint8_t));
-	writer->write((char*)&this->colorClass,	sizeof(uint8_t));
-	writer->write((char*)&this->quantity,	sizeof(uint8_t));
+	writer->write((char*)&this->facingAndColor,	1);
+	writer->write((char*)&this->prevSignal,	1);
+	writer->write((char*)&this->signal,		1);
+	writer->write((char*)&this->quantity,	1);
 }
+
+uint16_t LogicTile::MemorySize() {
+	return 12;
+};
 
 void LogicTile::Deserialize(std::ifstream* reader, int* blockSize)
 {
 	if (int(*blockSize - sizeof(Pos)) < 0) return;
 	else *blockSize -= sizeof(Pos);
 	reader->read((char*)&this->pos,			sizeof(Pos));
+
+	
+	if (int(*blockSize - sizeof(LogicPack)) < 0) return;
+	else *blockSize -= sizeof(LogicPack);
+	reader->read((char*)&this->facingAndColor, sizeof(LogicPack));
+	
+	/*
 	if (int(*blockSize - sizeof(Facing)) < 0) return;
 	else *blockSize -= sizeof(Facing);
-	reader->read((char*)&this->facing,		sizeof(Facing));
+	uint8_t* tempByte = new uint8_t();
+	reader->read((char*)tempByte, sizeof(uint8_t));
+	this->facing = Facing(*tempByte);
+	*/
+
 	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
 	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->prevSignal,	sizeof(uint8_t));
 	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
 	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->signal,		sizeof(uint8_t));
+
+	/*
 	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
 	else *blockSize -= sizeof(uint8_t);
-	reader->read((char*)&this->colorClass,	sizeof(uint8_t));
+	tempByte = new uint8_t();
+	reader->read((char*)tempByte,	sizeof(uint8_t));
+	this->colorClass = *tempByte;
+	*/
+
 	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
 	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->quantity,	sizeof(uint8_t));
@@ -121,7 +141,7 @@ bool LogicTile::GetConnected(LogicTile* querier)
 			return true;
 		if (this->IsSource())
 			return true;
-		if (querier->colorClass == this->colorClass)
+		if (querier->GetColorClass(this) == this->GetColorClass(querier))
 			return true;
 	}
 	return false;
@@ -140,7 +160,7 @@ bool DirectionalLogicTile::GetConnected(LogicTile* querier)
 			}
 			return false;
 		}
-		if (querier->colorClass == this->colorClass)
+		if (querier->GetColorClass(this) == this->GetColorClass(querier))
 			return true;
 	}
 	return false;
@@ -469,6 +489,20 @@ uint8_t WireBridge::ShowPowered(LogicTile* querier)
 		if(this->signal2)
 			return GC::colorClassB;
 	}
+	return 0;
+}
+
+uint8_t WireBridge::GetColorClass(LogicTile* querier)
+{
+	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
+	{
+		return GC::colorClassA;
+	}
+	else
+	{
+		return GC::colorClassB;
+	}
+	return 0;
 }
 
 uint8_t WireBridge::GetSignal(LogicTile* querier)

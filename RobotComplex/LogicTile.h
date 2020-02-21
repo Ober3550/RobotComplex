@@ -11,20 +11,26 @@
 #include "SpriteVector.h"
 #include "MySet.h"
 #include "ParentTile.h"
+#include "LogicPacking.h"
 
 class LogicTile : public ParentTile {
 public:
-	LogicTypes logictype;					// 1 byte
 	Pos pos;								// 8 bytes
-	Facing facing;							// 1 byte
+	LogicTypes logictype;					// 1 byte
 	uint8_t prevSignal;						// 1 byte
 	uint8_t signal;							// 1 byte
-	uint8_t colorClass;						// xxxxxBGR 8 color byte
-	uint8_t quantity = 1;						// quantity for crafting multiple on the same tile
-	virtual uint16_t MemorySize() {
-		return sizeof(Pos) + sizeof(Facing) + sizeof(uint8_t) * 4;
+	uint8_t quantity = 1;					// quantity for crafting multiple on the same tile
+	union
+	{
+		uint8_t facingAndColor;
+		struct {
+			Facing facing : 2;
+			uint8_t colorClass : 3;
+		};
 	};
+	virtual uint16_t MemorySize();
 	static sf::Texture* texture;			// Empty texture
+	virtual uint8_t GetColorClass(LogicTile* querier) { return this->colorClass; };
 	virtual uint8_t GetSignal(LogicTile* querier) { return this->signal; };
 	virtual void SignalEval(std::array<uint8_t, 4> neighbours);
 	virtual void DoWireLogic();
@@ -262,6 +268,7 @@ public:
 	void Serialize(std::ofstream*);
 	void Deserialize(std::ifstream*, int* blockSize);
 	WireBridge() { logictype = wirebridge; };
+	uint8_t GetColorClass(LogicTile* querier);
 	bool GetConnected(LogicTile* querier);
 	uint8_t GetSignal(LogicTile* querier);
 	void SignalEval(std::array<uint8_t, 4> neighbours);

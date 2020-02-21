@@ -445,6 +445,9 @@
     <ClInclude Include="ElementTypes.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
+    <ClInclude Include="LogicPacking.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm">

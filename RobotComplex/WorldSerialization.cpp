@@ -50,7 +50,7 @@ void WorldSave::Deserialize(std::string filename)
 	updateQueueD.Deserialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
-	program.hotbar.Deserialize("saves/" + filename + "/inventory.txt");
+	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin");
 }
 
 void WorldSave::SerializeItemNames(std::string filename)
@@ -91,7 +91,7 @@ void WorldSave::SerializeLogicStructure(std::string filename)
 	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())
 	{
-		for (int i=1; i<=logicTypes.size();i++)
+		for (int i=0; i<logicTypes.size();i++)
 		{
 			LogicTile* tempLogic = LogicTile::Factory(i);
 			if (tempLogic)

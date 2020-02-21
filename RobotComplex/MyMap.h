@@ -237,16 +237,20 @@ public:
 			int successfulLoads = 0;
 			while (!myfile.eof()) {
 				prevKey = key;
-				//myfile.read((char*)sectionSize, sizeof(uint16_t));
 				myfile.read((char*)newClass, sizeof(uint8_t));
 				int elementSize = sizes[*newClass];
 				if (uint8_t* newlogicType = newMap.GetValue(*newClass))
 				{
-					LogicTile* newElement = LogicTile::Factory((*newClass));
+					LogicTile* newElement = LogicTile::Factory((*newlogicType));
 					newElement->Deserialize(&myfile, &elementSize);
 					key = newElement->pos.CoordToEncoded();
 					this->insert({ key,newElement });
 					successfulLoads++;
+				}
+				else
+				{
+					LogicTile* failed = *this->GetValue(prevKey);
+					delete failed;
 				}
 				// Otherwise element does not exist in the map
 				// If memory block pointer isn't resting at the start of the next block move it forward or backward.

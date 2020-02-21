@@ -326,6 +326,7 @@
     <ClInclude Include="GetFileNamesInFolder.h" />
     <ClInclude Include="ItemTile.h" />
     <ClInclude Include="KeyNames.h" />
+    <ClInclude Include="LogicPacking.h" />
     <ClInclude Include="LogicTile.h" />
     <ClInclude Include="LogicTypes.h" />
     <ClInclude Include="MyMap.h" />

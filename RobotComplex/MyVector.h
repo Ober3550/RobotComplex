@@ -78,9 +78,6 @@ public:
 			{
 				if (value)
 				{
-					uint16_t* sectionSize = new uint16_t();
-					*sectionSize = sizeof(*value);
-					myfile.write((char*)sectionSize, sizeof(uint16_t));
 					ElementTypes* elementType = new ElementTypes();
 					if (LogicTile* logic = dynamic_cast<LogicTile*> (value))
 					{
@@ -111,11 +108,9 @@ public:
 		if (myfile.is_open() && fileLength > 0)
 		{
 			myfile.seekg(0, std::ios::beg);
-			uint16_t* sectionSize = new uint16_t();
 			ElementTypes* newClass = new ElementTypes();
 			uint64_t key;
 			while (!myfile.eof()) {
-				myfile.read((char*)sectionSize, sizeof(uint16_t));
 				myfile.read((char*)newClass, sizeof(ElementTypes));
 				ParentTile* newElement = ParentTile::Factory(*newClass, &myfile);
 				this->emplace_back(newElement);
