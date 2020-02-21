@@ -129,7 +129,7 @@ public:
 		{
 			for (auto &kv : *this)
 			{
-				myfile.write((char*)&kv.second, sizeof(uint64_t) + sizeof(Robot));
+				kv.second.Serialize(&myfile);
 			}
 			myfile.close();
 		}
@@ -145,7 +145,7 @@ public:
 			myfile.seekg(0, std::ios::beg);
 			Robot* readMem = new Robot();
 			while (!myfile.eof()) {
-				myfile.read((char*)readMem, sizeof(Robot));
+				readMem->Deserialize(&myfile);
 				this->insert({ readMem->pos.CoordToEncoded(),*readMem });
 			}
 			myfile.close();

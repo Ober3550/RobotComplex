@@ -10,6 +10,7 @@ public:
 	Pos pos;												// 8 bytes
 	Facing facing = north;									// 1 byte
 	bool stopped = false;									// 1 byte
+	int MemorySize() { return 10; };
 	void SetFacing(Facing direction);
 	void Rotate(int r);
 	bool Move();
