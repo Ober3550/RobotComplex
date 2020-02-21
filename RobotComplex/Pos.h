@@ -27,4 +27,5 @@ public:
 	Pos operator/(float other); 
 	Pos operator*(int other);
 	Pos operator/(int other);
+	Pos operator%(int other);
 };

@@ -445,7 +445,7 @@
     <ClInclude Include="ElementTypes.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
-    <ClInclude Include="LogicPacking.h">
+    <ClInclude Include="Oregen.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>

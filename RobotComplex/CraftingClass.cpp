@@ -108,7 +108,7 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 						}
 						else
 						{
-							LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd + 1);
+							LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd);
 							LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
 							logicPlace->pos = alterPos;
 							world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });

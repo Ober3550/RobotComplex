@@ -103,6 +103,7 @@ public:
 	
 	sf::Color HSV2RGB(sf::Color);
 	void DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos);
+	void DrawAlignment();
 	void DrawUpdateCounter();
 	void DrawTooltips();
 	void DrawHotbar();

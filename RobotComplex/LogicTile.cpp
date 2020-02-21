@@ -79,9 +79,9 @@ void LogicTile::Deserialize(std::ifstream* reader, int* blockSize)
 	reader->read((char*)&this->pos,			sizeof(Pos));
 
 	
-	if (int(*blockSize - sizeof(LogicPack)) < 0) return;
-	else *blockSize -= sizeof(LogicPack);
-	reader->read((char*)&this->facingAndColor, sizeof(LogicPack));
+	if (int(*blockSize - 1) < 0) return;
+	else *blockSize -= 1;
+	reader->read((char*)&this->facingAndColor, 1);
 	
 	/*
 	if (int(*blockSize - sizeof(Facing)) < 0) return;

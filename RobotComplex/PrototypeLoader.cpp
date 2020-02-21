@@ -225,6 +225,7 @@ void LoadLogicToHotbar()
 	WireBridge* wireBridge = new WireBridge();
 	Comparer* comparer = new Comparer();
 	Robot* robot = new Robot();
+	Robot* robot2 = new Robot();
 	ItemTile* item = new ItemTile(4);
 	ItemTile* item2 = new ItemTile(3);
 
@@ -251,9 +252,9 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(booster);
 	program.hotbar.emplace_back(comparer);
 	program.hotbar.emplace_back(robot);
+	program.hotbar.emplace_back(robot2);
 	program.hotbar.emplace_back(item);
 	program.hotbar.emplace_back(item2);
-	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);

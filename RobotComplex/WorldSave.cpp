@@ -7,6 +7,9 @@
 #include "WorldSave.h"
 #include <typeinfo>
 #include "ProgramData.h"
+#include "Oregen.h"
+#include "FindInVector.h"
+#include <math.h>
 
 void WorldSave::GenerateChunk(Pos pos)
 {
@@ -27,7 +30,44 @@ void WorldSave::GenerateChunk(Pos pos)
 			float normalized = ((chunkNoise[(currentPos.x & GC::chunkMask) * 32 + (currentPos.y & GC::chunkMask)] + 1.0f) / 2.0f);
 			newChunk->tiles[i] = GroundTile{(uint8_t)(normalized * 512)};
 		}
+		GenerateOre(pos);
 	}
+}
+void WorldSave::GenerateOre(Pos pos)
+{
+	for (size_t i = 0; i < ores.size(); i++)
+	{
+		Pos region = Pos(pos);
+		region = region / oreRarities[i];
+		srand((region.CoordToEncoded() * 13 % 21) ^ (i * 41 % 17));
+		Pos generate = Pos{ rand(),rand() };
+		generate = (generate % (oreRarities[i] * GC::chunkSize)) + ((region * oreRarities[i]) * GC::chunkSize);
+		if (generate.ChunkPosition() == pos)
+		{
+			int itemNumber = findInVector(program.itemPrototypes, ores[i]).second;
+			if (itemNumber != -1)
+			{
+				ItemTile newItem = ItemTile();
+				newItem.itemTile = itemNumber;
+				int size = rand() % 10 + 10;
+				for (int x = generate.x - size; x < generate.x + size; x++)
+				{
+					for (int y = generate.y - size; y < generate.y + size; y++)
+					{
+						int distance = pow(generate.x - x, 2) + pow(generate.y - y, 2);
+						int quantity = size - sqrt(distance);
+						if (quantity > 0)
+						{
+							newItem.quantity = quantity;
+							Pos newPos = Pos{ x, y };
+							world.items.insert({ newPos.CoordToEncoded(), newItem });
+						}
+					}
+				}
+			}
+		}
+	}
+	
 }
 GroundTile* WorldSave::GetGroundTile(Pos pos)
 {
@@ -138,7 +178,8 @@ bool WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int push
 	Pos prevPos = itemsMoving->back();
 	Pos nextPos = prevPos.FacingPosition(toward);
 	// If there is already a different item moving to the position specified don't continue
-	if (!world.itemMovingTo.contains(nextPos.CoordToEncoded()) && !world.prevItemMovingTo.contains(nextPos.CoordToEncoded()))
+	// && !world.prevItemMovingTo.contains(nextPos.CoordToEncoded())
+	if (!world.itemMovingTo.contains(nextPos.CoordToEncoded()))
 	{
 		if (LogicTile* logic = world.GetLogicTile(nextPos))
 		{

@@ -528,12 +528,13 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		program.unscaledBoxes.clear();
 		program.scaledBoxes.clear();
 		RecreateSprites();
-		DrawTooltips();
-		DrawHotbar();
-		if(program.selectedLogicTile && !program.hoveringHotbar)
+		if (program.selectedLogicTile && program.hoveringHotbar == -1)
 			DrawSelectedBox(&program.scaledBoxes,program.mouseHovering);
+		DrawAlignment();
 		if (program.showDebugInfo)
 			DrawDebugHUD();
+		DrawTooltips();
+		DrawHotbar();
 	//}
 	window.setView(program.worldView);
 	program.groundSprites.draw(window);
@@ -782,6 +783,38 @@ void ProgramData::UpdateMap()
 		}
 	}
 	world.updateQueueD.clear();
-	++world.tick;
+	world.tick++;
+}
+
+void ProgramData::DrawAlignment()
+{
+	if (program.selectedLogicTile || program.hotbarIndex != -1)
+	{
+		bool drawLine = false;
+		Facing rotation = program.placeRotation;
+		if (program.selectedLogicTile)
+		{
+			if (program.selectedLogicTile->ShowAlign())
+				drawLine = true;
+			rotation = program.selectedLogicTile->facing;
+		}
+		if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
+		{
+			if (hotbarLogic->ShowAlign())
+				drawLine = true;
+			rotation = hotbarLogic->facing;
+		}
+		if (drawLine)
+		{
+			sf::RectangleShape selectionBox;
+			selectionBox.setSize(sf::Vector2f(4, 1024 * program.zoom));
+			selectionBox.setOrigin(sf::Vector2f(2, 1024 * program.zoom + GC::halfTileSize));
+			selectionBox.rotate(program.placeRotation * 90.f);
+			selectionBox.setFillColor(sf::Color(255, 255, 0, 255));
+			Pos drawPos = program.mouseHovering * GC::tileSize;
+			selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
+			program.scaledBoxes.emplace_back(selectionBox);
+		}
+	}
 }
 

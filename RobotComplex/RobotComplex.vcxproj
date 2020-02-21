@@ -326,13 +326,13 @@
     <ClInclude Include="GetFileNamesInFolder.h" />
     <ClInclude Include="ItemTile.h" />
     <ClInclude Include="KeyNames.h" />
-    <ClInclude Include="LogicPacking.h" />
     <ClInclude Include="LogicTile.h" />
     <ClInclude Include="LogicTypes.h" />
     <ClInclude Include="MyMap.h" />
     <ClInclude Include="MyMod.h" />
     <ClInclude Include="MySet.h" />
     <ClInclude Include="MyVector.h" />
+    <ClInclude Include="Oregen.h" />
     <ClInclude Include="ParentTile.h" />
     <ClInclude Include="Pos.h" />
     <ClInclude Include="ProgramData.h" />

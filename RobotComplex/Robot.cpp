@@ -37,7 +37,7 @@ bool Robot::Move()
 				{
 					// If next tile has an item on it and robot is not carying an item
 					// reduce the quantity of the tile and assign the item id to the robot
-					bool step;
+					bool step = true;
 					if (ItemTile* nextTile = world.GetItemTile(newPos))
 					{
 						std::vector<Pos> pushStack = { newPos };
@@ -56,6 +56,10 @@ bool Robot::Move()
 						world.robotMovingTo.insert(newPos.CoordToEncoded());
 						world.nextRobotPos.insert({ this->pos.CoordToEncoded(), this->facing });
 						return true;
+					}
+					else
+					{
+						bool pushFailed = true;
 					}
 				}
 			}

@@ -68,6 +68,7 @@ public:
 	bool PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft); // bool is for whether the robot should move after a failed operation
 	bool ChangeItem(Pos pos, uint16_t item, int quantity);
 	void GenerateChunk(Pos pos);
+	void GenerateOre(Pos pos);
 	void Serialize(std::string filename);
 	void SerializeItemNames(std::string filename);
 	void SerializeMisc(std::string filename);

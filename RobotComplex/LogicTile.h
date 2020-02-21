@@ -11,7 +11,6 @@
 #include "SpriteVector.h"
 #include "MySet.h"
 #include "ParentTile.h"
-#include "LogicPacking.h"
 
 class LogicTile : public ParentTile {
 public:
@@ -42,6 +41,7 @@ public:
 	virtual bool NeighbourConnects(LogicTile* querier) { return true; };
 	virtual bool IsSource() { return false; };
 	virtual bool ReceivesSignal(LogicTile* querier) { return true; };
+	virtual bool ShowAlign() { return false; };
 	virtual uint8_t ShowPowered(LogicTile* querier) { 
 		if (this->signal)
 		return colorClass;
@@ -114,6 +114,7 @@ public:
 	Redirector(const Redirector* other) {
 		this->logictype = redirector;
 	}
+	bool ShowAlign() { return true; };
 	void DoRobotLogic(Pos robotRef);						// Redirects robots when stepped onto
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip();
@@ -253,6 +254,7 @@ public:
 	void DoRobotLogic(Pos robotRef);						// Activates when a robot holding the correct item filter steps onto it
 	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
 	std::string GetTooltip() { return "This is a belt"; };
+	bool ShowAlign() { return true; };
 	Belt* Copy()
 	{
 		Belt* logicTile = new Belt();

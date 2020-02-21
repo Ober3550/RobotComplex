@@ -122,3 +122,7 @@ Pos Pos::operator/(int other)
 {
 	return Pos{ int(this->x / other), int(this->y / other) };
 }
+Pos Pos::operator%(int other)
+{
+	return Pos{ int(MyMod(this->x,other)), int(MyMod(this->y,other)) };
+}
