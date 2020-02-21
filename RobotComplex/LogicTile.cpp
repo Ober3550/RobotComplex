@@ -69,24 +69,40 @@ void LogicTile::Serialize(std::ofstream* writer)
 	writer->write((char*)&this->quantity,	sizeof(uint8_t));
 }
 
-void LogicTile::Deserialize(std::ifstream* reader)
+void LogicTile::Deserialize(std::ifstream* reader, int* blockSize)
 {
+	if (int(*blockSize - sizeof(Pos)) < 0) return;
+	else *blockSize -= sizeof(Pos);
 	reader->read((char*)&this->pos,			sizeof(Pos));
+	if (int(*blockSize - sizeof(Facing)) < 0) return;
+	else *blockSize -= sizeof(Facing);
 	reader->read((char*)&this->facing,		sizeof(Facing));
+	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
+	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->prevSignal,	sizeof(uint8_t));
+	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
+	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->signal,		sizeof(uint8_t));
+	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
+	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->colorClass,	sizeof(uint8_t));
+	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
+	else *blockSize -= sizeof(uint8_t);
 	reader->read((char*)&this->quantity,	sizeof(uint8_t));
 }
 
-void Redirector::Serialize(std::ofstream* writer)
+void WireBridge::Serialize(std::ofstream* writer)
 {
 	LogicTile::Serialize(writer);
+	writer->write((char*)&this->signal2, sizeof(uint8_t));
 }
 
-void Redirector::Deserialize(std::ifstream* reader)
+void WireBridge::Deserialize(std::ifstream* reader, int* blockSize)
 {
-	LogicTile::Deserialize(reader);
+	LogicTile::Deserialize(reader, blockSize);
+	if (int(*blockSize - sizeof(uint8_t)) < 0) return;
+	else *blockSize -= sizeof(uint8_t);
+	reader->read((char*)&this->signal2, sizeof(uint8_t));
 }
 
 void LogicTile::BaseCopy(LogicTile* logicTile)

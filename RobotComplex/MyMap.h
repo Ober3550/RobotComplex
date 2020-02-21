@@ -209,16 +209,19 @@ public:
 		{
 			for (auto &kv : *this)
 			{
-				uint16_t* sectionSize = new uint16_t();
-				*sectionSize = sizeof(*kv.second) - sizeof(uint32_t);
-				myfile.write((char*)sectionSize, sizeof(uint16_t));
+				// Section size is now stored separately
+				//uint16_t* sectionSize = new uint16_t();
+				//*sectionSize = sizeof(*kv.second) - sizeof(uint32_t);
+				//myfile.write((char*)sectionSize, sizeof(uint16_t));
 				//We don't need to write the key since it's just the encoded version of the position
 				kv.second->Serialize(&myfile);
 			}
 			myfile.close();
 		}
 	}
-	void Deserialize(std::string filename)
+	// We take in a new map incase of elements that were previously added get removed and the order of the elements change
+	// We take in the memory size stored within the file so that we don't be gready when reading in memory
+	void Deserialize(std::string filename, MyMap<uint8_t, uint8_t> newMap, std::vector<uint16_t> sizes)
 	{
 		std::ifstream myfile;
 		myfile.open(filename, std::ios::in | std::ios::binary);
@@ -227,16 +230,35 @@ public:
 		if (myfile.is_open() && fileLength > 0)
 		{
 			myfile.seekg(0, std::ios::beg);
-			uint16_t* sectionSize = new uint16_t();
+			//uint16_t* sectionSize = new uint16_t();
 			LogicTypes* newClass = new LogicTypes();
-			uint64_t key;
+			uint64_t prevKey;
+			uint64_t key = 0;
+			int successfulLoads = 0;
 			while (!myfile.eof()) {
-				myfile.read((char*)sectionSize, sizeof(uint16_t));
-				myfile.read((char*)newClass, sizeof(LogicTypes));
-				LogicTile* newElement = LogicTile::Factory(*newClass);
-				newElement->Deserialize(&myfile);
-				key = newElement->pos.CoordToEncoded();
-				this->insert({ key,newElement });
+				prevKey = key;
+				//myfile.read((char*)sectionSize, sizeof(uint16_t));
+				myfile.read((char*)newClass, sizeof(uint8_t));
+				int elementSize = sizes[*newClass];
+				if (uint8_t* newlogicType = newMap.GetValue(*newClass))
+				{
+					LogicTile* newElement = LogicTile::Factory((*newClass));
+					newElement->Deserialize(&myfile, &elementSize);
+					key = newElement->pos.CoordToEncoded();
+					this->insert({ key,newElement });
+					successfulLoads++;
+				}
+				else
+				{
+					// Element does not exist in map
+					LogicTile* issueLogic = *this->GetValue(prevKey);
+					int failed = 1;
+				}
+				// If memory block pointer isn't resting at the start of the next block move it forward or backward.
+				if (elementSize != 0)
+				{
+					myfile.seekg(elementSize, std::ifstream::cur);
+				}
 			}
 			this->erase(key);
 			myfile.close();

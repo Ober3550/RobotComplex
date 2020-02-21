@@ -1,0 +1,11 @@
+wire : 13
+pressureplate : 13
+redirector : 13
+inverter : 13
+booster : 13
+counter : 13
+repeater : 13
+gate : 13
+belt : 13
+wirebridge : 14
+comparer : 13

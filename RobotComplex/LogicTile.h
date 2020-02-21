@@ -21,6 +21,9 @@ public:
 	uint8_t signal;							// 1 byte
 	uint8_t colorClass;						// xxxxxBGR 8 color byte
 	uint8_t quantity = 1;						// quantity for crafting multiple on the same tile
+	virtual uint16_t MemorySize() {
+		return sizeof(Pos) + sizeof(Facing) + sizeof(uint8_t) * 4;
+	};
 	static sf::Texture* texture;			// Empty texture
 	virtual uint8_t GetSignal(LogicTile* querier) { return this->signal; };
 	virtual void SignalEval(std::array<uint8_t, 4> neighbours);
@@ -40,7 +43,7 @@ public:
 	};
 	virtual void QueueUpdate();
 	virtual void Serialize(std::ofstream*);
-	virtual void Deserialize(std::ifstream*);
+	virtual void Deserialize(std::ifstream*, int* blockSize);
 	void BaseCopy(LogicTile*);		// Pass in a 'new' allocated memory address and have it populated with the originals properties
 
 	virtual void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags) {};
@@ -99,8 +102,6 @@ public:
 class Redirector : public LogicTile {
 public:
 	static sf::Texture* texture;					// A texture for drawing
-	virtual void Serialize(std::ofstream*);
-	virtual void Deserialize(std::ifstream*);
 	Redirector() { 
 		this->logictype = redirector;
 	}
@@ -257,6 +258,9 @@ public:
 class WireBridge : public LogicTile {
 public:
 	uint8_t signal2 = 0;
+	uint16_t MemorySize() { return (LogicTile::MemorySize() + 1); };
+	void Serialize(std::ofstream*);
+	void Deserialize(std::ifstream*, int* blockSize);
 	WireBridge() { logictype = wirebridge; };
 	bool GetConnected(LogicTile* querier);
 	uint8_t GetSignal(LogicTile* querier);

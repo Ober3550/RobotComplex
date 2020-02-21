@@ -41,6 +41,8 @@ public:
 	uint64_t seed = 0;
 	// Variables for keeping elements and data structure organised between versions/changes
 	MyMap<uint16_t, uint16_t> oldItemNewItem;	// A map from the old items to new items
+	MyMap<uint8_t, uint8_t> oldLogicNewLogic;
+	std::vector<uint16_t> oldLogicSize;
 
 	FastNoiseSIMD* noiseRef;
 	GroundTile*		 GetGroundTile(Pos pos);
@@ -69,8 +71,10 @@ public:
 	void Serialize(std::string filename);
 	void SerializeItemNames(std::string filename);
 	void SerializeMisc(std::string filename);
+	void SerializeLogicStructure(std::string filename);
 	void Deserialize(std::string filename);
 	void DeserializeItemNames(std::string filename);
+	void DeserializeLogicStructure(std::string filename);
 	void DeserializeMisc(std::string filename);
 	void clear();
 };

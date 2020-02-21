@@ -9,7 +9,8 @@ ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 		LogicTypes* logictype = new LogicTypes();
 		myfile->read((char*)logictype, sizeof(LogicTypes));
 		LogicTile* newLogic = LogicTile::Factory(*logictype);
-		newLogic->Deserialize(myfile);
+		int temp = 100;
+		newLogic->Deserialize(myfile,&temp);
 		return newLogic;
 	}
 	else if (element == ElementTypes::robot)

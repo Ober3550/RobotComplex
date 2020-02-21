@@ -24,3 +24,4 @@ repeater
 gate
 belt
 wirebridge
+comparer

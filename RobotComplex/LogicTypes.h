@@ -13,17 +13,18 @@ static const std::vector<std::string> logicTypes =
 	"gate",
 	"belt",
 	"wirebridge"
+	"comparer"
 };
 enum LogicTypes : uint8_t {
-	wire = 1,
-	pressureplate = 2,
-	redirector = 3,
-	inverter = 4,
-	booster = 5,
-	counter = 6,
-	repeater = 7,
-	gate = 8,
-	belt = 9,
-	wirebridge = 10,
-	comparer = 11
+	wire = 0,
+	pressureplate = 1,
+	redirector = 2,
+	inverter = 3,
+	booster = 4,
+	counter = 5,
+	repeater = 6,
+	gate = 7,
+	belt = 8,
+	wirebridge = 9,
+	comparer = 10
 };
