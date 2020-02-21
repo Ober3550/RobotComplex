@@ -38,10 +38,16 @@ void WorldSave::GenerateOre(Pos pos)
 	for (size_t i = 0; i < ores.size(); i++)
 	{
 		Pos region = Pos(pos);
+		Pos adjust = Pos{ 0,0 };
+		if (pos.x < 0)
+			adjust.x = -1;
+		if (pos.y < 0)
+			adjust.y = -1;
 		region = region / oreRarities[i];
-		srand((region.CoordToEncoded() * 13 % 21) ^ (i * 41 % 17));
+		// Some jank to get the random seed to work properly
+		srand(((uint32_t(region.y + adjust.y) << 16) | uint16_t(region.x + adjust.x)) ^ (i * 41 % 17));
 		Pos generate = Pos{ rand(),rand() };
-		generate = (generate % (oreRarities[i] * GC::chunkSize)) + ((region * oreRarities[i]) * GC::chunkSize);
+		generate = (generate % (oreRarities[i] * GC::chunkSize)) + ((region + adjust) * oreRarities[i]) * GC::chunkSize;
 		if (generate.ChunkPosition() == pos)
 		{
 			int itemNumber = findInVector(program.itemPrototypes, ores[i]).second;

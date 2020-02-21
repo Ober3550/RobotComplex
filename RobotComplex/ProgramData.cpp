@@ -79,6 +79,7 @@ void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float 
 	sprite.setTexture(*itemTextures[item.itemTile]);
 	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
 	sprite.setPosition(x + 16.f, y + 16.f);
+	sprite.setScale(sf::Vector2f(1.5f, 1.5f));
 	appendTo->emplace_back(sprite);
 }
 void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
