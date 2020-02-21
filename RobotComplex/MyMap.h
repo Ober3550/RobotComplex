@@ -248,12 +248,7 @@ public:
 					this->insert({ key,newElement });
 					successfulLoads++;
 				}
-				else
-				{
-					// Element does not exist in map
-					LogicTile* issueLogic = *this->GetValue(prevKey);
-					int failed = 1;
-				}
+				// Otherwise element does not exist in the map
 				// If memory block pointer isn't resting at the start of the next block move it forward or backward.
 				if (elementSize != 0)
 				{
