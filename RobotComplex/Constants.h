@@ -25,7 +25,7 @@ namespace GC
 	static constexpr uint8_t hotbarPadding = 4;
 
 	// Game constants
-	static constexpr uint8_t robotStrength = 4;
+	static constexpr uint8_t robotStrength = 6;
 	static constexpr uint8_t maxSignalStrength = 32;
 	static constexpr uint8_t startSignalStrength = 16;
 	static constexpr uint8_t colorClassA = 1;

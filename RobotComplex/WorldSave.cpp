@@ -222,7 +222,7 @@ bool WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int push
 				else
 				{
 					// If the item infront of the stack is the same type but is already 'full' don't push the stack
-					if (pushesLeft == 1 && nextItem->quantity == UINT8_MAX)
+					if (pushesLeft == 1 && nextItem->quantity == 1)
 					{
 						itemsMoving->clear();
 					}

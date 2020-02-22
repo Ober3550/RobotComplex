@@ -137,7 +137,7 @@ void LoadPrototypes()
 
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Recipe Catalyst, Animation, Animation Offset
 	std::vector<RecipeProto> recipePrototypes;
-	recipePrototypes.emplace_back(RecipeProto({ { "wire"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ 
@@ -228,6 +228,8 @@ void LoadLogicToHotbar()
 	Robot* robot2 = new Robot();
 	ItemTile* item = new ItemTile(4);
 	ItemTile* item2 = new ItemTile(3);
+	PlusOne* plusone = new PlusOne();
+	Shover* shover = new Shover();
 
 	int godQuantity = 200;
 	redirect->quantity = godQuantity;
@@ -241,6 +243,8 @@ void LoadLogicToHotbar()
 	comparer->quantity = godQuantity;
 	item->quantity = godQuantity;
 	item2->quantity = godQuantity;
+	plusone->quantity = godQuantity;
+	shover->quantity = godQuantity;
 
 	program.hotbar.emplace_back(redirect);
 	program.hotbar.emplace_back(belt);
@@ -255,8 +259,8 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(robot2);
 	program.hotbar.emplace_back(item);
 	program.hotbar.emplace_back(item2);
-	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(nullptr);
+	program.hotbar.emplace_back(plusone);
+	program.hotbar.emplace_back(shover);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);

@@ -42,6 +42,8 @@ sf::Texture* Comparer::texture = LoadTexture("logic/comparer.png");
 sf::Texture* Gate::texture = LoadTexture("logic/holder.png");
 sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
 sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
+sf::Texture* PlusOne::texture = LoadTexture("logic/plusone.png");
+sf::Texture* Shover::texture = LoadTexture("logic/shover.png");
 
 ProgramData program;
 WorldSave world;

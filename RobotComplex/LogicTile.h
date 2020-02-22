@@ -263,6 +263,22 @@ public:
 	}
 };
 
+class Shover : public LogicTile {
+public:
+	Shover() { logictype = shover; };
+	static sf::Texture* texture;
+	void DoItemLogic();										// Activates when an item of the same filter type is placed onto it
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
+	std::string GetTooltip() { return "Shoves only items to the side"; };
+	bool ShowAlign() { return true; };
+	Shover* Copy()
+	{
+		Shover* logicTile = new Shover();
+		this->BaseCopy(logicTile);
+		return logicTile;
+	}
+};
+
 class WireBridge : public LogicTile {
 public:
 	uint8_t signal2 = 0;
@@ -295,6 +311,21 @@ public:
 	Comparer* Copy()
 	{
 		Comparer* logicTile = new Comparer();
+		this->BaseCopy(logicTile);
+		return logicTile;
+	}
+};
+
+class PlusOne : public DirectionalLogicTile {
+public:
+	PlusOne() { logictype = plusone; };
+	static sf::Texture* texture;
+	void SignalEval(std::array<uint8_t, 4> neighbours);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
+	std::string GetTooltip() { return "Adds one to input signal"; };
+	PlusOne* Copy()
+	{
+		PlusOne* logicTile = new PlusOne();
 		this->BaseCopy(logicTile);
 		return logicTile;
 	}

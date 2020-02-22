@@ -477,6 +477,23 @@ void Belt::DoItemLogic()
 	}
 }
 
+void Shover::DoItemLogic()
+{
+	if (ItemTile* item = world.GetItemTile(this->pos))
+	{
+		std::vector<Pos> pushStack = { this->pos };
+		world.PushItems(&pushStack, this->facing, this->signal);
+		if (!pushStack.empty())
+		{
+			for (uint16_t i = 1; i < pushStack.size(); i++)
+			{
+				world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
+				world.updateQueueD.insert(pushStack[i - 1].FacingPosition(this->facing).CoordToEncoded());
+			}
+		}
+	}
+}
+
 uint8_t WireBridge::ShowPowered(LogicTile* querier)
 {
 	if (this->pos.FacingPosition(this->facing) == querier->pos || this->pos.BehindPosition(this->facing) == querier->pos)
@@ -548,4 +565,13 @@ void WireBridge::SignalEval(std::array<uint8_t, 4> neighbours)
 
 	if (temp != signal2)
 		this->prevSignal = this->signal - 1;
+}
+
+void PlusOne::SignalEval(std::array<uint8_t, 4> neighbours)
+{
+	//int b = std::max(neighbours[1], neighbours[3]);
+	if (neighbours[1] == 0 && neighbours[3] == 0)
+		this->signal = MyMod(neighbours[2] + 1, GC::maxSignalStrength);
+	else
+		this->signal = neighbours[2];
 }
