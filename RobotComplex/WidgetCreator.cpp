@@ -366,6 +366,14 @@ void WidgetCreator::SetDefaultKeyMapping()
 	keyPress = { sf::Keyboard::LAlt, /*alt*/ true, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Show Detailed Info" });
 
+	//Ctrl + C
+	userActionOrder.push_back("Copy");
+	userActions.insert({ "Copy",[&] {
+		program.selectionMode = true;
+	} });
+	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Copy" });
+
 	//F3
 	userActionOrder.push_back("Show Debug Info");
 	userActions.insert({ "Show Debug Info",[&] {
@@ -469,7 +477,14 @@ void WidgetCreator::UserInput(sf::Event input)
 	else if (input.type == sf::Event::MouseButtonPressed)
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		{
+			if (program.selectionMode)
+			{
+				program.startedSelection = true;
+				program.startSelection = program.mouseHovering;
+			}
 			LeftMousePressed();
+		}
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			RightMousePressed();
 	}
@@ -604,8 +619,8 @@ void WidgetCreator::LeftMousePressed()
 							if (existingLogic->logictype == hotbarLogic->logictype)
 							{
 								existingLogic->quantity++;
+								hotbarLogic->quantity--;
 							}
-							hotbarLogic->quantity--;
 							if (hotbarLogic->quantity == 0)
 							{
 								delete hotbarLogic;

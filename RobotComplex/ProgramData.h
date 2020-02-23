@@ -76,6 +76,9 @@ public:
 	uint8_t placeColor = 1;
 	bool showSignalStrength = true;
 	bool showDebugInfo = false;
+	bool selectionMode = false;
+	bool startedSelection = false;
+	Pos startSelection;
 	
 	std::string selectedSave = "";
 	bool running = true;
@@ -103,10 +106,12 @@ public:
 	
 	sf::Color HSV2RGB(sf::Color);
 	void DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos);
+	void DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos, Pos pos2);
 	void DrawAlignment();
 	void DrawUpdateCounter();
 	void DrawTooltips();
 	void DrawHotbar();
+	void DrawSelectedRegion();
 	void DrawDebugHUD();
 	void DrawGameState(sf::RenderWindow& window);
 	void DrawCrosshair(sf::RenderWindow& window);

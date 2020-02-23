@@ -281,6 +281,7 @@ void ProgramData::DrawTooltips()
 		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedLogicTile->GetTooltip(), Align::centre);
 	}
 }
+
 void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos)
 {
 	sf::RectangleShape selectionBox;
@@ -292,6 +293,31 @@ void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos
 	selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
 	appendTo->emplace_back(selectionBox);
 }
+
+void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos pos, Pos pos2)
+{
+	if (pos.x > pos2.x)
+	{
+		int temp = pos2.x;
+		pos2.x = pos.x;
+		pos.x = temp;
+	}
+	if (pos.y > pos2.y)
+	{
+		int temp = pos2.y;
+		pos2.y = pos.y;
+		pos.y = temp;
+	}
+	sf::RectangleShape selectionBox;
+	selectionBox.setSize(sf::Vector2f(32 * (pos2.x - pos.x), 32 * (pos2.y - pos.y)));
+	selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
+	selectionBox.setOutlineColor(sf::Color(255, 255, 0, 255));
+	selectionBox.setOutlineThickness(2);
+	Pos drawPos = pos * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+	selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
+	appendTo->emplace_back(selectionBox);
+}
+
 void ProgramData::DrawCrosshair(sf::RenderWindow& window)
 {
 	sf::RectangleShape verticalLine(sf::Vector2f(2.f, program.windowHeight));
@@ -532,6 +558,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		if (program.selectedLogicTile && program.hoveringHotbar == -1)
 			DrawSelectedBox(&program.scaledBoxes,program.mouseHovering);
 		DrawAlignment();
+		DrawSelectedRegion();
 		if (program.showDebugInfo)
 			DrawDebugHUD();
 		DrawTooltips();
@@ -818,6 +845,17 @@ void ProgramData::DrawAlignment()
 			Pos drawPos = program.mouseHovering * GC::tileSize;
 			selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
 			program.scaledBoxes.emplace_back(selectionBox);
+		}
+	}
+}
+
+void ProgramData::DrawSelectedRegion()
+{
+	if (program.selectionMode)
+	{
+		if (program.startedSelection)
+		{
+			DrawSelectedBox(&program.scaledBoxes, program.startSelection, program.mouseHovering);
 		}
 	}
 }

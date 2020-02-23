@@ -343,10 +343,7 @@ std::string PressurePlate::GetTooltip()
 void Inverter::SignalEval(std::array<uint8_t, 4> neighbours)
 {
 	int b = std::max(neighbours[1], neighbours[3]);
-	if (GC::startSignalStrength - neighbours[2] + b > 0)
-		this->signal = MyMod(GC::startSignalStrength - neighbours[2] + b, GC::maxSignalStrength);
-	else
-		this->signal = 0;
+	this->signal = MyMod(GC::startSignalStrength - neighbours[2] + b, GC::maxSignalStrength);
 }
 
 std::string Inverter::GetTooltip()
