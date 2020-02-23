@@ -79,5 +79,7 @@ public:
 	void MouseMoved();
 	void RightMousePressed();
 	void LeftMousePressed();
+	void FinishedSelection(Pos start, Pos end);
+	void PasteSelection();
 };
 extern WidgetCreator* creator;

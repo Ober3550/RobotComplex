@@ -76,9 +76,14 @@ public:
 	uint8_t placeColor = 1;
 	bool showSignalStrength = true;
 	bool showDebugInfo = false;
-	bool selectionMode = false;
+	bool cut = false;
+	bool copy = false;
+	bool paste = false;
+	bool godmode = true;
 	bool startedSelection = false;
 	Pos startSelection;
+	std::vector<ParentTile*> copyList;
+	
 	
 	std::string selectedSave = "";
 	bool running = true;
@@ -99,6 +104,7 @@ public:
 	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);
 	void RecreateRobotSprites(uint64_t encodedPos, float x, float y);
 	void RecreateAnimationSprites(uint64_t encodedPos, float x, float y);
+	void RecreateGhostSprites(uint64_t encodedPos, float x, float y);
 	void CreateSmallText(SpriteVector* appendTo, std::string text, float x, float y, float s, Align a);
 	void CreateText(float x, float y, std::string text, Align align);
 	void RecreateSprites();

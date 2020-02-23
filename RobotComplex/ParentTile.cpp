@@ -3,6 +3,8 @@
 #include "Robot.h"
 #include "ItemTile.h"
 #include "WorldSave.h"
+#include "ItemTileWPOS.h"
+#include "ProgramData.h"
 
 ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 {

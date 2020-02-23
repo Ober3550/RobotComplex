@@ -8,6 +8,7 @@
 #include "KeyNames.h"
 #include "GetFileNamesInFolder.h"
 #include "MyMod.h"
+#include "ItemTileWPOS.h"
 
 class SimpleButtonListener : public agui::ButtonListener
 {
@@ -298,6 +299,9 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.selectedRobot->stopped = true;
 		program.selectedRobot = nullptr;
 		program.hotbarIndex = -1;
+		program.paste = false;
+		program.copy = false;
+		program.cut = false;
 	} });
 	keyPress = { sf::Keyboard::Q, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Empty Hand" });
@@ -369,10 +373,28 @@ void WidgetCreator::SetDefaultKeyMapping()
 	//Ctrl + C
 	userActionOrder.push_back("Copy");
 	userActions.insert({ "Copy",[&] {
-		program.selectionMode = true;
+		program.hotbarIndex = -1;
+		program.copy = true;
 	} });
 	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Copy" });
+
+	//Ctrl + X
+	userActionOrder.push_back("Cut");
+	userActions.insert({ "Cut",[&] {
+		program.hotbarIndex = -1;
+		program.cut = true;
+	} });
+	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Cut" });
+
+	//Ctrl + V
+	userActionOrder.push_back("Paste");
+	userActions.insert({ "Paste",[&] {
+		program.paste = true;
+	} });
+	keyPress = { sf::Keyboard::V, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Paste" });
 
 	//F3
 	userActionOrder.push_back("Show Debug Info");
@@ -478,10 +500,14 @@ void WidgetCreator::UserInput(sf::Event input)
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			if (program.selectionMode)
+			if (program.cut || program.copy)
 			{
 				program.startedSelection = true;
 				program.startSelection = program.mouseHovering;
+			}
+			if (program.paste)
+			{
+				PasteSelection();
 			}
 			LeftMousePressed();
 		}
@@ -490,7 +516,13 @@ void WidgetCreator::UserInput(sf::Event input)
 	}
 	else if (input.type == sf::Event::MouseButtonReleased)
 	{
-
+		if (input.mouseButton.button == sf::Mouse::Button::Left)
+		{
+			if (program.startedSelection)
+			{
+				FinishedSelection(program.startSelection, program.mouseHovering);
+			}
+		}
 	}
 	else if (input.type == sf::Event::MouseWheelScrolled)
 	{
@@ -791,4 +823,74 @@ void WidgetCreator::RightMousePressed()
 		}
 		return;
 	}
+}
+
+void WidgetCreator::FinishedSelection(Pos start, Pos end)
+{
+	// Empty the old list when creating a new one
+	for (ParentTile* element : program.copyList)
+	{
+		delete element;
+	}
+	program.copyList.clear();
+	// Make sure start is the top left position of the rect
+	if (start.x > end.x)
+	{
+		int temp = end.x;
+		end.x = start.x;
+		start.x = temp;
+	}
+	if (start.y > end.y)
+	{
+		int temp = end.y;
+		end.y = start.y;
+		start.y = temp;
+	}
+	// Search the region and add elements to a list
+	for (int i = start.x; i < end.x; i++)
+	{
+		for (int j = start.y; j < end.y; j++)
+		{
+			if (LogicTile* logic = world.GetLogicTile(Pos{ i,j }))
+			{
+				LogicTile* copyLogic = logic->Copy();
+				copyLogic->pos = copyLogic->pos - start;
+				ParentTile* newElement = dynamic_cast<ParentTile*> (copyLogic);
+				program.copyList.emplace_back(newElement);
+			}
+			if (ItemTile* item = world.GetItemTile(Pos{ i,j }))
+			{
+				ItemTileWPOS* copyItem = new ItemTileWPOS();
+				copyItem->pos = Pos{ i,j } - start;
+				copyItem->itemTile = item->itemTile;
+				copyItem->quantity = item->quantity;
+				ParentTile* newElement = dynamic_cast<ParentTile*> (copyItem);
+				program.copyList.emplace_back(newElement);
+			}
+		}
+	}
+	program.cut = false;
+	program.copy = false;
+	program.startedSelection = false;
+}
+
+void WidgetCreator::PasteSelection()
+{
+	for (ParentTile* element : program.copyList)
+	{
+		if (LogicTile* newElement = dynamic_cast<LogicTile*> (element))
+		{
+			newElement->pos = newElement->pos + program.mouseHovering;
+			world.logictiles.insert({ newElement->pos.CoordToEncoded(), newElement->Copy() });
+		}
+		else if(ItemTileWPOS* newElement = dynamic_cast<ItemTileWPOS*> (element))
+		{
+			newElement->pos = newElement->pos + program.mouseHovering;
+			ItemTile copy;
+			copy.itemTile = newElement->itemTile;
+			copy.quantity = newElement->quantity;
+			world.items.insert({ newElement->pos.CoordToEncoded(), copy });
+		}
+	}
+	program.paste = false;
 }

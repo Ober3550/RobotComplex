@@ -10,6 +10,7 @@
 #include "CraftingProcess.h"
 #include "RedirectorColors.h"
 #include "Textures.h"
+#include "ItemTileWPOS.h"
 #include <typeinfo>
 #include <cmath>
 
@@ -168,6 +169,27 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 		robot->DrawTile(&program.robotSprites,int(x), int(y), 1.0f);
 	}
 }
+void ProgramData::RecreateGhostSprites(uint64_t encodedPos, float x, float y)
+{
+	for (ParentTile* elem : program.copyList)
+	{
+		if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
+		{
+			if ((ghost->pos + program.mouseHovering).CoordToEncoded() == encodedPos)
+			{
+				ghost->DrawTile(&program.logicSprites, x, y, 1.f, 128);
+			}
+		}
+		else if (Robot* ghost = dynamic_cast<Robot*> (elem))
+		{
+
+		}
+		else if (ItemTile* ghost = dynamic_cast<ItemTile*> (elem))
+		{
+
+		}
+	}
+}
 void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, float x, float y)
 {
 	if (CraftingProcess * recipe = world.GetCrafting(encodedPos))
@@ -215,6 +237,21 @@ void ProgramData::UpdateElementExists()
 	{
 		elementExists.insert({ elem.first });
 	}
+	for (auto elem : program.copyList)
+	{
+		if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
+		{
+			elementExists.insert({ (ghost->pos + program.mouseHovering).CoordToEncoded() });
+		}
+		else if (Robot* ghost = dynamic_cast<Robot*> (elem))
+		{
+			elementExists.insert({ (ghost->pos + program.mouseHovering).CoordToEncoded() });
+		}
+		else if (ItemTileWPOS* ghost = dynamic_cast<ItemTileWPOS*> (elem))
+		{
+			elementExists.insert({ (ghost->pos + program.mouseHovering).CoordToEncoded() });
+		}
+	}
 }
 void ProgramData::RecreateSprites() {
 	if (program.redrawGround)
@@ -249,6 +286,7 @@ void ProgramData::RecreateSprites() {
 				RecreateLogicSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateRobotSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateAnimationSprites(encodedPos, float(screenPos.x), float(screenPos.y));
+				RecreateGhostSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 			}
 		}
 	}
@@ -851,7 +889,7 @@ void ProgramData::DrawAlignment()
 
 void ProgramData::DrawSelectedRegion()
 {
-	if (program.selectionMode)
+	if (program.copy || program.cut)
 	{
 		if (program.startedSelection)
 		{

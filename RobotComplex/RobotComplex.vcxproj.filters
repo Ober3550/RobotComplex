@@ -332,6 +332,9 @@
     <ClCompile Include="ParentTile.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
+    <ClCompile Include="ItemTileWPOS.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h">
@@ -447,6 +450,9 @@
     </ClInclude>
     <ClInclude Include="Oregen.h">
       <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTileWPOS.h">
+      <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

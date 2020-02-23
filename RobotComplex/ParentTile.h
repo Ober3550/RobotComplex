@@ -13,5 +13,6 @@ public:
 	}
 	virtual void Serialize(std::ofstream* myfile) {};
 	virtual void Deserialize(std::ifstream* myfile) {};
+	Pos getPos();
 	static ParentTile* Factory(ElementTypes element, std::ifstream* myfile);
 };

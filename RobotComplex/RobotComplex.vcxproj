@@ -295,6 +295,7 @@
     <ClCompile Include="FileLength.cpp" />
     <ClCompile Include="GetFileNamesInFolder.cpp" />
     <ClCompile Include="ItemTile.cpp" />
+    <ClCompile Include="ItemTileWPOS.cpp" />
     <ClCompile Include="LogicTile.cpp" />
     <ClCompile Include="LogicTileDrawing.cpp" />
     <ClCompile Include="main.cpp" />
@@ -325,6 +326,7 @@
     <ClInclude Include="GetFileLength.h" />
     <ClInclude Include="GetFileNamesInFolder.h" />
     <ClInclude Include="ItemTile.h" />
+    <ClInclude Include="ItemTileWPOS.h" />
     <ClInclude Include="KeyNames.h" />
     <ClInclude Include="LogicTile.h" />
     <ClInclude Include="LogicTypes.h" />

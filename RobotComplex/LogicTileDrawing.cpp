@@ -123,11 +123,12 @@ void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t f
 	uint8_t color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 	
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
@@ -168,11 +169,12 @@ void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s, uin
 	uint8_t color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
@@ -194,7 +196,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	float sprite_rotation;
 	sprite.setTexture(*Wire::texture);
 
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	uint8_t color;
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
@@ -218,7 +220,8 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);
 				Blue = 255 * (color >> 2 & 1);
-				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+				Alpha = 128 + 127 * !(flags >> 7 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 				sprite_rotation = ((float)lookingAt) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
@@ -237,7 +240,8 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
@@ -259,7 +263,7 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	float sprite_rotation;
 	sprite.setTexture(*Wire::texture);
 
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	uint8_t color;
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
@@ -283,7 +287,8 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);
 				Blue = 255 * (color >> 2 & 1);
-				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+				Alpha = 128 + 127 * !(flags >> 7 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 				sprite_rotation = ((float)lookingAt) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
@@ -302,7 +307,8 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
@@ -324,7 +330,7 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	float sprite_rotation;
 	sprite.setTexture(*Wire::texture);
 
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	uint8_t color;
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
@@ -348,7 +354,8 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);
 				Blue = 255 * (color >> 2 & 1);
-				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+				Alpha = 128 + 127 * !(flags >> 7 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 				sprite_rotation = ((float)lookingAt) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
@@ -392,11 +399,12 @@ void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	uint8_t color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
@@ -408,7 +416,7 @@ void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 
 	// Output Sprite
 	sprite.setTexture(*texture);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
@@ -463,11 +471,12 @@ void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t f
 	uint8_t color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
@@ -491,11 +500,12 @@ void Shover::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t
 	uint8_t color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
@@ -521,18 +531,20 @@ void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s, uin
 	uint8_t color = black;
 	if (this->signal)
 		color = GC::colorClassA;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
 
 	uint8_t color2 = black;
 	if (this->signal2)
 		color2 = GC::colorClassB;
-	uint8_t Red2, Green2, Blue2;
+	uint8_t Red2, Green2, Blue2, Alpha2;
 	Red2 = 255 * (color2 & 1);
 	Green2 = 255 * (color2 >> 1 & 1);
 	Blue2 = 255 * (color2 >> 2 & 1);
+	Alpha2 = 128 + 127 * !(flags >> 7 & 1);
 	
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
@@ -552,9 +564,9 @@ void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s, uin
 				sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
 
 				if (int(Pos::RelativeFacing(this->facing, i)) & 1)
-					sprite.setColor(sf::Color(Red2, Green2, Blue2, 255));
+					sprite.setColor(sf::Color(Red2, Green2, Blue2, Alpha2));
 				else
-					sprite.setColor(sf::Color(Red, Green, Blue, 255));
+					sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 				sprite_rotation = ((float)i) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
@@ -582,11 +594,12 @@ void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t f
 	uint8_t color = black;
 	if (this->signal)
 		color = colorClass;
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	float sprite_rotation = float(this->facing) * 90.f;
@@ -608,7 +621,7 @@ void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	float sprite_rotation;
 	sprite.setTexture(*Wire::texture);
 
-	uint8_t Red, Green, Blue;
+	uint8_t Red, Green, Blue, Alpha;
 	uint8_t color;
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
@@ -632,7 +645,8 @@ void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 				Red = 255 * (color & 1);
 				Green = 255 * (color >> 1 & 1);
 				Blue = 255 * (color >> 2 & 1);
-				sprite.setColor(sf::Color(Red, Green, Blue, 255));
+				Alpha = 128 + 127 * !(flags >> 7 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 				sprite_rotation = ((float)lookingAt) * (float)90.f;
 				sprite.setRotation(sprite_rotation);
@@ -651,7 +665,8 @@ void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;
