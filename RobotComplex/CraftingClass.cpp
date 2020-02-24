@@ -116,15 +116,12 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 					}
 					else
 					{
-						if (ItemTile * tile = &world.items[alterPos.CoordToEncoded()])
+						// This must be true otherwise the successful craft was false
+						assert(world.ChangeItem(alterPos, recipeComp.itemTile, recipeComp.resultState));
+						if (recipeComp.resultState > 0)	// If an item is populated at a tile
 						{
-							// This must be true otherwise the successful craft was false
-							assert(world.ChangeItem(alterPos, recipeComp.itemTile, recipeComp.resultState));
-							if (recipeComp.resultState > 0)	// If an item is populated at a tile
-							{
-								// Try to queue a different recipe according to that item type.
-								TryCraftingOther(recipeComp.itemTile, alterPos);
-							}
+							// Try to queue a different recipe according to that item type.
+							TryCraftingOther(recipeComp.itemTile, alterPos);
 						}
 					}
 				}

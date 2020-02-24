@@ -846,6 +846,7 @@ void WidgetCreator::FinishedSelection(Pos start, Pos end)
 		end.y = start.y;
 		start.y = temp;
 	}
+	program.originSelection = start;
 	// Search the region and add elements to a list
 	for (int i = start.x; i < end.x; i++)
 	{
@@ -853,19 +854,21 @@ void WidgetCreator::FinishedSelection(Pos start, Pos end)
 		{
 			if (LogicTile* logic = world.GetLogicTile(Pos{ i,j }))
 			{
-				LogicTile* copyLogic = logic->Copy();
-				copyLogic->pos = copyLogic->pos - start;
-				ParentTile* newElement = dynamic_cast<ParentTile*> (copyLogic);
+				ParentTile* newElement = dynamic_cast<ParentTile*> (logic);
 				program.copyList.emplace_back(newElement);
+				if (program.cut)
+					world.logictiles.erase(Pos{ i,j }.CoordToEncoded());
 			}
 			if (ItemTile* item = world.GetItemTile(Pos{ i,j }))
 			{
 				ItemTileWPOS* copyItem = new ItemTileWPOS();
-				copyItem->pos = Pos{ i,j } - start;
+				copyItem->pos = Pos{ i,j };
 				copyItem->itemTile = item->itemTile;
 				copyItem->quantity = item->quantity;
 				ParentTile* newElement = dynamic_cast<ParentTile*> (copyItem);
 				program.copyList.emplace_back(newElement);
+				if (program.cut)
+					world.items.erase(Pos{ i,j }.CoordToEncoded());
 			}
 		}
 	}
@@ -880,16 +883,16 @@ void WidgetCreator::PasteSelection()
 	{
 		if (LogicTile* newElement = dynamic_cast<LogicTile*> (element))
 		{
-			newElement->pos = newElement->pos + program.mouseHovering;
-			world.logictiles.insert({ newElement->pos.CoordToEncoded(), newElement->Copy() });
+			LogicTile* copyElement = newElement->Copy();
+			copyElement->pos = copyElement->pos + program.mouseHovering - program.originSelection;
+			world.logictiles.insert({ copyElement->pos.CoordToEncoded(), copyElement});
 		}
 		else if(ItemTileWPOS* newElement = dynamic_cast<ItemTileWPOS*> (element))
 		{
-			newElement->pos = newElement->pos + program.mouseHovering;
 			ItemTile copy;
 			copy.itemTile = newElement->itemTile;
 			copy.quantity = newElement->quantity;
-			world.items.insert({ newElement->pos.CoordToEncoded(), copy });
+			world.items.insert({ (newElement->pos + program.mouseHovering - program.originSelection).CoordToEncoded(), copy });
 		}
 	}
 	program.paste = false;

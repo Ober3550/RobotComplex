@@ -74,13 +74,15 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 		program.platformSprites.emplace_back(sprite);
 	}
 }
-void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float y)
+void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float y, uint8_t flags)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*itemTextures[item.itemTile]);
 	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
 	sprite.setPosition(x + 16.f, y + 16.f);
 	sprite.setScale(sf::Vector2f(1.5f, 1.5f));
+	if (flags >> 7 & 1)
+		sprite.setColor(sf::Color(255, 255, 255, 128));
 	appendTo->emplace_back(sprite);
 }
 void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
@@ -114,7 +116,7 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 					y += int(float(difference.y) * float(GC::tileSize) * step);
 				}
 			}
-			DrawItem(&program.itemSprites,*tile, x, y);
+			DrawItem(&program.itemSprites,*tile, x, y, 0);
 		}
 	}
 }
@@ -171,22 +173,28 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 }
 void ProgramData::RecreateGhostSprites(uint64_t encodedPos, float x, float y)
 {
-	for (ParentTile* elem : program.copyList)
+	if (program.paste)
 	{
-		if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
+		for (ParentTile* elem : program.copyList)
 		{
-			if ((ghost->pos + program.mouseHovering).CoordToEncoded() == encodedPos)
+			if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
 			{
-				ghost->DrawTile(&program.logicSprites, x, y, 1.f, 128);
+				if ((ghost->pos + program.mouseHovering - originSelection).CoordToEncoded() == encodedPos)
+				{
+					ghost->DrawTile(&program.logicSprites, x, y, 1.f, 128);
+				}
 			}
-		}
-		else if (Robot* ghost = dynamic_cast<Robot*> (elem))
-		{
+			else if (Robot* ghost = dynamic_cast<Robot*> (elem))
+			{
 
-		}
-		else if (ItemTile* ghost = dynamic_cast<ItemTile*> (elem))
-		{
-
+			}
+			else if (ItemTileWPOS* ghost = dynamic_cast<ItemTileWPOS*> (elem))
+			{
+				if ((ghost->pos + program.mouseHovering - originSelection).CoordToEncoded() == encodedPos)
+				{
+					DrawItem(&program.itemSprites, ghost->itemTile, x, y, 128);
+				}
+			}
 		}
 	}
 }
@@ -237,19 +245,22 @@ void ProgramData::UpdateElementExists()
 	{
 		elementExists.insert({ elem.first });
 	}
-	for (auto elem : program.copyList)
+	if (program.paste)
 	{
-		if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
+		for (auto elem : program.copyList)
 		{
-			elementExists.insert({ (ghost->pos + program.mouseHovering).CoordToEncoded() });
-		}
-		else if (Robot* ghost = dynamic_cast<Robot*> (elem))
-		{
-			elementExists.insert({ (ghost->pos + program.mouseHovering).CoordToEncoded() });
-		}
-		else if (ItemTileWPOS* ghost = dynamic_cast<ItemTileWPOS*> (elem))
-		{
-			elementExists.insert({ (ghost->pos + program.mouseHovering).CoordToEncoded() });
+			if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
+			{
+				elementExists.insert({ (ghost->pos + program.mouseHovering - program.originSelection).CoordToEncoded() });
+			}
+			else if (Robot* ghost = dynamic_cast<Robot*> (elem))
+			{
+				elementExists.insert({ (ghost->pos + program.mouseHovering - program.originSelection).CoordToEncoded() });
+			}
+			else if (ItemTileWPOS* ghost = dynamic_cast<ItemTileWPOS*> (elem))
+			{
+				elementExists.insert({ (ghost->pos + program.mouseHovering - program.originSelection).CoordToEncoded() });
+			}
 		}
 	}
 }
@@ -400,7 +411,7 @@ void ProgramData::DrawHotbar()
 		}
 		else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
 		{
-			DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize));
+			DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize),0);
 			if(item->quantity > 1)
 			CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), float(x), float(y), 2.f, Align::right);
 		}

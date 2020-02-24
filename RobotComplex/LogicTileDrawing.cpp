@@ -374,7 +374,8 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	Red = 255 * (color & 1);
 	Green = 255 * (color >> 1 & 1);
 	Blue = 255 * (color >> 2 & 1);
-	sprite.setColor(sf::Color(Red, Green, Blue, 255));
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
 
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite_rotation = float(this->facing) * 90.f;

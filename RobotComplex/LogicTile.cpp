@@ -131,6 +131,7 @@ void LogicTile::BaseCopy(LogicTile* logicTile)
 	logicTile->pos = this->pos;
 	logicTile->facing = this->facing;
 	logicTile->prevSignal = this->prevSignal;
+	logicTile->signal = this->signal;
 	logicTile->colorClass = this->colorClass;
 }
 bool LogicTile::GetConnected(LogicTile* querier)

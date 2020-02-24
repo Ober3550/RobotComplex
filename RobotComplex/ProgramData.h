@@ -82,6 +82,7 @@ public:
 	bool godmode = true;
 	bool startedSelection = false;
 	Pos startSelection;
+	Pos originSelection;
 	std::vector<ParentTile*> copyList;
 	
 	
@@ -98,7 +99,7 @@ public:
 	int framesSinceTick = 0;
 
 	void RecreateGroundSprites(Pos tilePos, float x, float y);
-	void DrawItem(SpriteVector* appendTo, ItemTile item, float x, float y);
+	void DrawItem(SpriteVector* appendTo, ItemTile item, float x, float y, uint8_t flags);
 	void RecreatePlatformSprites(uint64_t encodedPos, float x, float y);
 	void RecreateItemSprites(uint64_t encodedPos, float x, float y);
 	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);

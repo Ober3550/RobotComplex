@@ -137,14 +137,14 @@ void LoadPrototypes()
 
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Recipe Catalyst, Animation, Animation Offset
 	std::vector<RecipeProto> recipePrototypes;
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
-	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
-	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5, "coal_ore",   "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
+	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ 
 		{ "steel_ingot",1 }, { "steel_ingot",1 }, 
 		{ "iron_ingot",-1 }, { "iron_ingot",-1 }, 
 		{ "iron_ingot",-1 }, { "coal_ore",-1 } 
-		}, 2, 5, "coal_ore", ""));
+		}, 2, 5, ""));
 
 	// Tier 2 Products
 	// Gear Shape
@@ -152,26 +152,26 @@ void LoadPrototypes()
 		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
 		{ "iron_ingot",-1 }, { "iron_gear",1 }, { "iron_ingot",-1 },
 		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
-		}, 3, 1, "iron_ingot", ""));
+		}, 3, 1, ""));
 
 	recipePrototypes.emplace_back(RecipeProto({
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
 		{ "copper_ingot",-1 }, { "copper_wire",1 }, { "copper_ingot",-1 },
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
-		}, 3, 1, "copper_ingot", ""));
+		}, 3, 1, ""));
 
 	// Plates
 	recipePrototypes.emplace_back(RecipeProto({
 		{ "",0 }, { "iron_plate",1 }, 
 		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
 		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
-		}, 2, 1, "iron_ingot", ""));
+		}, 2, 1, ""));
 
 	recipePrototypes.emplace_back(RecipeProto({
 		{ "",0 }, { "copper_plate",1 },
 		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
 		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
-		}, 2, 1, "copper_ingot", ""));
+		}, 2, 1, ""));
 
 	/*
 	recipePrototypes.emplace_back(RecipeProto({
@@ -182,9 +182,10 @@ void LoadPrototypes()
 		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 }
 		}, 5, 1, "clay", "", Pos{ 0,0 }));
 		*/	
-
+	MySet<uint16_t> catalysts = MySet<uint16_t>();
 	for (const RecipeProto& recipeProto : recipePrototypes)
 	{
+		catalysts.clear();
 		CraftingClass newRecipe;
 		newRecipe.recipeIndex = uint16_t(program.craftingRecipes.size());
 
@@ -199,17 +200,22 @@ void LoadPrototypes()
 				assert(false);
 			}
 			else
-			recipe.emplace_back(RecipeComponent{ (uint16_t)itemIndex.second, recipeCompProto.requirement, recipeCompProto.resultState });
+			{
+				catalysts.insert(itemIndex.second);
+				recipe.emplace_back(RecipeComponent{ (uint16_t)itemIndex.second, recipeCompProto.requirement, recipeCompProto.resultState });
+			}
 		}
 		newRecipe.recipe = recipe;
 		newRecipe.width = recipeProto.recipeWidth;
 		newRecipe.height = (uint8_t)(float(recipe.size()) / newRecipe.width);
 		newRecipe.craftTicks = recipeProto.craftingTime * GC::UPDATERATE;
-		uint16_t catalystIndex = findInVector(program.itemPrototypes, recipeProto.catalyst).second;
 		newRecipe.animationReference = (findInVector(animationPrototypes, recipeProto.animation).second + 1);
-
-		program.itemRecipeList[catalystIndex].emplace_back(newRecipe.recipeIndex);
 		program.craftingRecipes.emplace_back(newRecipe);
+
+		for (uint16_t catalystIndex : catalysts)
+		{
+			program.itemRecipeList[catalystIndex].emplace_back(newRecipe.recipeIndex);
+		}
 	}
 }
 
