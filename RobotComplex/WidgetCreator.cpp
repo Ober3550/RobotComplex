@@ -875,6 +875,7 @@ void WidgetCreator::FinishedSelection(Pos start, Pos end)
 	program.cut = false;
 	program.copy = false;
 	program.startedSelection = false;
+	program.paste = true;
 }
 
 void WidgetCreator::PasteSelection()

@@ -141,11 +141,22 @@ void WorldSave::DeserializeLogicStructure(std::string filename)
 
 void WorldSave::SerializeMisc(std::string filename)
 {
-
+	std::ofstream myfile;
+	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+	if (myfile.is_open())
+	{
+		myfile.write((char*)&program.cameraPos, sizeof(Pos));
+	}
 }
 
 void WorldSave::DeserializeMisc(std::string filename)
 {
-
+	std::ifstream myfile;
+	myfile.open(filename, std::ios::in | std::ios::binary);
+	myfile.seekg(0, std::ios::beg);
+	if (myfile.is_open())
+	{
+		myfile.read((char*)&program.cameraPos, sizeof(Pos));
+	}
 }
 
