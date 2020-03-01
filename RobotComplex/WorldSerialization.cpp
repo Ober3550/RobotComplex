@@ -4,6 +4,7 @@
 #include "Windows.h"
 #include "ProgramData.h"
 #include "FindInVector.h"
+#include "SplitString.h"
 
 void WorldSave::Serialize(std::string filename)
 {
@@ -111,31 +112,18 @@ void WorldSave::DeserializeLogicStructure(std::string filename)
 	int i = 0;
 	while (std::getline(file, str))
 	{
-		std::string name;
-		std::string size;
-		bool split = false;
-		for (char c : str)
+		std::vector<std::string> splitLine;
+		split(&splitLine, str, ':');
+		if (splitLine.size() != 0)
 		{
-			if (c == ':')
-				split = true;
-			else
+			std::pair<bool, int> map = findInVector(logicTypes, splitLine[0]);
+			oldLogicSize.emplace_back(std::stoi(splitLine[1]));
+			if (map.first)
 			{
-				if (c != ' ')
-				{
-					if (split)
-						size += c;
-					else
-						name += c;
-				}
+				oldLogicNewLogic.insert({ i, map.second }); 
 			}
+			i++;
 		}
-		std::pair<bool, int> map = findInVector(logicTypes, name);
-		oldLogicSize.emplace_back(std::stoi(size));
-		if (map.first)
-		{
-			oldLogicNewLogic.insert({ i, map.second });
-		}
-		i++;
 	}
 }
 

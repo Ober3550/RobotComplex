@@ -454,6 +454,9 @@
     <ClInclude Include="ItemTileWPOS.h">
       <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
+    <ClInclude Include="SplitString.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm">

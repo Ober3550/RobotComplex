@@ -135,7 +135,7 @@ void LoadPrototypes()
 		animationTextures.emplace_back(LoadTexture("machines/" + text + ".png"));
 	}
 
-	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Recipe Catalyst, Animation, Animation Offset
+	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Animation, Animation Offset
 	std::vector<RecipeProto> recipePrototypes;
 	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
 	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));

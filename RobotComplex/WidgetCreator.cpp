@@ -662,6 +662,7 @@ void WidgetCreator::LeftMousePressed()
 						else
 						{
 							LogicTile* logicPlace = hotbarLogic->Copy();
+							logicPlace->signal = 0;
 							logicPlace->pos = program.mouseHovering;
 							if (Robot* robot = world.GetRobot(program.mouseHovering))
 							{

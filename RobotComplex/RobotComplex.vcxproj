@@ -343,6 +343,7 @@
     <ClInclude Include="RedirectorColors.h" />
     <ClInclude Include="ReservedItems.h" />
     <ClInclude Include="Robot.h" />
+    <ClInclude Include="SplitString.h" />
     <ClInclude Include="SpriteVector.h" />
     <ClInclude Include="TestWorld.h" />
     <ClInclude Include="Textures.h" />
