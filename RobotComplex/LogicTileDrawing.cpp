@@ -681,3 +681,70 @@ void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	DrawSignalStrength(appendTo, x, y, s, this->signal, flags);
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
+
+void Toggle::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+{
+	// Centre Sprite
+	sf::Sprite sprite;
+	float sprite_rotation;
+	sprite.setTexture(*Wire::texture);
+
+	uint8_t Red, Green, Blue, Alpha;
+	uint8_t color;
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+	sprite.setTextureRect(sf::IntRect(32, 0, 32, 32));
+
+	// Neighbour Sprites
+	for (uint8_t i = 0; i < 4; i++)
+	{
+		Facing lookingAt = Pos::RelativeFacing(this->facing, i);
+		if (LogicTile* neighbour = world.GetLogicTile(this->pos.FacingPosition(lookingAt).CoordToEncoded()))
+		{
+			color = black;
+			if (neighbour->ShowPowered(this) || i != 0)
+				color |= neighbour->ShowPowered(this);
+			else
+				color |= this->ShowPowered(neighbour);
+			if (neighbour->GetConnected(this) && this->GetConnected(neighbour))
+			{
+				Red = 255 * (color & 1);
+				Green = 255 * (color >> 1 & 1);
+				Blue = 255 * (color >> 2 & 1);
+				Alpha = 128 + 127 * !(flags >> 7 & 1);
+				sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
+
+				sprite_rotation = ((float)lookingAt) * (float)90.f;
+				sprite.setRotation(sprite_rotation);
+
+				appendTo->emplace_back(sprite);
+			}
+		}
+	}
+	// Centre Sprite
+	sprite.setTexture(*texture);
+	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
+
+	color = black;
+	if (this->signal)
+		color = colorClass;
+	Red = 255 * (color & 1);
+	Green = 255 * (color >> 1 & 1);
+	Blue = 255 * (color >> 2 & 1);
+	Alpha = 128 + 127 * !(flags >> 7 & 1);
+	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
+
+	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+	sprite_rotation = float(this->facing) * 90.f;
+	sprite.setRotation(sprite_rotation);
+	sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
+	sprite.setScale(sf::Vector2f(s, s));
+
+	appendTo->emplace_back(sprite);
+
+	// Signal value
+	DrawSignalStrength(appendTo, x, y, s, this->signal, flags);
+	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
+}

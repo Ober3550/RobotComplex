@@ -330,3 +330,19 @@ public:
 		return logicTile;
 	}
 };
+
+class Toggle : public DirectionalLogicTile {
+public:
+	uint8_t prevBehindSignal;
+	Toggle() { logictype = toggle; };
+	static sf::Texture* texture;								// A textures for drawing
+	void SignalEval(std::array<uint8_t, 4> neighbours);
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags);
+	std::string GetTooltip() { return "This is a toggle"; };
+	Toggle* Copy()
+	{
+		Toggle* logicTile = new Toggle();
+		this->BaseCopy(logicTile);
+		return logicTile;
+	}
+};

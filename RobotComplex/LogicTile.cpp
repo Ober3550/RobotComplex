@@ -573,3 +573,14 @@ void PlusOne::SignalEval(std::array<uint8_t, 4> neighbours)
 	else
 		this->signal = neighbours[2];
 }
+
+void Toggle::SignalEval(std::array<uint8_t, 4> neighbours)
+{
+	if (LogicTile* neighbour = world.GetLogicTile(this->pos.BehindPosition(this->facing)))
+	{
+
+		if (neighbours[2] && prevBehindSignal == 0)
+			this->signal = MyMod(this->signal + GC::startSignalStrength, GC::maxSignalStrength);
+	}
+	prevBehindSignal = neighbours[2];
+}
