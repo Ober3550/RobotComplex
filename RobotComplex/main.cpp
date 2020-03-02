@@ -47,6 +47,8 @@ sf::Texture* Shover::texture = LoadTexture("logic/shover.png");
 sf::Texture* Toggle::texture = LoadTexture("logic/inverter.png");
 sf::Image icon;
 
+std::vector<sf::Event> eventHistory;
+
 ProgramData program;
 WorldSave world;
 WorldSave test;
@@ -231,7 +233,6 @@ int main()
 				// adjust the viewport when the window is resized
 				gui->resizeToDisplay();
 			}
-			inputHandler->processEvent(event);
 			if (event.type == sf::Event::KeyPressed)
 			{
 				if (event.key.code == sf::Keyboard::F11)
@@ -239,8 +240,37 @@ int main()
 					windowFullScreen = !windowFullScreen;
 					ResizeWindow(window, windowFullScreen,true);
 				}
+				// Stepping back should always be considered as input
+				else if (event.key.code == sf::Keyboard::Escape)
+				{
+					if (!creator->guiStack.empty()) {
+						creator->guiStack.pop();
+					}
+					else {
+						creator->guiStack.push(&creator->mainFrame);
+					}
+					if (creator->guiStack.empty())
+						program.gamePaused = false;
+					else
+						program.gamePaused = true;
+				}
+				else if (event.key.code == sf::Keyboard::B)
+				{
+					creator->captureBreakpoint = true;
+				}
 			}
+			if (event.type == sf::Event::MouseButtonPressed)
+			{
+				if (creator->captureBreakpoint)
+				{
+					bool exitToDebug = true;
+				}
+			}
+			if(!program.gamePaused)
 			creator->UserInput(event);
+			inputHandler->processEvent(event);
+			creator->InterfaceUserInput(event);
+			eventHistory.emplace_back(event);
 		}
 		creator->SetGuiVisibility();
 		window.clear();

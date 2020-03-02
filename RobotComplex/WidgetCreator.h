@@ -33,6 +33,11 @@ struct std::hash<sf::Event::KeyEvent> {
 class WidgetCreator {
 public:
 	agui::Gui* mGui;
+	bool captureBreakpoint = false;
+	const int frameWidth = 8;
+	const int gridSize = 50;
+	const int frameHeadPadding = 35;
+	const int padding = 10;
 	int mainFrameWidth = 300;
 	int mainFrameHeight = 250;
 	bool buttonsEnabled = true;
@@ -48,12 +53,22 @@ public:
 	// Play Menu
 	agui::Frame saveFrame;
 	agui::ListBox worldSaves;
+	agui::Button newWorldButton;
 	agui::Button loadButton;
 	agui::Button saveButton;
-	agui::Button backButton;
+	agui::Button saveBackButton;
+
+	// New World Menu
+	agui::Frame newWorldFrame;
+	agui::Label worldNameTitle;
+	agui::TextField worldName;
+	agui::Widget* lastWidget;
+	agui::Button newWorldBackButton;
 
 	// Controls Menu
 	agui::Frame keyFrame;
+	agui::ScrollPane controlPane;
+	agui::Button controlBackButton;
 	std::vector<agui::Button*> remapButtons;
 	std::vector<agui::Label*> keyActions;
 	MyMap<sf::Event::KeyEvent, std::string>   actionMap;
@@ -71,11 +86,13 @@ public:
 	}
 	void AddMainFrame();
 	void AddSaveFrame();
+	void AddNewWorldFrame();
 	void SetGuiVisibility();
 	void SetDefaultKeyMapping();
 	void MapNewButton(sf::Event::KeyEvent);
 	void AddKeyMapFrame();
 	void UserInput(sf::Event event);
+	void InterfaceUserInput(sf::Event event);
 	void MouseMoved();
 	void RightMousePressed();
 	void LeftMousePressed();

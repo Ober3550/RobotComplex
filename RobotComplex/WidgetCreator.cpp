@@ -43,9 +43,11 @@ class SaveSelect : public agui::SelectionListener
 WidgetCreator::WidgetCreator(agui::Gui *guiInstance, sf::RenderWindow* windowRef)
 {
 	mGui = guiInstance;
+	mGui->setDelayMouseDownEvents(false);
 	window = windowRef;
 	AddMainFrame();
 	AddSaveFrame();
+	AddNewWorldFrame();
 	SetDefaultKeyMapping();
 	AddKeyMapFrame();
 }
@@ -53,11 +55,11 @@ void WidgetCreator::AddMainFrame()
 {
 	mGui->add(&mainFrame);
 	// Options mainFrame
-	mainFrame.setSize(mainFrameWidth, mainFrameHeight);
-	mainFrame.setLocation((int)(program.windowWidth / 2) - (mainFrameWidth / 2), (int)(program.windowHeight / 2) - (mainFrameHeight / 2));
 	mainFrame.setText("Main Menu");
+	int row = 0;
+	
 	// Play Button changes to load and save frame
-	playButton.setSize(mainFrameWidth - 10, 50);
+	playButton.setSize(gridSize * frameWidth, gridSize);
 	playButton.setText("Play");
 	playButton.addButtonListener(new SimpleButtonListener([&] {
 		// Don't push duplicates to the stack
@@ -72,9 +74,9 @@ void WidgetCreator::AddMainFrame()
 		}
 	}));
 	mainFrame.add(&playButton);
-	playButton.setLocation(0, 0);
+	playButton.setLocation(0, row*gridSize);
+	row++;
 	// 'Controls' Button changes key mapping
-	controlsButton.setSize(mainFrameWidth - 10, 50);
 	controlsButton.setText("Controls");
 	controlsButton.addButtonListener(new SimpleButtonListener([&] {
 		// Don't push duplicates to the stack
@@ -83,26 +85,50 @@ void WidgetCreator::AddMainFrame()
 				creator->guiStack.push(&keyFrame);
 	}));
 	mainFrame.add(&controlsButton);
-	controlsButton.setLocation(0, 50);
+	controlsButton.setSize(gridSize * frameWidth, gridSize);
+	controlsButton.setLocation(0, row * gridSize);
+	row++;
 	// Exit Button
 	exitButton.setText("Exit Game");
 	exitButton.addButtonListener(new SimpleButtonListener([&] {
 		program.running = false;
 	}));
 	mainFrame.add(&exitButton);
-	exitButton.setSize(mainFrameWidth - 10, 50);
-	exitButton.setLocation(0, mainFrameHeight - 85);
+	exitButton.setSize(gridSize * frameWidth, gridSize);
+	exitButton.setLocation(0, row* gridSize);
+	row++;
 	mainFrame.setVisibility(true);
 	// Ensure that top of gui stack is the main frame
 	guiStack.push(&mainFrame);
+
+	// Resize parent element according to its children
+	mainFrame.setSize(agui::Dimension(gridSize * frameWidth + padding, row * gridSize + frameHeadPadding));
+	mainFrame.setLocation((int)(program.windowWidth / 2) - (mainFrame.getSize().getWidth() / 2), (int)(program.windowHeight / 2) - (mainFrame.getSize().getHeight() / 2));
 }
 void WidgetCreator::AddSaveFrame()
 {
-	//Save Frame
-	mGui->add(&saveFrame);
-	saveFrame.setText("Save Menu");
-	saveFrame.setSize(mainFrameWidth, mainFrameHeight);
-	saveFrame.setLocation((int)(program.windowWidth / 2) - (mainFrameWidth / 2), (int)(program.windowHeight / 2) - (mainFrameHeight / 2));
+	// Current vertical grid position
+	int row = 0;
+
+	// New World Button
+	newWorldButton.setText("New World");
+	newWorldButton.addButtonListener(new SimpleButtonListener([&] {
+		// Don't push duplicates to the stack
+		if (!creator->guiStack.empty())
+			if (creator->guiStack.top() != &creator->newWorldFrame)
+				creator->guiStack.push(&newWorldFrame);
+		}));
+	saveFrame.add(&newWorldButton);
+	newWorldButton.setSize(gridSize * frameWidth, gridSize);
+	newWorldButton.setLocation(0, row * gridSize);
+	row++;
+
+	//Save Listbox
+	saveFrame.add(&worldSaves);
+	worldSaves.addSelectionListener(new SaveSelect());
+	worldSaves.setLocation(0, row * gridSize);
+	worldSaves.setSize(frameWidth * gridSize - padding, 4 * gridSize);
+	row += 4;
 
 	// Save Button
 	saveButton.setText("Save Game");
@@ -112,8 +138,9 @@ void WidgetCreator::AddSaveFrame()
 		program.worldMutex.unlock();
 	}));
 	saveFrame.add(&saveButton);
-	saveButton.setSize(mainFrameWidth / 2, 50);
-	saveButton.setLocation(0, mainFrameHeight - 85 - 50);
+	saveButton.setSize(gridSize * frameWidth, gridSize);
+	saveButton.setLocation(0, row * gridSize);
+	row++;
 
 	// Load Button
 	loadButton.setText("Load Game");
@@ -123,20 +150,14 @@ void WidgetCreator::AddSaveFrame()
 		program.worldMutex.unlock();
 	}));
 	saveFrame.add(&loadButton);
-	loadButton.setSize(mainFrameWidth / 2, 50);
-	loadButton.setLocation(mainFrameWidth / 2, mainFrameHeight - 85 - 50);
-
-	//Save Listbox
-	saveFrame.add(&worldSaves);
-	worldSaves.addSelectionListener(new SaveSelect());
-	worldSaves.setLocation(0, 0);
-	worldSaves.setSize(mainFrameWidth, mainFrameHeight - 85 - 50);
+	loadButton.setSize(gridSize * frameWidth, gridSize);
+	loadButton.setLocation(0, row * gridSize);
+	row++;
 
 	// Back button exists on every frame 
 	// such that those that aren't good with keyboard and mouse have easy navigation
-	backButton.setSize(mainFrameWidth - 10, 50);
-	backButton.setText("Back");
-	backButton.addButtonListener(new SimpleButtonListener([&] {
+	saveBackButton.setText("Back");
+	saveBackButton.addButtonListener(new SimpleButtonListener([&] {
 		if (!creator->guiStack.empty()) {
 			creator->guiStack.pop();
 		}
@@ -144,17 +165,62 @@ void WidgetCreator::AddSaveFrame()
 			creator->guiStack.push(&creator->mainFrame);
 		}
 	}));
-	saveFrame.add(&backButton);
-	backButton.setLocation(0, mainFrameHeight - 85);
+	saveFrame.add(&saveBackButton);
+	saveBackButton.setSize(gridSize * frameWidth, gridSize);
+	saveBackButton.setLocation(0, row * gridSize);
+	row++;
 
+	// Save Frame
+	mGui->add(&saveFrame);
+	saveFrame.setText("Save Menu");
+	saveFrame.setSize(frameWidth * gridSize, row * gridSize + frameHeadPadding);
+	saveFrame.setLocation((int)(program.windowWidth / 2) - (saveFrame.getSize().getWidth() / 2), (int)(program.windowHeight / 2) - (saveFrame.getSize().getHeight() / 2));
 	saveFrame.setVisibility(true);
 }
+
+void WidgetCreator::AddNewWorldFrame()
+{
+	int row = 0;
+	worldNameTitle.setText("World Name:");
+	newWorldFrame.add(&worldNameTitle);
+	worldNameTitle.setSize(gridSize * frameWidth / 2, gridSize);
+	worldNameTitle.setLocation(0, row * gridSize);
+	newWorldFrame.add(&worldName);
+	worldName.setFocusable(true);
+	worldName.setSize(gridSize * frameWidth / 2, gridSize);
+	worldName.setLocation(gridSize * frameWidth / 2, row * gridSize);
+	row++;
+	
+	// Back button exists on every frame 
+	// such that those that aren't good with keyboard and mouse have easy navigation
+	newWorldBackButton.setText("Back");
+	newWorldBackButton.addButtonListener(new SimpleButtonListener([&] {
+		if (!creator->guiStack.empty()) {
+			creator->guiStack.pop();
+		}
+		else {
+			creator->guiStack.push(&creator->mainFrame);
+		}
+		}));
+	newWorldFrame.add(&newWorldBackButton);
+	newWorldBackButton.setSize(gridSize * frameWidth, gridSize);
+	newWorldBackButton.setLocation(0, row * gridSize);
+	row++;
+
+	mGui->add(&newWorldFrame);
+	newWorldFrame.setText("New World Menu");
+	newWorldFrame.setSize(frameWidth * gridSize, row * gridSize + frameHeadPadding);
+	newWorldFrame.setLocation((int)(program.windowWidth / 2) - (saveFrame.getSize().getWidth() / 2), (int)(program.windowHeight / 2) - (saveFrame.getSize().getHeight() / 2));
+	newWorldFrame.setVisibility(true);
+}
+
 void WidgetCreator::SetGuiVisibility()
 {
 	buttonsEnabled = false;
 	mainFrame.setVisibility(false);
 	saveFrame.setVisibility(false);
 	keyFrame.setVisibility(false);
+	newWorldFrame.setVisibility(false);
 	if (!guiStack.empty())
 	{
 		agui::Frame* visibleFrame = guiStack.top();
@@ -165,21 +231,6 @@ void WidgetCreator::SetGuiVisibility()
 void WidgetCreator::SetDefaultKeyMapping()
 {
 	sf::Event::KeyEvent keyPress;
-	userActionOrder.push_back( "Menu step back" );
-	userActions.insert({ "Menu step back",[&] {
-		if (!creator->guiStack.empty()) {
-			creator->guiStack.pop();
-		}
-		else {
-			creator->guiStack.push(&creator->mainFrame);
-		}
-		if (creator->guiStack.empty())
-			program.gamePaused = false;
-		else
-			program.gamePaused = true;
-	} });
-	keyPress = { sf::Keyboard::Escape, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Menu step back" });
 
 	//W
 	userActionOrder.push_back("Move Forward");
@@ -415,12 +466,34 @@ void WidgetCreator::SetDefaultKeyMapping()
 
 void WidgetCreator::AddKeyMapFrame()
 {
+	const int scal = 2;
 	// Key Frame
 	mGui->add(&keyFrame);
 	keyFrame.setText("Controls");
-	keyFrame.setSize(mainFrameWidth, 600);
-	keyFrame.setLocation((int)(program.windowWidth / 2) - (mainFrameWidth / 2), (int)(program.windowHeight / 2) - (600 / 2));
+	keyFrame.setSize(gridSize * 4 * scal, gridSize * 6 + frameHeadPadding);
+	keyFrame.setLocation((int)(program.windowWidth / 2) - int(keyFrame.getSize().getWidth()/2), (int)(program.windowHeight / 2) - int(keyFrame.getSize().getHeight() / 2));
 	keyFrame.setVisibility(false);
+
+	keyFrame.add(&controlPane);
+	controlPane.setWheelScrollRate(10);
+	controlPane.setVKeyScrollRate(20);
+	controlPane.setSize(gridSize * 4 * scal - padding, gridSize * 5);
+	controlPane.setLocation(0, 0);
+
+	// Back button exists on every frame 
+	// such that those that aren't good with keyboard and mouse have easy navigation
+	controlBackButton.setSize(gridSize * 4 * scal, gridSize);
+	controlBackButton.setText("Back");
+	controlBackButton.addButtonListener(new SimpleButtonListener([&] {
+		if (!creator->guiStack.empty()) {
+			creator->guiStack.pop();
+		}
+		else {
+			creator->guiStack.push(&creator->mainFrame);
+		}
+		}));
+	keyFrame.add(&controlBackButton);
+	controlBackButton.setLocation(0, gridSize * 5);
 
 	int buttons = 0;
 	for (std::string actionName : userActionOrder)
@@ -442,17 +515,17 @@ void WidgetCreator::AddKeyMapFrame()
 			creator->actionBindButtonIndex = buttons;
 		}));
 
-		newTitle->setSize(mainFrameWidth / 2, 22);
-		newButton->setSize(mainFrameWidth / 2 - 15, 22);
+		newTitle->setSize(1.5 * gridSize * scal, gridSize / 2);
+		newButton->setSize(1.5 * gridSize * scal, gridSize / 2);
 
-		newTitle->setLocation(0, buttons * 25);
-		newButton->setLocation(mainFrameWidth / 2, buttons * 25);
+		newTitle->setLocation(0 * gridSize * scal, buttons * gridSize / 2);
+		newButton->setLocation(2 * gridSize * scal, buttons * gridSize / 2);
 
 		keyActions.emplace_back(newTitle);
 		remapButtons.emplace_back(newButton);
 
-		keyFrame.add(keyActions.back());
-		keyFrame.add(remapButtons.back());
+		controlPane.add(keyActions.back());
+		controlPane.add(remapButtons.back());
 
 		buttons++;
 	}
@@ -526,14 +599,17 @@ void WidgetCreator::UserInput(sf::Event input)
 	}
 	else if (input.type == sf::Event::MouseWheelScrolled)
 	{
-		if (input.mouseWheelScroll.delta != 0)
+		if (!program.gamePaused)
 		{
-			program.scale -= input.mouseWheelScroll.delta;
-			if (program.scale < 0.0f)
-				program.scale = 0.0f;
-			if (program.scale > 75.0f)
-				program.scale = 75.0f;
-			program.zoom = 0.5f + program.scale / 10.0f;
+			if (input.mouseWheelScroll.delta != 0)
+			{
+				program.scale -= input.mouseWheelScroll.delta;
+				if (program.scale < 0.0f)
+					program.scale = 0.0f;
+				if (program.scale > 75.0f)
+					program.scale = 75.0f;
+				program.zoom = 0.5f + program.scale / 10.0f;
+			}
 		}
 	}
 }
@@ -898,4 +974,17 @@ void WidgetCreator::PasteSelection()
 		}
 	}
 	program.paste = false;
+}
+
+void WidgetCreator::InterfaceUserInput(sf::Event event)
+{
+	lastWidget = mGui->getWidgetUnderMouse();
+	if (lastWidget == &worldName)
+	{
+		bool hasFocus = worldName.isFocused();
+		if (hasFocus)
+		{
+			bool seeFocus = true;
+		}
+	}
 }
