@@ -44,6 +44,10 @@ sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
 sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
 sf::Texture* PlusOne::texture = LoadTexture("logic/plusone.png");
 sf::Texture* Shover::texture = LoadTexture("logic/shover.png");
+sf::Texture* Toggle::texture = LoadTexture("logic/inverter.png");
+sf::Image icon;
+
+std::vector<sf::Event> eventHistory;
 
 ProgramData program;
 WorldSave world;
@@ -76,6 +80,8 @@ void initializeAgui(sf::RenderTarget& target)
 	program.guiFont.loadFromFile(font);
 	//Setting a global font is required and failure to do so will crash.
 	agui::Widget::setGlobalFont(defaultFont);
+	//Set icon image
+	assert(icon.loadFromFile("Assets/x32/robotIcon.png"));
 }
 
 void UpdateWorld()
@@ -126,8 +132,7 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 		program.windowHeight = float(displaySize.getHeight());
 		program.halfWindowWidth = program.windowWidth / 2;
 		program.halfWindowHeight = program.windowHeight / 2;
-		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
-
+		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "RoboFactory", sf::Style::Default);
 		if (program.windowedWidth == program.windowWidth && program.windowedHeight == program.windowHeight)
 			maximize = true;
 	}
@@ -137,12 +142,12 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 		program.windowHeight = program.windowedHeight;
 		program.halfWindowWidth = program.windowWidth / 2;
 		program.halfWindowHeight = program.windowHeight / 2;
-		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma", sf::Style::Default);
+		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "RoboFactory", sf::Style::Default);
 		maximize = true;
 	}
 	if (windowFullScreen)
 	{
-		window.create(sf::VideoMode(int(sf::VideoMode::getDesktopMode().width), int(sf::VideoMode::getDesktopMode().height)), "Terraforma", sf::Style::Fullscreen);
+		window.create(sf::VideoMode(int(sf::VideoMode::getDesktopMode().width), int(sf::VideoMode::getDesktopMode().height)), "RoboFactory", sf::Style::Fullscreen);
 		program.windowWidth = float(sf::VideoMode::getDesktopMode().width);
 		program.windowHeight = float(sf::VideoMode::getDesktopMode().height);
 		program.halfWindowWidth = program.windowWidth / 2;
@@ -156,6 +161,9 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 	program.hudView = sf::View();
 	program.hudView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
 	program.hudView.setCenter(0, 0);
+
+	// Re add the icon to the window
+	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
 	program.redrawGround = true;
 
@@ -202,7 +210,7 @@ int main()
 	bool windowFullScreen = false;
 
 	// Load Gui
-	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "Terraforma");
+	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "RoboFactory");
 	sf::WindowHandle windowHandle = window.getSystemHandle();
 	ShowWindow(windowHandle, SW_MAXIMIZE);
 	maximize = true;
@@ -225,7 +233,6 @@ int main()
 				// adjust the viewport when the window is resized
 				gui->resizeToDisplay();
 			}
-			inputHandler->processEvent(event);
 			if (event.type == sf::Event::KeyPressed)
 			{
 				if (event.key.code == sf::Keyboard::F11)
@@ -233,8 +240,37 @@ int main()
 					windowFullScreen = !windowFullScreen;
 					ResizeWindow(window, windowFullScreen,true);
 				}
+				// Stepping back should always be considered as input
+				else if (event.key.code == sf::Keyboard::Escape)
+				{
+					if (!creator->guiStack.empty()) {
+						creator->guiStack.pop();
+					}
+					else {
+						creator->guiStack.push(&creator->mainFrame);
+					}
+					if (creator->guiStack.empty())
+						program.gamePaused = false;
+					else
+						program.gamePaused = true;
+				}
+				else if (event.key.code == sf::Keyboard::B)
+				{
+					creator->captureBreakpoint = true;
+				}
 			}
+			if (event.type == sf::Event::MouseButtonPressed)
+			{
+				if (creator->captureBreakpoint)
+				{
+					bool exitToDebug = true;
+				}
+			}
+			if(!program.gamePaused)
 			creator->UserInput(event);
+			inputHandler->processEvent(event);
+			creator->InterfaceUserInput(event);
+			eventHistory.emplace_back(event);
 		}
 		creator->SetGuiVisibility();
 		window.clear();

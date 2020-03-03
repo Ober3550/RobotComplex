@@ -646,12 +646,15 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 
 void ProgramData::MovePlatform(Pos pos, Facing toward)
 {
-	if(program.showDebugInfo)
-		Sleep(100);
+	
 	Pos newPos = pos.FacingPosition(toward);
 	program.scaledPersistentBoxes.clear();
-	DrawSelectedBox(&program.scaledPersistentBoxes, pos);
-	DrawSelectedBox(&program.scaledPersistentBoxes, newPos);
+	if (program.showDebugInfo)
+	{
+		Sleep(100);
+		DrawSelectedBox(&program.scaledPersistentBoxes, pos);
+		DrawSelectedBox(&program.scaledPersistentBoxes, newPos);
+	}
 	if (LogicTile* logic = world.GetLogicTile(pos))
 	{
 		// If there's a platform infront and they're also moving, move them first

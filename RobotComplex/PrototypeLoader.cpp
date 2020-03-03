@@ -156,7 +156,7 @@ void LoadPrototypes()
 
 	recipePrototypes.emplace_back(RecipeProto({
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
-		{ "copper_ingot",-1 }, { "copper_wire",1 }, { "copper_ingot",-1 },
+		{ "copper_ingot",-1 }, { "copper_wire",4 }, { "copper_ingot",-1 },
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
 		}, 3, 1, ""));
 
@@ -236,6 +236,7 @@ void LoadLogicToHotbar()
 	ItemTile* item2 = new ItemTile(3);
 	PlusOne* plusone = new PlusOne();
 	Shover* shover = new Shover();
+	Toggle* toggle = new Toggle();
 
 	int godQuantity = 200;
 	redirect->quantity = godQuantity;
@@ -251,6 +252,7 @@ void LoadLogicToHotbar()
 	item2->quantity = godQuantity;
 	plusone->quantity = godQuantity;
 	shover->quantity = godQuantity;
+	toggle->quantity = godQuantity;
 
 	program.hotbar.emplace_back(redirect);
 	program.hotbar.emplace_back(belt);
@@ -267,7 +269,7 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(item2);
 	program.hotbar.emplace_back(plusone);
 	program.hotbar.emplace_back(shover);
-	program.hotbar.emplace_back(nullptr);
+	program.hotbar.emplace_back(toggle);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);
 	program.hotbar.emplace_back(nullptr);

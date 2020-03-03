@@ -16,7 +16,8 @@ static const std::vector<std::string> logicTypes =
 	"wirebridge",
 	"comparer",
 	"plusone",
-	"shover"
+	"shover",
+	"toggle"
 };
 enum LogicTypes : uint8_t {
 	wire = 0,
@@ -31,5 +32,6 @@ enum LogicTypes : uint8_t {
 	wirebridge = 9,
 	comparer = 10,
 	plusone = 11,
-	shover = 12
+	shover = 12,
+	toggle = 13
 };

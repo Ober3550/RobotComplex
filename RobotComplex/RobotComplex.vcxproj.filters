@@ -27,6 +27,9 @@
     <Filter Include="Header Files\Agui\SFML_Backend">
       <UniqueIdentifier>{4d5a6fb6-5ba3-438e-9dcd-64f2204c87cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{44c828f3-d138-4a22-8d96-4b8b59850dde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -457,10 +460,26 @@
     <ClInclude Include="SplitString.h">
       <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm">
       <Filter>Header Files\Agui</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="favicon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ProgramIcon.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

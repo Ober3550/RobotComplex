@@ -31,6 +31,7 @@
     <ProjectGuid>{e9fcfa25-2709-4e70-b3d0-5c92a06c06bc}</ProjectGuid>
     <RootNamespace>RobotComplex</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <ProjectName>RoboFactory</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -342,6 +343,7 @@
     <ClInclude Include="RecipePrototype.h" />
     <ClInclude Include="RedirectorColors.h" />
     <ClInclude Include="ReservedItems.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Robot.h" />
     <ClInclude Include="SplitString.h" />
     <ClInclude Include="SpriteVector.h" />
@@ -354,6 +356,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ProgramIcon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="favicon.ico" />
+    <Image Include="icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
