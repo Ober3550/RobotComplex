@@ -156,7 +156,7 @@ void LoadPrototypes()
 
 	recipePrototypes.emplace_back(RecipeProto({
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
-		{ "copper_ingot",-1 }, { "copper_wire",1 }, { "copper_ingot",-1 },
+		{ "copper_ingot",-1 }, { "copper_wire",4 }, { "copper_ingot",-1 },
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
 		}, 3, 1, ""));
 

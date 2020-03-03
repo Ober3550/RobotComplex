@@ -174,7 +174,12 @@ bool DirectionalLogicTile::ReceivesSignal(LogicTile* querier)
 		return false;
 }
 void LogicTile::DoWireLogic() {
-	//Sleep(100);
+	program.scaledPersistentBoxes.clear();
+	if (program.showDebugInfo)
+	{
+		Sleep(100);
+		program.DrawSelectedBox(&program.scaledPersistentBoxes, pos);
+	}
 	std::array<uint8_t, 4> neighbourSignals = { 0,0,0,0 };
 	std::array<LogicTile*, 4> neighbourTile = std::array<LogicTile*, 4>();
 	this->prevSignal = this->signal;

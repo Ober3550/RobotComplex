@@ -905,10 +905,6 @@ void WidgetCreator::RightMousePressed()
 void WidgetCreator::FinishedSelection(Pos start, Pos end)
 {
 	// Empty the old list when creating a new one
-	for (ParentTile* element : program.copyList)
-	{
-		delete element;
-	}
 	program.copyList.clear();
 	// Make sure start is the top left position of the rect
 	if (start.x > end.x)
