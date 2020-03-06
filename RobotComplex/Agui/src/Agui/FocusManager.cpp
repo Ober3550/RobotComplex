@@ -86,17 +86,17 @@ bool FocusManager::widgetIsModalChild( Widget* widget )
 	void FocusManager::setFocusedWidget( Widget* widget )
 	{
 		//changes the focused widget
+		if (widget)
+		{
+			if (focusedWidget)
+				if (focusedWidget != widget)
+					focusedWidget->focusLost();
 
-		if(focusedWidget)
-			if(focusedWidget != widget)
-				focusedWidget->focusLost();
+			focusedWidget = widget;
 
-		focusedWidget = widget;
-
-		if(widget)
-			if(widget->isFocusable() && widget->isVisible() 
-				&& widget->isEnabled())
+			if (widget->isFocusable() && widget->isVisible() && widget->isEnabled())
 				widget->focusGained();
+		}
 	}
 
 	bool FocusManager::requestModalFocus( Widget* widget )

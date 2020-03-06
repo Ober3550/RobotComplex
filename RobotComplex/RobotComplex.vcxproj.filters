@@ -30,6 +30,9 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{44c828f3-d138-4a22-8d96-4b8b59850dde}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Agui\Headers">
+      <UniqueIdentifier>{55e03671-b833-45ae-81ca-020cb2118beb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -462,6 +465,258 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\ActionEvent.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\ActionListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Agui.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\BaseTypes.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\BlinkingEvent.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\BorderLayout.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Color.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\CursorProvider.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Dimension.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\EmptyWidget.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Enumerations.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\EventArgs.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\FlowLayout.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\FocusListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\FocusManager.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Font.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\FontLoader.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Graphics.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\GridLayout.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Gui.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Image.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\ImageLoader.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Input.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\KeyboardListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Layout.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\MouseListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Platform.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Point.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Rectangle.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\ResizableBorderLayout.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\ResizableText.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\SelectionListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\TableLayout.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\TapListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\TopContainer.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Transform.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\UTF8.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widget.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\WidgetListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Button\Button.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Button\ButtonGroup.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Button\ButtonListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\CheckBox\CheckBox.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\CheckBox\CheckBoxListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\DropDown\DropDown.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\DropDown\DropDownListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Frame\Frame.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Frame\FrameListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ImageWidget\ImageWidget.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Label\Label.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Label\LabelListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ListBox\ListBox.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ListBox\ListBoxListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\PopUp\PopUpMenu.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\PopUp\PopUpMenuItem.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\RadioButton\RadioButton.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\RadioButton\RadioButtonGroup.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\RadioButton\RadioButtonListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\HScrollBar.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\HScrollBarListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\VScrollBar.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\VScrollBarListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ScrollPane\ScrollPane.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Slider\Slider.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Slider\SliderListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Tab\Tab.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Tab\TabbedPane.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\Tab\TabbedPaneListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\TextBox\ExtendedTextBox.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\TextBox\TextBox.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\TextBox\TextBoxListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\TextField\TextField.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\TextField\TextFieldListener.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Widgets\ToolTip\ToolTip.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Clipboard\Clipboard.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Clipboard\OSXClipboard.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Clipboard\WinClipboard.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Font.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2FontLoader.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Graphics.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Image.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2ImageLoader.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Input.hpp">
+      <Filter>Header Files\Agui\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
