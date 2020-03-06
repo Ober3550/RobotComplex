@@ -63,6 +63,7 @@ public:
 	agui::Label worldNameTitle;
 	agui::TextField worldName;
 	agui::Widget* lastWidget;
+	agui::Button newWorldGenerate;
 	agui::Button newWorldBackButton;
 
 	// Controls Menu

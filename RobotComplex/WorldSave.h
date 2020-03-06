@@ -38,7 +38,7 @@ public:
 	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
 	bool moving = false;
 	uint64_t tick;
-	uint64_t seed = 0;
+	int seed = 0;
 	// Variables for keeping elements and data structure organised between versions/changes
 	MyMap<uint16_t, uint16_t> oldItemNewItem;	// A map from the old items to new items
 	MyMap<uint8_t, uint8_t> oldLogicNewLogic;
@@ -62,6 +62,17 @@ public:
 		noiseRef->SetFractalGain(0.5f);
 		noiseRef->SetAxisScales(0.4f,0.4f,0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
+	}
+	WorldSave(int seed)
+	{
+		this->seed = seed;
+		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
+		noiseRef->SetFractalOctaves(6);
+		noiseRef->SetFractalLacunarity(2);
+		noiseRef->SetFractalGain(0.5f);
+		noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
+		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
+		noiseRef->SetSeed(seed);
 	}
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);

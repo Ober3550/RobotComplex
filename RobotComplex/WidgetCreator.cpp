@@ -184,11 +184,29 @@ void WidgetCreator::AddNewWorldFrame()
 	worldNameTitle.setText("World Name:");
 	newWorldFrame.add(&worldNameTitle);
 	worldNameTitle.setSize(gridSize * frameWidth / 2, gridSize);
-	worldNameTitle.setLocation(0, row * gridSize);
+	worldNameTitle.setLocation(0.2 * gridSize * frameWidth, (float(row) + 0.25) * gridSize);
 	newWorldFrame.add(&worldName);
 	worldName.setFocusable(true);
 	worldName.setSize(gridSize * frameWidth / 2, gridSize);
 	worldName.setLocation(gridSize * frameWidth / 2, row * gridSize);
+	row++;
+
+	// Back button exists on every frame 
+	// such that those that aren't good with keyboard and mouse have easy navigation
+	std::hash<std::string> hasher;
+	newWorldGenerate.setText("Generate");
+	newWorldGenerate.addButtonListener(new SimpleButtonListener([&] {
+		program.worldMutex.lock();
+		world.clear();
+		std::string worldName = creator->worldName.getText();
+		world = WorldSave(hasher(worldName));
+		world.Serialize(worldName);
+		program.redrawGround = true;
+		program.worldMutex.unlock();
+		}));
+	newWorldFrame.add(&newWorldGenerate);
+	newWorldGenerate.setSize(gridSize * frameWidth, gridSize);
+	newWorldGenerate.setLocation(0, row * gridSize);
 	row++;
 	
 	// Back button exists on every frame 

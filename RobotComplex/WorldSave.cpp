@@ -311,6 +311,10 @@ void WorldSave::clear()
 	itemPrevMoved.clear();
 	robots.clear();
 	nextRobotPos.clear();
+	for (std::pair<uint64_t,LogicTile*> logic : logictiles)
+	{
+		delete logic.second;
+	}
 	logictiles.clear();
 	worldChunks.clear();
 	craftingQueue.clear();
@@ -318,7 +322,13 @@ void WorldSave::clear()
 	updateQueueB.clear();
 	updateQueueC.clear();
 	updateQueueD.clear();
+	/*
+	for (ParentTile* element: program.hotbar)
+	{
+		delete element;
+	}
 	program.hotbar.clear();
+	*/
 	tick = 0;
 	seed = 0;
 }
