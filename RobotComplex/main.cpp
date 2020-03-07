@@ -170,16 +170,11 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 	// Copy the gui stack (state) before deleting and reinitializing it
 
 	if (creator)
-	{
 		creator->~WidgetCreator();
-		creator = new WidgetCreator(gui, &window);
-		if (!program.gamePaused) {
-			creator->guiStack.pop();
-		}
-	}
-	else
-	{
-		creator = new WidgetCreator(gui, &window);
+
+	creator = new WidgetCreator(gui, &window);
+	if (!program.gamePaused) {
+		creator->guiStack.pop();
 	}
 	
 	window.setView(program.worldView);
@@ -254,22 +249,9 @@ int main()
 					else
 						program.gamePaused = true;
 				}
-				else if (event.key.code == sf::Keyboard::B)
-				{
-					creator->captureBreakpoint = true;
-				}
 			}
-			if (event.type == sf::Event::MouseButtonPressed)
-			{
-				if (creator->captureBreakpoint)
-				{
-					bool exitToDebug = true;
-				}
-			}
-			if(!program.gamePaused)
 			creator->UserInput(event);
 			inputHandler->processEvent(event);
-			creator->InterfaceUserInput(event);
 			eventHistory.emplace_back(event);
 		}
 		creator->SetGuiVisibility();
@@ -290,6 +272,7 @@ int main()
 			program.frameRate = GC::FRAMERATE;
 		program.frameRate = (program.frameRate + float(CLOCKS_PER_SEC) / float(endUpdate - beginUpdate)) * 0.5;
 	}
+	creator->SaveProgramSettings();
 	program.running = false;
 	MapUpdate.wait();
 	return 0;

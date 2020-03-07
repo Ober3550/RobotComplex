@@ -9,6 +9,7 @@
 #include "GetFileNamesInFolder.h"
 #include "MyMod.h"
 #include "ItemTileWPOS.h"
+#include "SplitString.h"
 
 class SimpleButtonListener : public agui::ButtonListener
 {
@@ -48,7 +49,11 @@ WidgetCreator::WidgetCreator(agui::Gui *guiInstance, sf::RenderWindow* windowRef
 	AddMainFrame();
 	AddSaveFrame();
 	AddNewWorldFrame();
-	SetDefaultKeyMapping();
+	if (!LoadProgramSettings())
+	{
+		LoadDefaultKeyMapping();
+	}
+	CreateActionList();
 	AddKeyMapFrame();
 }
 void WidgetCreator::AddMainFrame()
@@ -58,6 +63,19 @@ void WidgetCreator::AddMainFrame()
 	mainFrame.setText("Main Menu");
 	int row = 0;
 	
+	// New World Button
+	newWorldFromStart.setText("New World");
+	newWorldFromStart.addButtonListener(new SimpleButtonListener([&] {
+		// Don't push duplicates to the stack
+		if (!creator->guiStack.empty())
+			if (creator->guiStack.top() != &creator->newWorldFrame)
+				creator->guiStack.push(&newWorldFrame);
+		}));
+	mainFrame.add(&newWorldFromStart);
+	newWorldFromStart.setSize(gridSize * frameWidth, gridSize);
+	newWorldFromStart.setLocation(0, row * gridSize);
+	row++;
+
 	// Play Button changes to load and save frame
 	playButton.setSize(gridSize * frameWidth, gridSize);
 	playButton.setText("Play");
@@ -67,7 +85,7 @@ void WidgetCreator::AddMainFrame()
 			if (creator->guiStack.top() != &creator->saveFrame)
 				creator->guiStack.push(&saveFrame);
 		creator->worldSaves.clearItems();
-		std::vector<std::string> names = getFileNamesInFolder("saves");
+		std::vector<std::string> names = getFolderNamesInFolder("saves");
 		for (std::string name : names)
 		{
 			worldSaves.addItem(name);
@@ -246,10 +264,65 @@ void WidgetCreator::SetGuiVisibility()
 	}
 	buttonsEnabled = true;
 }
-void WidgetCreator::SetDefaultKeyMapping()
+void WidgetCreator::LoadDefaultKeyMapping()
 {
 	sf::Event::KeyEvent keyPress;
+	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Move Forward" });
 
+	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Turn Left" });
+
+	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Turn Around" });
+
+	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Turn Right" });
+
+	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Rotate Clockwise" });
+
+	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ true, /*system*/ false };
+	actionMap.insert({ keyPress, "Rotate Anti-Clockwise" });
+
+	keyPress = { sf::Keyboard::Q, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Empty Hand" });
+
+	keyPress = { sf::Keyboard::Delete, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Remove Logic" });
+
+	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Set Robot Auto" });
+
+	keyPress = { sf::Keyboard::Z, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Swap hotbar" });
+
+	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Change ColorClass" });
+
+	keyPress = { sf::Keyboard::LAlt, /*alt*/ true, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Show Detailed Info" });
+
+	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Copy" });
+
+	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Cut" });
+
+	keyPress = { sf::Keyboard::V, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Paste" });
+
+	keyPress = { sf::Keyboard::F3, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+	actionMap.insert({ keyPress, "Show Debug Info" });
+
+	for (int i = 0; i < 20; i++)
+	{
+		keyPress = { sf::Keyboard::Key(int(sf::Keyboard::Num0) + MyMod(i + 1,10)), /*alt*/ false, /*ctrl*/ false, /*shift*/ i > 9, /*system*/ false };
+		actionMap.insert({ keyPress, "Hotbar " + std::to_string(i + 1) });
+	}
+}
+void WidgetCreator::CreateActionList()
+{
 	//W
 	userActionOrder.push_back("Move Forward");
 	userActions.insert({ "Move Forward",[&] {
@@ -264,8 +337,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 				program.cameraPos.y -= int(GC::cameraSpeed * program.zoom);
 			}
 	} });
-	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Move Forward" });
 
 	//A
 	userActionOrder.push_back("Turn Left");
@@ -281,8 +352,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.cameraPos.x -= int(GC::cameraSpeed * program.zoom);
 		}
 	} });
-	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Turn Left" });
 
 	//S
 	userActionOrder.push_back("Turn Around");
@@ -298,8 +367,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.cameraPos.y += int(GC::cameraSpeed * program.zoom);
 		}
 	} });
-	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Turn Around" });
 
 	//D
 	userActionOrder.push_back("Turn Right");
@@ -315,8 +382,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.cameraPos.x += int(GC::cameraSpeed * program.zoom);
 		}
 	} });
-	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Turn Right" });
 
 	//R
 	userActionOrder.push_back("Rotate Clockwise");
@@ -337,8 +402,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.placeRotation = Pos::RelativeFacing(program.placeRotation,1);
 		}
 	} });
-	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Rotate Clockwise" });
 
 	//R
 	userActionOrder.push_back("Rotate Anti-Clockwise");
@@ -358,8 +421,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.placeRotation = Pos::RelativeFacing(program.placeRotation, -1);
  }
 	} });
-	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ true, /*system*/ false };
-	actionMap.insert({ keyPress, "Rotate Anti-Clockwise" });
 
 	//Q
 	userActionOrder.push_back("Empty Hand");
@@ -372,8 +433,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 		program.copy = false;
 		program.cut = false;
 	} });
-	keyPress = { sf::Keyboard::Q, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Empty Hand" });
 
 	//Delete
 	userActionOrder.push_back("Remove Logic");
@@ -388,8 +447,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.selectedLogicTile = nullptr;
 		}
 	} });
-	keyPress = { sf::Keyboard::Delete, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Remove Logic" });
 
 	//X
 	userActionOrder.push_back("Set Robot Auto");
@@ -404,8 +461,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.selectedRobot = nullptr;
 		}
 	} });
-	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Set Robot Auto" });
 
 	//Z
 	userActionOrder.push_back("Swap hotbar");
@@ -417,8 +472,6 @@ void WidgetCreator::SetDefaultKeyMapping()
 			program.hotbar[i + 10] = temp;
 		}
 	} });
-	keyPress = { sf::Keyboard::Z, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Swap hotbar" });
 
 	//C
 	userActionOrder.push_back("Change ColorClass");
@@ -428,57 +481,44 @@ void WidgetCreator::SetDefaultKeyMapping()
 		else
 			program.placeColor = 1;
 	} });
-	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Change ColorClass" });
 
 	//Alt
 	userActionOrder.push_back("Show Detailed Info");
 	userActions.insert({ "Show Detailed Info",[&] {
 		program.showSignalStrength = !program.showSignalStrength;
 	} });
-	keyPress = { sf::Keyboard::LAlt, /*alt*/ true, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Show Detailed Info" });
-
+	
 	//Ctrl + C
 	userActionOrder.push_back("Copy");
 	userActions.insert({ "Copy",[&] {
 		program.hotbarIndex = -1;
 		program.copy = true;
 	} });
-	keyPress = { sf::Keyboard::C, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Copy" });
-
+	
 	//Ctrl + X
 	userActionOrder.push_back("Cut");
 	userActions.insert({ "Cut",[&] {
 		program.hotbarIndex = -1;
 		program.cut = true;
 	} });
-	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Cut" });
-
+	
 	//Ctrl + V
 	userActionOrder.push_back("Paste");
 	userActions.insert({ "Paste",[&] {
 		program.paste = true;
 	} });
-	keyPress = { sf::Keyboard::V, /*alt*/ false, /*ctrl*/ true, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Paste" });
 
 	//F3
 	userActionOrder.push_back("Show Debug Info");
 	userActions.insert({ "Show Debug Info",[&] {
 		program.showDebugInfo = !program.showDebugInfo;
 	} });
-	keyPress = { sf::Keyboard::F3, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Show Debug Info" });
-
+	
 	for (int i = 0; i < 20; i++)
 	{
 		userActionOrder.push_back("Hotbar " + std::to_string(i + 1));
 		userActions.insert({ "Hotbar "+std::to_string(i+1),[i] {program.hotbarIndex = i; } });
-		keyPress = { sf::Keyboard::Key(int(sf::Keyboard::Num0) + MyMod(i+1,10)), /*alt*/ false, /*ctrl*/ false, /*shift*/ i>9, /*system*/ false };
-		actionMap.insert({ keyPress, "Hotbar "+std::to_string(i+1) });
+		
 	}
 }
 
@@ -524,7 +564,7 @@ void WidgetCreator::AddKeyMapFrame()
 		{
 			if (keyAction.second == actionName)
 			{
-				newButton->setText(toString(keyAction.first));
+				newButton->setText(KeyNames::toString(keyAction.first));
 			}
 		}
 		newButton->addButtonListener(new SimpleButtonListener([actionName, buttons] {
@@ -647,7 +687,7 @@ void WidgetCreator::MapNewButton(sf::Event::KeyEvent newButton)
 	// set its name to None to indicate that it is unbound now.
 	for (uint16_t i = 0; i < remapButtons.size(); i++)
 	{
-		if (remapButtons[i]->getText() == toString(newButton))
+		if (remapButtons[i]->getText() == KeyNames::toString(newButton))
 		{
 			remapButtons[i]->setText("None");
 		}
@@ -656,7 +696,7 @@ void WidgetCreator::MapNewButton(sf::Event::KeyEvent newButton)
 	// Set new buttons name to the string representation of the key event
 	if (!actionBindButtonIndex)
 		OutputDebugStringA("Error finding button that control mapping refers to.\r\n");
-	remapButtons[actionBindButtonIndex]->setText(toString(newButton));
+	remapButtons[actionBindButtonIndex]->setText(KeyNames::toString(newButton));
 	actionMap[newButton] = actionBindWaiting;
 
 	// Clean up
@@ -990,15 +1030,42 @@ void WidgetCreator::PasteSelection()
 	program.paste = false;
 }
 
-void WidgetCreator::InterfaceUserInput(sf::Event event)
+void WidgetCreator::SaveProgramSettings()
 {
-	lastWidget = mGui->getWidgetUnderMouse();
-	if (lastWidget == &worldName)
+	std::ofstream myfile;
+	myfile.open("saves/config.txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	if (myfile.is_open())
 	{
-		bool hasFocus = worldName.isFocused();
-		if (hasFocus)
+		for (std::pair<sf::Event::KeyEvent, std::string> action : actionMap)
 		{
-			bool seeFocus = true;
+			myfile << action.second + ":" + KeyNames::toString(action.first) + "\r\n";
 		}
 	}
+	myfile.close();
 }
+
+// Returns true when a key mapping config has been found
+bool WidgetCreator::LoadProgramSettings()
+{
+	std::ifstream myfile("saves/config.txt");
+	if (!myfile.is_open())
+		return false;
+	std::string str;
+	int i = 0;
+	while (std::getline(myfile, str))
+	{
+		std::vector<std::string> splitLine;
+		split(&splitLine, str, ':');
+		if (splitLine.size() != 0)
+		{
+			if (sf::Event::KeyEvent* valid = KeyNames::toEvent(splitLine[1]))
+			{
+				actionMap.insert({ *valid, splitLine[0] });
+			}
+		}
+		i++;
+	}
+	myfile.close();
+	return true;
+}
+

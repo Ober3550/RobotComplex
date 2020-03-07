@@ -117,7 +117,7 @@
       <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>agui.lib;agui_sfml2.lib;sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;gdi32.lib;kernel32.lib;user32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;gdi32.lib;kernel32.lib;user32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\RobotComplex\Agui\lib\Debug;$(SolutionDir)\RobotComplex\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -297,6 +297,7 @@
     <ClCompile Include="GetFileNamesInFolder.cpp" />
     <ClCompile Include="ItemTile.cpp" />
     <ClCompile Include="ItemTileWPOS.cpp" />
+    <ClCompile Include="KeyNames.cpp" />
     <ClCompile Include="LogicTile.cpp" />
     <ClCompile Include="LogicTileDrawing.cpp" />
     <ClCompile Include="main.cpp" />
@@ -306,6 +307,7 @@
     <ClCompile Include="ProgramData.cpp" />
     <ClCompile Include="PrototypeLoader.cpp" />
     <ClCompile Include="Robot.cpp" />
+    <ClCompile Include="SplitString.cpp" />
     <ClCompile Include="TestWorld.cpp" />
     <ClCompile Include="WidgetCreator.cpp" />
     <ClCompile Include="WorldSave.cpp" />

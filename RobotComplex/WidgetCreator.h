@@ -46,6 +46,7 @@ public:
 
 	// Main Menu
 	agui::Frame mainFrame;
+	agui::Button newWorldFromStart;
 	agui::Button playButton;
 	agui::Button controlsButton;
 	agui::Button exitButton;
@@ -89,11 +90,13 @@ public:
 	void AddSaveFrame();
 	void AddNewWorldFrame();
 	void SetGuiVisibility();
-	void SetDefaultKeyMapping();
+	bool LoadProgramSettings();
+	void SaveProgramSettings();
+	void LoadDefaultKeyMapping();
+	void CreateActionList();
 	void MapNewButton(sf::Event::KeyEvent);
 	void AddKeyMapFrame();
 	void UserInput(sf::Event event);
-	void InterfaceUserInput(sf::Event event);
 	void MouseMoved();
 	void RightMousePressed();
 	void LeftMousePressed();
