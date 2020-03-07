@@ -1,4 +1,5 @@
 #include "GetFileNamesInFolder.h"
+#include <cassert>
 std::vector<std::string> getNamesInFolder(std::string folder){
 	std::vector<std::string> names;
 	std::string pattern(folder);

@@ -85,6 +85,8 @@ void WidgetCreator::AddMainFrame()
 			if (creator->guiStack.top() != &creator->saveFrame)
 				creator->guiStack.push(&saveFrame);
 		creator->worldSaves.clearItems();
+		if (!CreateDirectory("saves", NULL) && ERROR_ALREADY_EXISTS != GetLastError())
+			return;
 		std::vector<std::string> names = getFolderNamesInFolder("saves");
 		for (std::string name : names)
 		{
@@ -1032,6 +1034,8 @@ void WidgetCreator::PasteSelection()
 
 void WidgetCreator::SaveProgramSettings()
 {
+	if (!CreateDirectory("saves", NULL) && ERROR_ALREADY_EXISTS != GetLastError())
+		return;
 	std::ofstream myfile;
 	myfile.open("saves/config.txt", std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())

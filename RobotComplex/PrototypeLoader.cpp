@@ -22,7 +22,7 @@ sf::Texture* LoadTexture(std::string filename)
 {
 	sf::Texture* texture = new sf::Texture();
 	//sf::Texture* texture = nullptr;
-	if (!texture->loadFromFile("Assets/x32/" + filename))
+	if (!texture->loadFromFile("Assets/" + filename))
 	{
 		OutputDebugStringA((filename + " failed to load\r\n").c_str());
 	}
@@ -46,12 +46,7 @@ void LoadPrototypes()
 	LoadAllTextures();
 
 	// Ground Tiles
-	std::string groundFolder = "new_ground";
-	std::vector<std::string> groundPrototypes = getFileNamesInFolder("Assets/x32/" + groundFolder);
-	for (const std::string& text : groundPrototypes)
-	{
-		groundTextures.emplace_back(LoadTexture(groundFolder +"/" + text));
-	}
+	groundTexture = LoadTexture("groundTexture8greyscale.png");
 
 	// Items
 	program.itemPrototypes = {
@@ -132,7 +127,7 @@ void LoadPrototypes()
 
 	for (const std::string& text : animationPrototypes)
 	{
-		animationTextures.emplace_back(LoadTexture("machines/" + text + ".png"));
+		animationTextures.emplace_back(LoadTexture("animations/" + text + ".png"));
 	}
 
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Animation, Animation Offset

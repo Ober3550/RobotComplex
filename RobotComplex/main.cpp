@@ -23,13 +23,11 @@ agui::SFML2Graphics* graphicsHandler = NULL;
 agui::Font *defaultFont = NULL;
 std::thread worldUpdate;
 
-std::vector<sf::Texture*> groundTextures;
+sf::Texture* groundTexture;
 std::vector<sf::Texture*> itemTextures;
 std::vector<sf::Texture*> animationTextures;
-sf::Texture* platformTexture = LoadTexture("platform.png");
 sf::Texture* robotTexture = LoadTexture("robotNew.png");
 sf::Texture* font = LoadTexture("font.png");
-sf::Texture* buttonTexture = LoadTexture("button.png");
 
 sf::Texture* LogicTile::texture = LoadTexture("blank.png");
 sf::Texture* Wire::texture = LoadTexture("logic/wire.png");
@@ -75,13 +73,13 @@ void initializeAgui(sf::RenderTarget& target)
 	//Set the graphics handler
 	gui->setGraphics(graphicsHandler);
 	//Set the font
-	std::string font = "Fonts/DejaVuSans.ttf";
+	std::string font = "Assets/DejaVuSans.ttf";
 	defaultFont = agui::Font::load(font, 16);
 	program.guiFont.loadFromFile(font);
 	//Setting a global font is required and failure to do so will crash.
 	agui::Widget::setGlobalFont(defaultFont);
 	//Set icon image
-	assert(icon.loadFromFile("Assets/x32/robotIcon.png"));
+	assert(icon.loadFromFile("Assets/robotIcon.png"));
 }
 
 void UpdateWorld()
@@ -132,7 +130,9 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 		program.windowHeight = float(displaySize.getHeight());
 		program.halfWindowWidth = program.windowWidth / 2;
 		program.halfWindowHeight = program.windowHeight / 2;
+		window.setActive(false);
 		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "RoboFactory", sf::Style::Default);
+		window.setActive(true);
 		if (program.windowedWidth == program.windowWidth && program.windowedHeight == program.windowHeight)
 			maximize = true;
 	}
@@ -142,12 +142,16 @@ void ResizeWindow(sf::RenderWindow& window, bool windowFullScreen, bool recreate
 		program.windowHeight = program.windowedHeight;
 		program.halfWindowWidth = program.windowWidth / 2;
 		program.halfWindowHeight = program.windowHeight / 2;
+		window.setActive(false);
 		window.create(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "RoboFactory", sf::Style::Default);
+		window.setActive(true);
 		maximize = true;
 	}
 	if (windowFullScreen)
 	{
+		window.setActive(false);
 		window.create(sf::VideoMode(int(sf::VideoMode::getDesktopMode().width), int(sf::VideoMode::getDesktopMode().height)), "RoboFactory", sf::Style::Fullscreen);
+		window.setActive(true);
 		program.windowWidth = float(sf::VideoMode::getDesktopMode().width);
 		program.windowHeight = float(sf::VideoMode::getDesktopMode().height);
 		program.halfWindowWidth = program.windowWidth / 2;
@@ -206,6 +210,7 @@ int main()
 
 	// Load Gui
 	sf::RenderWindow window(sf::VideoMode(int(program.windowWidth), int(program.windowHeight)), "RoboFactory");
+	window.setActive(true);
 	sf::WindowHandle windowHandle = window.getSystemHandle();
 	ShowWindow(windowHandle, SW_MAXIMIZE);
 	maximize = true;

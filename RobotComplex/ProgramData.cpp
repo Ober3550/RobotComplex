@@ -40,7 +40,7 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 		program.maxGround = textureIndex;
 	if (textureIndex < program.minGround)
 		program.minGround = textureIndex;
-	sprite.setTexture(*groundTextures[0]);
+	sprite.setTexture(*groundTexture);
 	sprite.setTextureRect(sf::IntRect((textureIndex / 32)*32, 0, 32, 32));
 	sf::Color color = HSV2RGB(sf::Color(MyMod(textureIndex+16,256), 100 + MyMod(textureIndex,32), 220, 255 ));
 	sprite.setColor(color);
@@ -50,6 +50,7 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 }
 void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 {
+	/*
 	if (uint16_t* platform = world.platforms.GetValue(encodedPos))
 	{
 		if (!program.showDebugInfo)
@@ -73,6 +74,7 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 		sprite.setPosition(x + float(GC::halfTileSize), y + float(GC::halfTileSize));
 		program.platformSprites.emplace_back(sprite);
 	}
+	*/
 }
 void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float y, uint8_t flags)
 {

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RobotComplex", "RobotComplex\RobotComplex.vcxproj", "{E9FCFA25-2709-4E70-B3D0-5C92A06C06BC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoboFactory", "RobotComplex\RobotComplex.vcxproj", "{E9FCFA25-2709-4E70-B3D0-5C92A06C06BC}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "RoboFactoryInstaller", "RoboFactoryInstaller\RoboFactoryInstaller.vdproj", "{89DD704C-37E6-49CF-AF22-7758B6500D92}"
 EndProject
@@ -27,6 +27,7 @@ Global
 		{89DD704C-37E6-49CF-AF22-7758B6500D92}.Debug|x86.ActiveCfg = Debug
 		{89DD704C-37E6-49CF-AF22-7758B6500D92}.Release|x64.ActiveCfg = Release
 		{89DD704C-37E6-49CF-AF22-7758B6500D92}.Release|x86.ActiveCfg = Release
+		{89DD704C-37E6-49CF-AF22-7758B6500D92}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
