@@ -341,6 +341,12 @@
     <ClCompile Include="ItemTileWPOS.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
+    <ClCompile Include="KeyNames.cpp">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
+    <ClCompile Include="SplitString.cpp">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h">

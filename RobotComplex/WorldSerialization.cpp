@@ -98,7 +98,7 @@ void WorldSave::SerializeLogicStructure(std::string filename)
 			if (tempLogic)
 			{
 				int logicSize = tempLogic->MemorySize();
-				myfile << (logicTypes[i] + " : " + std::to_string(logicSize) + "\r\n");
+				myfile << (logicTypes[i] + ":" + std::to_string(logicSize) + "\r\n");
 			}
 		}
 		myfile.close();
@@ -133,18 +133,26 @@ void WorldSave::SerializeMisc(std::string filename)
 	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())
 	{
-		myfile.write((char*)&program.cameraPos, sizeof(Pos));
+		myfile << "Camera Pos," + std::to_string(program.cameraPos.x) + "," + std::to_string(program.cameraPos.y);
 	}
 }
 
 void WorldSave::DeserializeMisc(std::string filename)
 {
-	std::ifstream myfile;
-	myfile.open(filename, std::ios::in | std::ios::binary);
-	myfile.seekg(0, std::ios::beg);
-	if (myfile.is_open())
+	std::ifstream myfile(filename);
+	std::string str;
+	while (std::getline(myfile, str))
 	{
-		myfile.read((char*)&program.cameraPos, sizeof(Pos));
+		std::vector<std::string> splitLine;
+		split(&splitLine, str, ',');
+		if (splitLine.size() != 0)
+		{
+			if (splitLine[0] == "Camera Pos")
+			{
+				program.cameraPos.x = std::stoi(splitLine[1]);
+				program.cameraPos.y = std::stoi(splitLine[2]);
+			}
+		}
 	}
 }
 
