@@ -64,6 +64,7 @@ void WidgetCreator::AddMainFrame()
 	int row = 0;
 	
 	// New World Button
+	/*
 	newWorldFromStart.setText("New World");
 	newWorldFromStart.addButtonListener(new SimpleButtonListener([&] {
 		// Don't push duplicates to the stack
@@ -74,7 +75,7 @@ void WidgetCreator::AddMainFrame()
 	mainFrame.add(&newWorldFromStart);
 	newWorldFromStart.setSize(gridSize * frameWidth, gridSize);
 	newWorldFromStart.setLocation(0, row * gridSize);
-	row++;
+	row++;*/
 
 	// Play Button changes to load and save frame
 	playButton.setSize(gridSize * frameWidth, gridSize);
@@ -108,15 +109,30 @@ void WidgetCreator::AddMainFrame()
 	controlsButton.setSize(gridSize * frameWidth, gridSize);
 	controlsButton.setLocation(0, row * gridSize);
 	row++;
+
+	// Back button exists on every frame 
+	// such that those that aren't good with keyboard and mouse have easy navigation
+	mainBackButton.setText("Back");
+	mainBackButton.addButtonListener(new SimpleButtonListener([&] {
+		if (!creator->guiStack.empty()) {
+			creator->guiStack.pop();
+		}
+		}));
+	mainFrame.add(&mainBackButton);
+	mainBackButton.setSize(gridSize * frameWidth, gridSize);
+	mainBackButton.setLocation(0, row * gridSize);
+	row++;
+
 	// Exit Button
 	exitButton.setText("Exit Game");
 	exitButton.addButtonListener(new SimpleButtonListener([&] {
 		program.running = false;
-	}));
+		}));
 	mainFrame.add(&exitButton);
 	exitButton.setSize(gridSize * frameWidth, gridSize);
-	exitButton.setLocation(0, row* gridSize);
+	exitButton.setLocation(0, row * gridSize);
 	row++;
+
 	mainFrame.setVisibility(true);
 	// Ensure that top of gui stack is the main frame
 	guiStack.push(&mainFrame);
@@ -168,6 +184,10 @@ void WidgetCreator::AddSaveFrame()
 		program.worldMutex.lock();
 		world.Deserialize(program.selectedSave);
 		program.worldMutex.unlock();
+		while (!creator->guiStack.empty())
+		{
+			creator->guiStack.pop();
+		}
 	}));
 	saveFrame.add(&loadButton);
 	loadButton.setSize(gridSize * frameWidth, gridSize);
@@ -216,13 +236,21 @@ void WidgetCreator::AddNewWorldFrame()
 	std::hash<std::string> hasher;
 	newWorldGenerate.setText("Generate");
 	newWorldGenerate.addButtonListener(new SimpleButtonListener([&] {
-		program.worldMutex.lock();
-		world.clear();
 		std::string worldName = creator->worldName.getText();
-		world = WorldSave(hasher(worldName));
-		world.Serialize(worldName);
-		program.redrawGround = true;
-		program.worldMutex.unlock();
+		if (worldName != "")
+		{
+			program.worldMutex.lock();
+			world.clear();
+
+			world = WorldSave(hasher(worldName));
+			world.Serialize(worldName);
+			program.redrawGround = true;
+			program.worldMutex.unlock();
+			while (!creator->guiStack.empty())
+			{
+				creator->guiStack.pop();
+			}
+		}
 		}));
 	newWorldFrame.add(&newWorldGenerate);
 	newWorldGenerate.setSize(gridSize * frameWidth, gridSize);
@@ -270,16 +298,16 @@ void WidgetCreator::LoadDefaultKeyMapping()
 {
 	sf::Event::KeyEvent keyPress;
 	keyPress = { sf::Keyboard::W, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Move Forward" });
+	actionMap.insert({ keyPress, "Move North" });
 
 	keyPress = { sf::Keyboard::A, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Turn Left" });
+	actionMap.insert({ keyPress, "Move West" });
 
 	keyPress = { sf::Keyboard::S, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Turn Around" });
+	actionMap.insert({ keyPress, "Move South" });
 
 	keyPress = { sf::Keyboard::D, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	actionMap.insert({ keyPress, "Turn Right" });
+	actionMap.insert({ keyPress, "Move East" });
 
 	keyPress = { sf::Keyboard::R, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Rotate Clockwise" });
@@ -326,26 +354,28 @@ void WidgetCreator::LoadDefaultKeyMapping()
 void WidgetCreator::CreateActionList()
 {
 	//W
-	userActionOrder.push_back("Move Forward");
-	userActions.insert({ "Move Forward",[&] {
+	userActionOrder.push_back("Move North");
+	userActions.insert({ "Move North",[&] {
 		if (program.selectedRobot)
-			{
-				program.selectedRobot->Move();
-			}
-			else
-			{
-			if(!world.moving)
-				world.MovePlatform(program.mouseHovering,north);
-				program.cameraPos.y -= int(GC::cameraSpeed * program.zoom);
-			}
+		{
+			program.selectedRobot->facing = north;
+			program.selectedRobot->Move();
+		}
+		else
+		{
+		if(!world.moving)
+			world.MovePlatform(program.mouseHovering,north);
+			program.cameraPos.y -= int(GC::cameraSpeed * program.zoom);
+		}
 	} });
 
 	//A
-	userActionOrder.push_back("Turn Left");
-	userActions.insert({ "Turn Left",[&] {
+	userActionOrder.push_back("Move West");
+	userActions.insert({ "Move West",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->Rotate(-1);
+			program.selectedRobot->facing = west;
+			program.selectedRobot->Move();
 		}
 		else
 		{
@@ -356,11 +386,12 @@ void WidgetCreator::CreateActionList()
 	} });
 
 	//S
-	userActionOrder.push_back("Turn Around");
-	userActions.insert({ "Turn Around",[&] {
+	userActionOrder.push_back("Move South");
+	userActions.insert({ "Move South",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->Rotate(2);
+			program.selectedRobot->facing = south;
+			program.selectedRobot->Move();
 		}
 		else
 		{
@@ -371,11 +402,12 @@ void WidgetCreator::CreateActionList()
 	} });
 
 	//D
-	userActionOrder.push_back("Turn Right");
-	userActions.insert({ "Turn Right",[&] {
+	userActionOrder.push_back("Move East");
+	userActions.insert({ "Move East",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->Rotate(1);
+			program.selectedRobot->facing = east;
+			program.selectedRobot->Move();
 		}
 		else
 		{
@@ -522,6 +554,18 @@ void WidgetCreator::CreateActionList()
 		userActions.insert({ "Hotbar "+std::to_string(i+1),[i] {program.hotbarIndex = i; } });
 		
 	}
+
+	// Every tick
+	for (std::string action : userActionOrder)
+	{
+		actionFrequency.insert({ action, 3600 });
+	}
+	actionFrequency["Move North"] = 1;
+	actionFrequency["Move East"] = 1;
+	actionFrequency["Move South"] = 1;
+	actionFrequency["Move West"] = 1;
+	actionFrequency["Right Mouse"] = 7;
+	actionFrequency["Left Mouse"] = 7;
 }
 
 void WidgetCreator::AddKeyMapFrame()
@@ -606,9 +650,19 @@ void WidgetCreator::UserInput(sf::Event input)
 		}
 		else if (std::string* action = actionMap.GetValue(input.key))
 		{
-			if (std::function<void()>* func = this->userActions.GetValue(*action))
+			if (!program.gamePaused)
 			{
-				(*func)();
+				if (int* timeout = heldTick.GetValue(*action))
+				{
+					if (*timeout == 0)
+					{
+						heldTick[*action] = world.tick;
+					}
+				}
+				else
+				{
+					heldTick[*action] = world.tick;
+				}
 			}
 		}
 	} else if (input.type == sf::Event::KeyReleased)
@@ -617,6 +671,10 @@ void WidgetCreator::UserInput(sf::Event input)
 		{
 			MapNewButton(input.key);
 		}
+		if (std::string* action = actionMap.GetValue(input.key))
+		{
+			heldTick[*action] = 0;
+		}
 	}
 	else if (input.type == sf::Event::MouseMoved)
 	{
@@ -624,33 +682,27 @@ void WidgetCreator::UserInput(sf::Event input)
 		//sf::Vector2f scaledPos = window->mapPixelToCoords(tempPos, program.worldView);
 		program.mousePos = Pos{ int(tempPos.x) - int(program.halfWindowWidth),int(tempPos.y) - int(program.halfWindowHeight) };
 		MouseMoved();
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && program.prevMouseHovering != program.mouseHovering)
-			LeftMousePressed();
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && program.prevMouseHovering != program.mouseHovering)
-			RightMousePressed();
 	}
 	else if (input.type == sf::Event::MouseButtonPressed)
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			if (program.cut || program.copy)
-			{
-				program.startedSelection = true;
-				program.startSelection = program.mouseHovering;
-			}
-			if (program.paste)
-			{
-				PasteSelection();
-			}
-			LeftMousePressed();
+			heldTick["Left Mouse"] = world.tick;
 		}
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-			RightMousePressed();
+		{
+			heldTick["Right Mouse"] = world.tick;
+		}
 	}
 	else if (input.type == sf::Event::MouseButtonReleased)
 	{
-		if (input.mouseButton.button == sf::Mouse::Button::Left)
+		if (input.mouseButton.button == sf::Mouse::Button::Right)
 		{
+			heldTick["Right Mouse"] = 0;
+		}
+		else if (input.mouseButton.button == sf::Mouse::Button::Left)
+		{
+			heldTick["Left Mouse"] = 0;
 			if (program.startedSelection)
 			{
 				FinishedSelection(program.startSelection, program.mouseHovering);
@@ -740,8 +792,7 @@ void WidgetCreator::MouseMoved()
 				{
 					program.selectedHotbar = program.hotbar[i];
 					program.hoveringHotbar = i;
-					if (program.selectedLogicTile)
-						foundLogic = true;
+					foundLogic = true;
 				}
 			}
 			if (!foundLogic)
@@ -764,6 +815,15 @@ void WidgetCreator::LeftMousePressed()
 {
 	if (!program.gamePaused)
 	{
+		if (program.cut || program.copy)
+		{
+			program.startedSelection = true;
+			program.startSelection = program.mouseHovering;
+		}
+		if (program.paste)
+		{
+			PasteSelection();
+		}
 		if (program.hoveringHotbar != -1)
 		{
 			program.hotbarIndex = program.hoveringHotbar;
@@ -857,7 +917,7 @@ void WidgetCreator::LeftMousePressed()
 
 void WidgetCreator::RightMousePressed()
 {
-    if (ItemTile* item = world.GetItemTile(program.mouseHovering))
+	if (ItemTile* item = world.GetItemTile(program.mouseHovering))
 	{
 		// If you can take an item off then do so
 		if (world.ChangeItem(program.mouseHovering, item->itemTile, -1))
@@ -897,13 +957,13 @@ void WidgetCreator::RightMousePressed()
 		}
 		return;
 	}
-	if (LogicTile * logic = world.GetLogicTile(program.mouseHovering))
+	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
 	{
 		if (logic->quantity > 0)
 		{
 			logic->quantity--;
 		}
-		if(logic->quantity == 0)
+		if (logic->quantity == 0)
 		{
 			world.logictiles.erase(program.mouseHovering.CoordToEncoded());
 			for (int i = 0; i < 4; i++)
@@ -1073,3 +1133,72 @@ bool WidgetCreator::LoadProgramSettings()
 	return true;
 }
 
+void WidgetCreator::PerformActions()
+{
+	// There can only be one input for robot control...
+	std::vector<std::string> mask = { "Move North","Move East","Move South","Move West" };
+	int oldest[4] = { 0 };
+	bool outerMask = false;
+	for (std::pair<std::string, int> action : creator->heldTick)
+	{
+		if (action.second > 0)
+		{
+			bool masked = false;
+			if (program.selectedRobot)
+			{
+				for (int i = 0; i < mask.size(); i++)
+				{
+					if (action.first == mask[i])
+					{
+						oldest[i] = 1 + world.tick - action.second;
+						masked = true;
+						outerMask = true;
+					}
+				}
+			}
+			if (!masked)
+			{
+				if ((world.tick - action.second) % actionFrequency[action.first] == 0)
+				{
+					// Deliberately miss the second action
+					int actionNum = (world.tick - action.second) / actionFrequency[action.first];
+					if (actionNum != 1)
+					{
+						if (action.first == "Left Mouse")
+						{
+							LeftMousePressed();
+						}
+						else if (action.first == "Right Mouse")
+						{
+							RightMousePressed();
+						}
+						else if (std::function<void()>* func = creator->userActions.GetValue(action.first))
+						{
+							(*func)();
+						}
+					}
+				}
+			}
+		}
+	}
+	if (outerMask)
+	{
+		int max = 0;
+		int maxInd = -1;
+		for (int i = 0; i < 4; i++)
+		{
+			if (oldest[i] > max)
+			{
+				max = oldest[i];
+				maxInd = i;
+			}
+		}
+		if ((max - 1) % actionFrequency[mask[maxInd]] == 0)
+		{
+			if (std::function<void()>* func = creator->userActions.GetValue(mask[maxInd]))
+			{
+				(*func)();
+			}
+		}
+	}
+}

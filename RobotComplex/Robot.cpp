@@ -68,14 +68,20 @@ bool Robot::Move()
 	return false;
 }
 
-void Robot::DrawTile(SpriteVector* appendTo, int x, int y, float s)
+void Robot::DrawTile(SpriteVector* appendTo, int x, int y, float s, uint8_t flags, sf::Color color)
 {
 	sf::Sprite sprite;
 	sprite.setTexture(*robotTexture);
-	sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
 	sprite.setOrigin(16, 32);
 	sprite.setPosition(float(x + 16), float(y + 16));
 	sprite.setScale(sf::Vector2f(s, s));
+
+	sprite.setColor(color);
+	sprite.setTextureRect(sf::IntRect(64 * facing, 48, 32, 48));
+	appendTo->emplace_back(sprite);
+	
+	sprite.setColor(sf::Color(255, 255, 255, 255));
+	sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
 	appendTo->emplace_back(sprite);
 }
 

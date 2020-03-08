@@ -89,7 +89,7 @@ void LogicTile::DrawQuantity(SpriteVector* appendTo, float x, float y, float s, 
 	}
 }
 
-void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags) {
+void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor) {
 	this->facing = north;
 	sf::Sprite sprite;
 	sprite.setTexture(*texture);
@@ -112,7 +112,7 @@ void PressurePlate::DrawTile(SpriteVector* appendTo, float x, float y, float s, 
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -160,7 +160,7 @@ void Wire::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t f
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -189,7 +189,7 @@ void Redirector::DrawTile(SpriteVector* appendTo, float x, float y, float s, uin
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -256,7 +256,7 @@ void Inverter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -323,7 +323,7 @@ void Booster::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -390,7 +390,7 @@ void Comparer::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Input Sprite
 	sf::Sprite sprite;
@@ -433,7 +433,7 @@ void Repeater::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Baseplate
 	sf::Sprite sprite;
@@ -463,7 +463,7 @@ void Counter::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	program.textOverlay.emplace_back(counterValue);
 }
 
-void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -492,7 +492,7 @@ void Belt::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t f
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Shover::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Shover::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -521,7 +521,7 @@ void Shover::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -586,7 +586,7 @@ void WireBridge::DrawTile(SpriteVector* appendTo, float x, float y, float s, uin
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Main Sprite
 	sf::Sprite sprite;
@@ -615,7 +615,7 @@ void Gate::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t f
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;
@@ -682,7 +682,7 @@ void PlusOne::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
 
-void Toggle::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags)
+void Toggle::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color modifiedColor)
 {
 	// Centre Sprite
 	sf::Sprite sprite;

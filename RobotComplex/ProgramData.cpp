@@ -140,7 +140,7 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, float x, float y)
 				y += int(float(difference.y) * float(GC::tileSize) * step);
 			}
 		}
-		logic->DrawTile(&program.logicSprites, x, y, 1.0f, uint8_t(program.showSignalStrength));
+		logic->DrawTile(&program.logicSprites, x, y, 1.0f, uint8_t(program.showSignalStrength), sf::Color(255,255,255,255));
 	}
 }
 void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
@@ -170,7 +170,12 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 				y += float(difference.y) * float(GC::tileSize) * step;
 			}
 		}
-		robot->DrawTile(&program.robotSprites,int(x), int(y), 1.0f);
+		sf::Color color;
+		if (robot == program.selectedRobot)
+			color = sf::Color(130, 120, 255, 255);
+		else
+			color = sf::Color(250, 191, 38, 255);
+		robot->DrawTile(&program.robotSprites,int(x), int(y), 1.0f, 0, color);
 	}
 }
 void ProgramData::RecreateGhostSprites(uint64_t encodedPos, float x, float y)
@@ -183,7 +188,7 @@ void ProgramData::RecreateGhostSprites(uint64_t encodedPos, float x, float y)
 			{
 				if ((ghost->pos + program.mouseHovering - originSelection).CoordToEncoded() == encodedPos)
 				{
-					ghost->DrawTile(&program.logicSprites, x, y, 1.f, 128);
+					ghost->DrawTile(&program.logicSprites, x, y, 1.f, 128, sf::Color(255,255,255,128));
 				}
 			}
 			else if (Robot* ghost = dynamic_cast<Robot*> (elem))
@@ -194,6 +199,7 @@ void ProgramData::RecreateGhostSprites(uint64_t encodedPos, float x, float y)
 			{
 				if ((ghost->pos + program.mouseHovering - originSelection).CoordToEncoded() == encodedPos)
 				{
+
 					DrawItem(&program.itemSprites, ghost->itemTile, x, y, 128);
 				}
 			}
@@ -404,12 +410,12 @@ void ProgramData::DrawHotbar()
 			logic->signal = GC::startSignalStrength;
 			logic->facing = program.placeRotation;
 			logic->colorClass = program.placeColor;
-			logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, 2);
+			logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, 2, sf::Color(255,255,255,255));
 		}
 		else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
 		{
-			robot->facing = program.placeRotation;
-			robot->DrawTile(&program.hotbarSprites,int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f);
+			robot->facing = Facing(south);
+			robot->DrawTile(&program.hotbarSprites,int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f, 0, sf::Color(250, 191, 38, 255));
 		}
 		else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
 		{
@@ -753,7 +759,6 @@ void ProgramData::SwapBots()
 
 void ProgramData::MoveBots()
 {
-	SwapBots();
 	for (MyMap<uint64_t,Robot>::iterator robotIter = world.robots.begin(); robotIter != world.robots.end(); robotIter++)
 	{
 		if (&robotIter->second != program.selectedRobot)
@@ -880,7 +885,7 @@ void ProgramData::DrawAlignment()
 				drawLine = true;
 			rotation = program.selectedLogicTile->facing;
 		}
-		if (program.hotbarIndex != -1)
+		else if (program.hotbarIndex != -1)
 		{
 			if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
 			{
@@ -894,7 +899,7 @@ void ProgramData::DrawAlignment()
 			sf::RectangleShape selectionBox;
 			selectionBox.setSize(sf::Vector2f(4, 1024 * program.zoom));
 			selectionBox.setOrigin(sf::Vector2f(2, 1024 * program.zoom + GC::halfTileSize));
-			selectionBox.rotate(program.placeRotation * 90.f);
+			selectionBox.rotate(rotation * 90.f);
 			selectionBox.setFillColor(sf::Color(255, 255, 0, 255));
 			Pos drawPos = program.mouseHovering * GC::tileSize;
 			selectionBox.setPosition(float(drawPos.x), float(drawPos.y));

@@ -62,6 +62,7 @@ public:
 		noiseRef->SetFractalGain(0.5f);
 		noiseRef->SetAxisScales(0.4f,0.4f,0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
+		this->tick = 0;
 	}
 	WorldSave(int seed)
 	{
@@ -73,6 +74,7 @@ public:
 		noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
 		noiseRef->SetSeed(seed);
+		this->tick = 0;
 	}
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);

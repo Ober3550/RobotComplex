@@ -90,6 +90,9 @@ void UpdateWorld()
 		program.worldMutex.lock();
 		if (!program.gamePaused)
 		{
+			program.SwapBots();
+			if (creator)
+				creator->PerformActions();
 			program.framesSinceTick = 0;
 			program.UpdateMap();
 		}
@@ -249,14 +252,14 @@ int main()
 					else {
 						creator->guiStack.push(&creator->mainFrame);
 					}
-					if (creator->guiStack.empty())
-						program.gamePaused = false;
-					else
-						program.gamePaused = true;
 				}
 			}
 			creator->UserInput(event);
 			inputHandler->processEvent(event);
+			if (creator->guiStack.empty())
+				program.gamePaused = false;
+			else
+				program.gamePaused = true;
 			eventHistory.emplace_back(event);
 		}
 		creator->SetGuiVisibility();

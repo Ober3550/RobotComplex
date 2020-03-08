@@ -36,3 +36,19 @@ ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 		return newItem;
 	}
 }
+
+void ParentTile::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color)
+{
+	if (LogicTile* logic = dynamic_cast<LogicTile*> (this))
+	{
+		logic->DrawTile(appendTo, x, y, s, flags, color);
+	}
+	else if (Robot* robot = dynamic_cast<Robot*> (this))
+	{
+		robot->DrawTile(appendTo, x, y, s, flags, color);
+	}
+	else if (ItemTile* item = dynamic_cast<ItemTile*> (this))
+	{
+		item->DrawTile(appendTo, x, y, s, flags, color);
+	}
+}

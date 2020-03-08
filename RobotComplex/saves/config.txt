@@ -1,31 +1,3 @@
-Move Forward:W
-Turn Left:A
-Turn Around:S
-Turn Right:D
-Rotate Clockwise:R
-Rotate Anti-Clockwise:Shift + R
-Empty Hand:Q
-Remove Logic:Delete
-Set Robot Auto:X
-Swap hotbar:Z
-Change ColorClass:C
-Show Detailed Info:Alt + LAlt
-Copy:Control + C
-Cut:Control + X
-Paste:Control + V
-Show Debug Info:F3
-Hotbar 1:Num1
-Hotbar 2:Num2
-Hotbar 3:Num3
-Hotbar 4:Num4
-Hotbar 5:Num5
-Hotbar 6:Num6
-Hotbar 7:Num7
-Hotbar 8:Num8
-Hotbar 9:Num9
-Hotbar 10:Num0
-Hotbar 11:Shift + Num1
-Hotbar 12:Shift + Num2
 Hotbar 13:Shift + Num3
 Hotbar 14:Shift + Num4
 Hotbar 15:Shift + Num5
@@ -34,3 +6,31 @@ Hotbar 17:Shift + Num7
 Hotbar 18:Shift + Num8
 Hotbar 19:Shift + Num9
 Hotbar 20:Shift + Num0
+Hotbar 12:Shift + Num2
+Hotbar 11:Shift + Num1
+Hotbar 10:Num0
+Hotbar 9:Num9
+Hotbar 8:Num8
+Hotbar 7:Num7
+Hotbar 6:Num6
+Hotbar 5:Num5
+Hotbar 4:Num4
+Hotbar 3:Num3
+Hotbar 2:Num2
+Hotbar 1:Num1
+Show Debug Info:F3
+Paste:Control + V
+Cut:Control + X
+Copy:Control + C
+Show Detailed Info:Alt + LAlt
+Change ColorClass:C
+Swap hotbar:Z
+Set Robot Auto:X
+Remove Logic:Delete
+Empty Hand:Q
+Rotate Anti-Clockwise:Shift + R
+Rotate Clockwise:R
+Move East:D
+Move South:S
+Move West:A
+Move North:W

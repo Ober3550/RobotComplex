@@ -46,9 +46,10 @@ public:
 
 	// Main Menu
 	agui::Frame mainFrame;
-	agui::Button newWorldFromStart;
+	//agui::Button newWorldFromStart;
 	agui::Button playButton;
 	agui::Button controlsButton;
+	agui::Button mainBackButton;
 	agui::Button exitButton;
 
 	// Play Menu
@@ -75,6 +76,8 @@ public:
 	std::vector<agui::Label*> keyActions;
 	MyMap<sf::Event::KeyEvent, std::string>   actionMap;
 	MyMap<std::string, std::function<void()>> userActions;
+	MyMap<std::string, int> heldTick;
+	MyMap<std::string, int> actionFrequency;
 	std::vector<std::string> userActionOrder;
 	std::string actionBindWaiting = "";
 	int actionBindButtonIndex = 0;
@@ -102,5 +105,6 @@ public:
 	void LeftMousePressed();
 	void FinishedSelection(Pos start, Pos end);
 	void PasteSelection();
+	void PerformActions();
 };
 extern WidgetCreator* creator;

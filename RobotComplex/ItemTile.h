@@ -1,8 +1,9 @@
 #include <cstdint>
 #include "ParentTile.h"
 #pragma once
-struct ItemTile : public ParentTile
+class ItemTile : public ParentTile
 {
+public:
 	uint16_t itemTile;
 	uint8_t quantity;
 	ItemTile()
@@ -16,6 +17,7 @@ struct ItemTile : public ParentTile
 		this->quantity = 1;
 	}
 	std::string GetTooltip();
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color);
 	virtual void Serialize(std::ofstream*);
 	virtual void Deserialize(std::ifstream*);
 };

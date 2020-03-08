@@ -14,7 +14,7 @@ public:
 	void SetFacing(Facing direction);
 	void Rotate(int r);
 	bool Move();
-	void DrawTile(SpriteVector* appendTo, int x, int y, float s);
+	void DrawTile(SpriteVector* appendTo, int x, int y, float s, uint8_t flags, sf::Color color);
 	Robot* Copy()
 	{
 		Robot* newRobot = new Robot();

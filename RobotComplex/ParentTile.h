@@ -5,6 +5,7 @@
 #include "Pos.h"
 #include "ElementTypes.h"
 #include "LogicTypes.h"
+#include "SpriteVector.h"
 class ParentTile
 {
 public:
@@ -13,6 +14,6 @@ public:
 	}
 	virtual void Serialize(std::ofstream* myfile) {};
 	virtual void Deserialize(std::ifstream* myfile) {};
-	Pos getPos();
+	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color);
 	static ParentTile* Factory(ElementTypes element, std::ifstream* myfile);
 };
