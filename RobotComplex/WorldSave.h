@@ -37,6 +37,7 @@ public:
 	MyMap<uint64_t,int> updateQueueC;	// Queue for updates next ticks
 	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
 	bool moving = false;
+	std::string name;
 	uint64_t tick;
 	int seed = 0;
 	// Variables for keeping elements and data structure organised between versions/changes
@@ -62,6 +63,7 @@ public:
 		noiseRef->SetFractalGain(0.5f);
 		noiseRef->SetAxisScales(0.4f,0.4f,0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
+		this->name = "New World";
 		this->tick = 0;
 	}
 	WorldSave(int seed)
@@ -74,12 +76,15 @@ public:
 		noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
 		noiseRef->SetSeed(seed);
+		this->name = "New World";
 		this->tick = 0;
 	}
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);
 	bool PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft); // bool is for whether the robot should move after a failed operation
 	bool ChangeItem(Pos pos, uint16_t item, int quantity);
+	void ChangeRobot(Pos pos, int quantity);
+	void ChangeLogic(Pos pos, int quantity);
 	void GenerateChunk(Pos pos);
 	void GenerateOre(Pos pos);
 	void Serialize(std::string filename);

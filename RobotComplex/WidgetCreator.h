@@ -103,6 +103,7 @@ public:
 	void MouseMoved();
 	void RightMousePressed();
 	void LeftMousePressed();
+	void LeftMouseStarted();
 	void FinishedSelection(Pos start, Pos end);
 	void PasteSelection();
 	void PerformActions();

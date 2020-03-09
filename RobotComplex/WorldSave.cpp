@@ -302,33 +302,31 @@ void WorldSave::MovePlatform(Pos pos, Facing toward)
 	}
 }
 
-void WorldSave::clear()
+void WorldSave::ChangeLogic(Pos pos, int quantity)
 {
-	platforms.clear();
-	nextPlatforms.clear();
-	items.clear();
-	nextItemPos.clear();
-	itemPrevMoved.clear();
-	robots.clear();
-	nextRobotPos.clear();
-	for (std::pair<uint64_t,LogicTile*> logic : logictiles)
+	if (LogicTile* logic = world.GetLogicTile(pos))
 	{
-		delete logic.second;
+		if (logic->quantity > 0)
+		{
+			logic->quantity+=quantity;
+		}
+		if (logic->quantity == 0)
+		{
+			world.logictiles.erase(pos.CoordToEncoded());
+			for (int i = 0; i < 4; i++)
+			{
+				world.updateQueueC.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+			}
+			program.selectedLogicTile = nullptr;
+		}
 	}
-	logictiles.clear();
-	worldChunks.clear();
-	craftingQueue.clear();
-	updateQueueA.clear();
-	updateQueueB.clear();
-	updateQueueC.clear();
-	updateQueueD.clear();
-	/*
-	for (ParentTile* element: program.hotbar)
+}
+
+void WorldSave::ChangeRobot(Pos pos, int quantity)
+{
+	if (Robot* robot = world.GetRobot(pos))
 	{
-		delete element;
+		program.selectedRobot = nullptr;
+		world.robots.erase(pos.CoordToEncoded());
 	}
-	program.hotbar.clear();
-	*/
-	tick = 0;
-	seed = 0;
 }

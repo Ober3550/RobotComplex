@@ -321,17 +321,17 @@ void ProgramData::DrawUpdateCounter()
 }
 void ProgramData::DrawTooltips()
 {
-	if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
+	if (program.selectedHotbar)
+	{
+		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedHotbar->GetTooltip(), Align::centre);
+	}
+	else if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
 	{
 		if (tile->itemTile > 2)
 		{
 			std::string quantity = std::to_string(tile->quantity);
 			CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), tile->GetTooltip() + " " + quantity, Align::centre);
 		}
-	}
-	else if (program.selectedHotbar)
-	{
-		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedHotbar->GetTooltip(), Align::centre);
 	}
 	else if (program.selectedLogicTile)
 	{
@@ -404,24 +404,27 @@ void ProgramData::DrawHotbar()
 		hotbarSlot.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
 		program.hotbarSlots.emplace_back(hotbarSlot);
 
-		if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[i]))
+		if (program.hotbar[i])
 		{
-			logic->pos = Pos{ INT_MAX,INT_MAX };
-			logic->signal = GC::startSignalStrength;
-			logic->facing = program.placeRotation;
-			logic->colorClass = program.placeColor;
-			logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, 2, sf::Color(255,255,255,255));
-		}
-		else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
-		{
-			robot->facing = Facing(south);
-			robot->DrawTile(&program.hotbarSprites,int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f, 0, sf::Color(250, 191, 38, 255));
-		}
-		else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
-		{
-			DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize),0);
-			if(item->quantity > 1)
-			CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), float(x), float(y), 2.f, Align::right);
+			if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[i]))
+			{
+				logic->pos = Pos{ INT_MAX,INT_MAX };
+				logic->signal = GC::startSignalStrength;
+				logic->facing = program.placeRotation;
+				logic->colorClass = program.placeColor;
+				logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, 2, sf::Color(255, 255, 255, 255));
+			}
+			else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
+			{
+				robot->facing = Facing(south);
+				robot->DrawTile(&program.hotbarSprites, int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f, 0, sf::Color(250, 191, 38, 255));
+			}
+			else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
+			{
+				DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 0);
+				if (item->quantity > 1)
+					CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), float(x), float(y), 2.f, Align::right);
+			}
 		}
 	}
 }

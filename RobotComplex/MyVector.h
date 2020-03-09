@@ -91,9 +91,12 @@ public:
 					{
 						elementType = new ElementTypes(ElementTypes::item);
 					}
-					myfile.write((char*)elementType, sizeof(uint8_t));
-					//We don't need to write the key since it's just the encoded version of the position
-					value->Serialize(&myfile);
+					if (elementType)
+					{
+						myfile.write((char*)elementType, sizeof(uint8_t));
+						//We don't need to write the key since it's just the encoded version of the position
+						value->Serialize(&myfile);
+					}
 				}
 			}
 			myfile.close();
@@ -113,13 +116,12 @@ public:
 			while (!myfile.eof()) {
 				myfile.read((char*)newClass, sizeof(ElementTypes));
 				ParentTile* newElement = ParentTile::Factory(*newClass, &myfile);
-				this->emplace_back(newElement);
+				if (newElement)
+				{
+					this->emplace_back(newElement);
+				}
 			}
 			myfile.close();
-		}
-		while (this->size() < 20)
-		{
-			this->emplace_back(nullptr);
 		}
 	}
 };
