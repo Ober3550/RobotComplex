@@ -4,7 +4,7 @@ namespace GC
 {
 	static constexpr int32_t  FRAMERATE = 60;
 	static constexpr int32_t  UPDATERATE = 20;
-	static constexpr uint8_t cameraSpeed = 32;
+	static constexpr uint8_t cameraSpeed = 10;
 
 	// World Constants
 	static constexpr uint8_t  chunkShift = 5;

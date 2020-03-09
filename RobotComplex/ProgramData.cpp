@@ -762,7 +762,19 @@ void ProgramData::MoveBots()
 	for (MyMap<uint64_t,Robot>::iterator robotIter = world.robots.begin(); robotIter != world.robots.end(); robotIter++)
 	{
 		if (&robotIter->second != program.selectedRobot)
+		{
 			robotIter->second.Move();
+		}
+		if (program.rotateBot != 0)
+		{
+			robotIter->second.Rotate(program.rotateBot);
+			program.rotateBot = 0;
+		}
+		if (program.moveBot)
+		{
+			robotIter->second.Move();
+			program.moveBot = false;	
+		}
 	}
 }
 
@@ -859,6 +871,7 @@ void ProgramData::UpdateMap()
 	world.robotMovingTo.clear();
 	world.platformMovingTo.clear();
 	SwapItems();
+	SwapBots();
 	MoveBots();
 	CheckItemsMoved();
 	SwapPlatforms();

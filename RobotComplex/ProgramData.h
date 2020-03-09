@@ -72,6 +72,8 @@ public:
 	ParentTile* selectedHotbar;
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
+	int rotateBot = 0;
+	bool moveBot = false;
 	Facing placeRotation;
 	uint8_t placeColor = 1;
 	bool showSignalStrength = true;

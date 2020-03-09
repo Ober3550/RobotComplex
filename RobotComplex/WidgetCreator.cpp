@@ -358,8 +358,10 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move North",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->facing = north;
-			program.selectedRobot->Move();
+			//program.selectedRobot->facing = north;
+			if(creator->heldTick["Move North"] == world.tick)
+				program.rotateBot = 0;
+			program.moveBot = true;
 		}
 		else
 		{
@@ -374,8 +376,9 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move West",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->facing = west;
-			program.selectedRobot->Move();
+			//program.selectedRobot->facing = west;
+			if (creator->heldTick["Move West"] == world.tick)
+				program.rotateBot = -1;
 		}
 		else
 		{
@@ -390,8 +393,9 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move South",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->facing = south;
-			program.selectedRobot->Move();
+			//program.selectedRobot->facing = south;
+			if (creator->heldTick["Move South"] == world.tick)
+				program.rotateBot = 2;
 		}
 		else
 		{
@@ -406,8 +410,9 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move East",[&] {
 		if (program.selectedRobot)
 		{
-			program.selectedRobot->facing = east;
-			program.selectedRobot->Move();
+			//program.selectedRobot->facing = east;
+			if (creator->heldTick["Move East"] == world.tick)
+				program.rotateBot = 1;
 		}
 		else
 		{
@@ -564,8 +569,8 @@ void WidgetCreator::CreateActionList()
 	actionFrequency["Move East"] = 1;
 	actionFrequency["Move South"] = 1;
 	actionFrequency["Move West"] = 1;
-	actionFrequency["Right Mouse"] = 7;
-	actionFrequency["Left Mouse"] = 7;
+	actionFrequency["Right Mouse"] = 8;
+	actionFrequency["Left Mouse"] = 10;
 }
 
 void WidgetCreator::AddKeyMapFrame()
@@ -682,6 +687,12 @@ void WidgetCreator::UserInput(sf::Event input)
 		//sf::Vector2f scaledPos = window->mapPixelToCoords(tempPos, program.worldView);
 		program.mousePos = Pos{ int(tempPos.x) - int(program.halfWindowWidth),int(tempPos.y) - int(program.halfWindowHeight) };
 		MouseMoved();
+		if (program.mouseHovering != program.prevMouseHovering)
+		{
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+				heldTick["Left Mouse"] = world.tick;
+		}
+			
 	}
 	else if (input.type == sf::Event::MouseButtonPressed)
 	{
@@ -1160,22 +1171,17 @@ void WidgetCreator::PerformActions()
 			{
 				if ((world.tick - action.second) % actionFrequency[action.first] == 0)
 				{
-					// Deliberately miss the second action
-					int actionNum = (world.tick - action.second) / actionFrequency[action.first];
-					if (actionNum != 1)
+					if (action.first == "Left Mouse")
 					{
-						if (action.first == "Left Mouse")
-						{
-							LeftMousePressed();
-						}
-						else if (action.first == "Right Mouse")
-						{
-							RightMousePressed();
-						}
-						else if (std::function<void()>* func = creator->userActions.GetValue(action.first))
-						{
-							(*func)();
-						}
+						LeftMousePressed();
+					}
+					else if (action.first == "Right Mouse")
+					{
+						RightMousePressed();
+					}
+					else if (std::function<void()>* func = creator->userActions.GetValue(action.first))
+					{
+						(*func)();
 					}
 				}
 			}

@@ -90,16 +90,19 @@ void UpdateWorld()
 		program.worldMutex.lock();
 		if (!program.gamePaused)
 		{
-			program.SwapBots();
 			if (creator)
 				creator->PerformActions();
-			program.framesSinceTick = 0;
-			program.UpdateMap();
+			if (world.tick % (GC::FRAMERATE / GC::UPDATERATE) == 0)
+			{
+				program.framesSinceTick = 0;
+				program.UpdateMap();
+			}
+			world.tick++;
 		}
 		if (!program.showDebugInfo)
 		program.worldMutex.unlock();
 		clock_t updateTime = clock();
-		int padTime = int(CLOCKS_PER_SEC / float(GC::UPDATERATE)) + beginUpdate - updateTime;
+		int padTime = int(CLOCKS_PER_SEC / float(GC::FRAMERATE)) + beginUpdate - updateTime;
 		if (padTime > 0)
 			Sleep(padTime);
 		clock_t endUpdate = clock();
