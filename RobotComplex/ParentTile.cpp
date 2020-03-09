@@ -16,8 +16,7 @@ ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 		if (uint8_t* newlogicType = world.oldLogicNewLogic.GetValue(*logictype))
 		{
 			LogicTile* newLogic = LogicTile::Factory(*newlogicType);
-			int temp = 100;
-			newLogic->Deserialize(myfile, &temp);
+			newLogic->Deserialize(myfile, &elementSize);
 			return newLogic;
 		}
 		else
@@ -33,8 +32,11 @@ ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 	{
 		ItemTile* newItem = new ItemTile();
 		newItem->Deserialize(myfile);
+		if (newItem->itemTile == 0)
+			return nullptr;
 		return newItem;
 	}
+	return nullptr;
 }
 
 void ParentTile::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color)
