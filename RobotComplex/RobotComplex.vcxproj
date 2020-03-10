@@ -442,6 +442,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm" />
+    <None Include="data\items.lua" />
+    <None Include="data\recipes.lua" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ProgramIcon.rc" />

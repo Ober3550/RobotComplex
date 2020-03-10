@@ -33,6 +33,9 @@
     <Filter Include="Header Files\Agui\Headers">
       <UniqueIdentifier>{55e03671-b833-45ae-81ca-020cb2118beb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{31f77f00-d0d4-4525-b7e4-74c72154978e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -728,6 +731,12 @@
   <ItemGroup>
     <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm">
       <Filter>Header Files\Agui</Filter>
+    </None>
+    <None Include="data\items.lua">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="data\recipes.lua">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

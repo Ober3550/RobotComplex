@@ -17,6 +17,16 @@
 #include "Animation.h"
 #include "GetFileNamesInFolder.h"
 
+extern "C"
+{
+#include "Lua/include/lua.h";
+#include "Lua/include/lauxlib.h";
+#include "Lua/include/lualib.h";
+}
+
+#ifdef _WIN32
+#pragma comment(lib, "lua53.lib")
+#endif
 
 sf::Texture* LoadTexture(std::string filename)
 {
@@ -39,7 +49,46 @@ void LoadAllTextures()
 	}
 }
 
+bool CheckLua(lua_State* L, int r)
+{
+	if (r != LUA_OK)
+	{
+		std::string errormsg = lua_tostring(L, -1);
+		std::cout << errormsg << std::endl;
+		return false;
+	}
+	return true;
+}
 
+static void lua_append_linear_table(lua_State* L, int index, std::vector<std::string>* vec)
+{
+	// Push another reference to the table on top of the stack (so we know
+	// where it is, and this function can work for negative, positive and
+	// pseudo indices
+	lua_pushvalue(L, index);
+	// stack now contains: -1 => table
+	lua_pushnil(L);
+	// stack now contains: -1 => nil; -2 => table
+	while (lua_next(L, -2))
+	{
+		// stack now contains: -1 => value; -2 => key; -3 => table
+		// copy the key so that lua_tostring does not modify the original
+		lua_pushvalue(L, -2);
+		// stack now contains: -1 => key; -2 => value; -3 => key; -4 => table
+		//const char* key = lua_tostring(L, -1);
+		const char* value = lua_tostring(L, -2);
+		vec->emplace_back(value);
+		//printf("%s => %s\n", key, value);
+		// pop value + copy of key, leaving original key
+		lua_pop(L, 2);
+		// stack now contains: -1 => key; -2 => table
+	}
+	// stack now contains: -1 => table (when lua_next returns 0 it pops the key
+	// but does not push anything.)
+	// Pop table
+	lua_pop(L, 1);
+	// Stack is now the same as it was on entry to this function
+}
 
 void LoadPrototypes()
 {
@@ -48,28 +97,20 @@ void LoadPrototypes()
 	// Ground Tiles
 	groundTexture = LoadTexture("groundTexture8greyscale.png");
 
+	lua_State* L = luaL_newstate();
 	// Items
-	program.itemPrototypes = {
-		"",
-		"anything",
-		"energy",
-		"coal_ore",
-		"iron_ore",
-		"copper_ore",
-		"clay",
-		"iron_ingot",
-		"copper_ingot",
-		"clay_brick",
-		"steel_ingot",
-		"copper_plate",
-		"copper_wire",
-		"iron_plate",
-		"iron_gear",
-		"iron_rod"
-	};
+	if (CheckLua(L, luaL_dofile(L, "data/items.lua")))
+	{
+		lua_getglobal(L, "items");
+		if (lua_istable(L, -1))
+		{
+			lua_append_linear_table(L, -1, &program.itemPrototypes);
+		}
+	}
+
 	program.regItemsEnd = program.itemPrototypes.size();
 	// Add logical elements to the end of the list to allow for crafting them
-	for(std::string logic : logicTypes)
+	for (std::string logic : logicTypes)
 		program.itemPrototypes.emplace_back(logic);
 	std::regex addSpaces("_");
 	// Populate the item tooltips according to the prototype names
@@ -86,7 +127,7 @@ void LoadPrototypes()
 		}
 		program.itemTooltips.emplace_back(temp);
 	}
-	for (int i=0;i<program.regItemsEnd;i++)
+	for (int i = 0; i < program.regItemsEnd; i++)
 	{
 		itemTextures.emplace_back(LoadTexture("items/" + program.itemPrototypes[i] + ".png"));
 	}
@@ -104,7 +145,6 @@ void LoadPrototypes()
 	program.logicTooltips.emplace_back(logicTypeTooltips);	// Counter
 	program.logicTooltips.emplace_back(logicTypeTooltips);	// Comparer
 	program.logicTooltips[0].emplace_back("Wire transfers signals");
-	program.logicTooltips[1].emplace_back("Does nothing when powered");
 	program.logicTooltips[1].emplace_back("Redirects the robot");
 	program.logicTooltips[2].emplace_back("Creates signal when robot or item ontop");
 	program.logicTooltips[3].emplace_back("Inverter: output = 16 - behind + side");
@@ -130,55 +170,124 @@ void LoadPrototypes()
 		animationTextures.emplace_back(LoadTexture("animations/" + text + ".png"));
 	}
 
+	// Recipes loaded from lua
+	if (CheckLua(L, luaL_dofile(L, "data/recipes.lua")))
+	{
+		lua_getglobal(L, "recipes");
+		if (lua_istable(L, -1))
+		{
+			lua_pushnil(L);
+			// stack now contains: -1 => nil; -2 => table
+			while (lua_next(L, -2))
+			{
+				std::string recipeName = "";
+				RecipeProto newRecipe;
+				lua_pushvalue(L, -2);
+				if (lua_isstring(L, -1))
+				{
+					recipeName = lua_tostring(L, -1);
+				}
+				if (lua_istable(L, -2))
+				{
+					lua_pushstring(L, "width");
+					lua_gettable(L, -3);
+					newRecipe.recipeWidth = lua_tonumber(L, -1);
+					lua_pop(L, 1);
+
+					lua_pushstring(L, "craft_time");
+					lua_gettable(L, -3);
+					newRecipe.craftingTime = lua_tonumber(L, -1);
+					lua_pop(L, 1);
+
+					lua_pushstring(L, "animation");
+					lua_gettable(L, -3);
+					newRecipe.animation = lua_tostring(L, -1);
+					lua_pop(L, 1);
+
+					lua_pushstring(L, "components");
+					lua_gettable(L, -3);
+					if (lua_istable(L,-1))
+					{
+						lua_pushnil(L);
+						while (lua_next(L, -2))
+						{
+							RecipeCompProto newComponent;
+							// For Components
+							lua_pushvalue(L, -2);
+							int index;
+							if(lua_isnumber(L,-1))
+								index = lua_tonumber(L, -1);
+							if (lua_istable(L, -2))
+							{
+								lua_rawgeti(L, -2, 1);
+								if(lua_isstring(L,-1))	
+									newComponent.itemName = lua_tostring(L, -1);
+								lua_pop(L, 1);
+
+								lua_rawgeti(L, -2, 2);
+								if (lua_isnumber(L, -1))
+									newComponent.resultState = lua_tonumber(L, -1);
+								lua_pop(L, 1);
+
+								lua_rawgeti(L, -2, 3);
+								if (lua_isnumber(L, -1))
+									newComponent.requirement = lua_tonumber(L, -1);
+								lua_pop(L, 1);
+							}
+							lua_pop(L, 2);
+							newRecipe.recipe.emplace_back(newComponent);
+						}
+					}
+					lua_pop(L, 1);
+				}
+				lua_pop(L, 2);
+				program.recipePrototypes.insert({ recipeName,newRecipe });
+			}
+			lua_pop(L, 1);
+
+		}
+	}
+
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Animation, Animation Offset
-	std::vector<RecipeProto> recipePrototypes;
-	recipePrototypes.emplace_back(RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
-	recipePrototypes.emplace_back(RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
-	recipePrototypes.emplace_back(RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 }   }, 1, 5,  "furnace_animation"));
-	recipePrototypes.emplace_back(RecipeProto({ 
-		{ "steel_ingot",1 }, { "steel_ingot",1 }, 
-		{ "iron_ingot",-1 }, { "iron_ingot",-1 }, 
-		{ "iron_ingot",-1 }, { "coal_ore",-1 } 
-		}, 2, 5, ""));
+	/*
+	program.recipePrototypes.insert({"iron_ingot",RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
+	program.recipePrototypes.insert({"copper_ingot",RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
+	program.recipePrototypes.insert({ "clay_brick", RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
+	program.recipePrototypes.insert({"steel_ingot",RecipeProto({
+		{ "steel_ingot",1 }, { "steel_ingot",1 },
+		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
+		{ "iron_ingot",-1 }, { "coal_ore",-1 }
+		}, 2, 5, "")});
 
 	// Tier 2 Products
 	// Gear Shape
-	recipePrototypes.emplace_back(RecipeProto({
+	program.recipePrototypes.insert({ "iron_gear",RecipeProto({
 		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
 		{ "iron_ingot",-1 }, { "iron_gear",1 }, { "iron_ingot",-1 },
 		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
-		}, 3, 1, ""));
+		}, 3, 1, "")});
 
-	recipePrototypes.emplace_back(RecipeProto({
+	program.recipePrototypes.insert({ "copper_wire",RecipeProto({
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
 		{ "copper_ingot",-1 }, { "copper_wire",4 }, { "copper_ingot",-1 },
 		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
-		}, 3, 1, ""));
+		}, 3, 1, "")});
 
 	// Plates
-	recipePrototypes.emplace_back(RecipeProto({
-		{ "",0 }, { "iron_plate",1 }, 
+	program.recipePrototypes.insert({ "iron_plate",RecipeProto({
+		{ "",0 }, { "iron_plate",1 },
 		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
 		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
-		}, 2, 1, ""));
+		}, 2, 1, "")});
 
-	recipePrototypes.emplace_back(RecipeProto({
+	program.recipePrototypes.insert({ "copper_plate", RecipeProto({
 		{ "",0 }, { "copper_plate",1 },
 		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
 		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
-		}, 2, 1, ""));
-
-	/*
-	recipePrototypes.emplace_back(RecipeProto({
-		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 },
-		{ "clay",-1 }, { "clay",-1 }, { "",0 },{ "clay",-1 }, { "clay",-1 },
-		{ "clay",-1 }, { "",0 }, { "die_gear",1 },{ "",0 }, { "clay",-1 },
-		{ "clay",-1 }, { "clay",-1 }, { "",0 },{ "clay",-1 }, { "clay",-1 },
-		{ "",0 }, { "clay",-1 }, { "clay",-1 },{ "clay",-1 }, { "",0 }
-		}, 5, 1, "clay", "", Pos{ 0,0 }));
-		*/	
+		}, 2, 1, "")});
+	*/
 	MySet<uint16_t> catalysts = MySet<uint16_t>();
-	for (const RecipeProto& recipeProto : recipePrototypes)
+	for (std::pair<std::string, RecipeProto> recipeProto : program.recipePrototypes)
 	{
 		catalysts.clear();
 		CraftingClass newRecipe;
@@ -186,7 +295,7 @@ void LoadPrototypes()
 
 		// Recipe Population
 		std::vector<RecipeComponent> recipe;
-		for (const RecipeCompProto& recipeCompProto : recipeProto.recipe)
+		for (RecipeCompProto recipeCompProto : recipeProto.second.recipe)
 		{
 			std::pair<bool,int> itemIndex = findInVector(program.itemPrototypes, recipeCompProto.itemName);
 			if (!itemIndex.first)
@@ -201,10 +310,10 @@ void LoadPrototypes()
 			}
 		}
 		newRecipe.recipe = recipe;
-		newRecipe.width = recipeProto.recipeWidth;
+		newRecipe.width = recipeProto.second.recipeWidth;
 		newRecipe.height = (uint8_t)(float(recipe.size()) / newRecipe.width);
-		newRecipe.craftTicks = recipeProto.craftingTime * GC::UPDATERATE;
-		newRecipe.animationReference = (findInVector(animationPrototypes, recipeProto.animation).second + 1);
+		newRecipe.craftTicks = recipeProto.second.craftingTime * GC::UPDATERATE;
+		newRecipe.animationReference = (findInVector(animationPrototypes, recipeProto.second.animation).second + 1);
 		program.craftingRecipes.emplace_back(newRecipe);
 
 		for (uint16_t catalystIndex : catalysts)
