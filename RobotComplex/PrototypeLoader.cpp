@@ -32,7 +32,7 @@ sf::Texture* LoadTexture(std::string filename)
 {
 	sf::Texture* texture = new sf::Texture();
 	//sf::Texture* texture = nullptr;
-	if (!texture->loadFromFile("Assets/" + filename))
+	if (!texture->loadFromFile("assets/" + filename))
 	{
 		OutputDebugStringA((filename + " failed to load\r\n").c_str());
 	}
@@ -112,8 +112,11 @@ void LoadPrototypes()
 	// Add logical elements to the end of the list to allow for crafting them
 	for (std::string logic : logicTypes)
 		program.itemPrototypes.emplace_back(logic);
-	std::regex addSpaces("_");
+	program.itemPrototypes.emplace_back("robot");
+
+
 	// Populate the item tooltips according to the prototype names
+	std::regex addSpaces("_");
 	for (std::string text : program.itemPrototypes)
 	{
 		std::string temp = "";
@@ -251,40 +254,7 @@ void LoadPrototypes()
 	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Animation, Animation Offset
 	/*
 	program.recipePrototypes.insert({"iron_ingot",RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
-	program.recipePrototypes.insert({"copper_ingot",RecipeProto({ { "copper_ingot",1 }, { "copper_ore",-1 }, { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
-	program.recipePrototypes.insert({ "clay_brick", RecipeProto({ { "clay_brick"  ,1 }, { "clay",-1 },       { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
-	program.recipePrototypes.insert({"steel_ingot",RecipeProto({
-		{ "steel_ingot",1 }, { "steel_ingot",1 },
-		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
-		{ "iron_ingot",-1 }, { "coal_ore",-1 }
-		}, 2, 5, "")});
 
-	// Tier 2 Products
-	// Gear Shape
-	program.recipePrototypes.insert({ "iron_gear",RecipeProto({
-		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
-		{ "iron_ingot",-1 }, { "iron_gear",1 }, { "iron_ingot",-1 },
-		{ "",0 }, { "iron_ingot",-1 }, { "",0 },
-		}, 3, 1, "")});
-
-	program.recipePrototypes.insert({ "copper_wire",RecipeProto({
-		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
-		{ "copper_ingot",-1 }, { "copper_wire",4 }, { "copper_ingot",-1 },
-		{ "",0 }, { "copper_ingot",-1 }, { "",0 },
-		}, 3, 1, "")});
-
-	// Plates
-	program.recipePrototypes.insert({ "iron_plate",RecipeProto({
-		{ "",0 }, { "iron_plate",1 },
-		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
-		{ "iron_ingot",-1 }, { "iron_ingot",-1 },
-		}, 2, 1, "")});
-
-	program.recipePrototypes.insert({ "copper_plate", RecipeProto({
-		{ "",0 }, { "copper_plate",1 },
-		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
-		{ "copper_ingot",-1 }, { "copper_ingot",-1 },
-		}, 2, 1, "")});
 	*/
 	MySet<uint16_t> catalysts = MySet<uint16_t>();
 	for (std::pair<std::string, RecipeProto> recipeProto : program.recipePrototypes)
@@ -305,8 +275,15 @@ void LoadPrototypes()
 			}
 			else
 			{
-				catalysts.insert(itemIndex.second);
-				recipe.emplace_back(RecipeComponent{ (uint16_t)itemIndex.second, recipeCompProto.requirement, recipeCompProto.resultState });
+				if (itemIndex.second)
+				{
+					catalysts.insert(itemIndex.second);
+					recipe.emplace_back(RecipeComponent{ (uint16_t)itemIndex.second, recipeCompProto.requirement, recipeCompProto.resultState });
+				}
+				else
+				{
+					recipe.emplace_back(RecipeComponent{ 0,0,0 });
+				}
 			}
 		}
 		newRecipe.recipe = recipe;

@@ -939,8 +939,8 @@ void WidgetCreator::UserInput(sf::Event input)
 				program.scale -= input.mouseWheelScroll.delta;
 				if (program.scale < 0.0f)
 					program.scale = 0.0f;
-				if (program.scale > 75.0f)
-					program.scale = 75.0f;
+				if (program.scale > 35.0f)
+					program.scale = 35.0f;
 				program.zoom = 0.5f + program.scale / 10.0f;
 			}
 		}

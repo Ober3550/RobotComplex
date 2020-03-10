@@ -22,11 +22,48 @@ int CraftingClass::CheckCrafting(Pos pos)
 				// do not craft otherwise the players materials will be consumed
 				if (recipeComp.itemTile >= program.regItemsEnd)
 				{
-					if (LogicTile* logic = world.GetLogicTile(checkPos.CoordToEncoded()))
+					// If the item is the last item it's the robot
+					if (recipeComp.itemTile == program.itemPrototypes.size() - 1)
 					{
-						if(logic->quantity == UINT8_MAX)
-							return failed;
+						if (recipeComp.resultState > 0)
+						{
+							if (Robot* robot = world.GetRobot(checkPos))
+							{
+								return failed;
+							}
+						}
+						else if (recipeComp.resultState < 0)
+						{
+							if (Robot* robot = world.GetRobot(checkPos))
+							{
+
+							}
+							else
+								return failed;
+						}
 					}
+					else
+					{
+						if (recipeComp.resultState > 0)
+						{
+							if (LogicTile* logic = world.GetLogicTile(checkPos.CoordToEncoded()))
+							{
+								if (logic->quantity + recipeComp.resultState > UINT8_MAX)
+									return failed;
+							}
+						}
+						else if(recipeComp.resultState < 0)
+						{
+							if (LogicTile* logic = world.GetLogicTile(checkPos.CoordToEncoded()))
+							{
+								if (logic->quantity + recipeComp.resultState < 0)
+									return failed;
+							}
+							else
+								return failed;
+						}
+					}
+					
 				}
 				else
 				{
@@ -102,16 +139,48 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 					// If item number isn't an item create a different item in the world
 					if (recipeComp.itemTile >= program.regItemsEnd)
 					{
-						if (LogicTile* logic = world.GetLogicTile(alterPos.CoordToEncoded()))
+						if (recipeComp.itemTile == program.itemPrototypes.size() - 1)
 						{
-							logic->quantity++;
+							if (recipeComp.resultState > 0)
+							{
+								Robot robot;
+								robot.stopped = true;
+								robot.pos = alterPos;
+								world.robots.insert({ alterPos.CoordToEncoded(),robot });
+							}
+							else if(recipeComp.resultState < 0)
+							{
+								world.robots.erase(alterPos.CoordToEncoded());
+							}
 						}
 						else
 						{
-							LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd);
-							LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
-							logicPlace->pos = alterPos;
-							world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });
+							if (recipeComp.resultState > 0)
+							{
+								if (LogicTile* logic = world.GetLogicTile(alterPos.CoordToEncoded()))
+								{
+									logic->quantity += recipeComp.resultState;
+								}
+								else
+								{
+									LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd);
+									LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
+									logicPlace->pos = alterPos;
+									world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });
+								}
+							}
+							else if (recipeComp.resultState < 0)
+							{
+								if (LogicTile* logic = world.GetLogicTile(alterPos.CoordToEncoded()))
+								{
+									logic->quantity += recipeComp.resultState;
+									if (logic->quantity == 0)
+									{
+										delete logic;
+										world.logictiles.erase(alterPos.CoordToEncoded());
+									}
+								}
+							}
 						}
 					}
 					else

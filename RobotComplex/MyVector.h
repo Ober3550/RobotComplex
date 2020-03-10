@@ -121,6 +121,8 @@ public:
 					this->emplace_back(newElement);
 				}
 			}
+			// Remove the last element cause it's usually junk
+			this->pop_back();
 			myfile.close();
 		}
 	}
