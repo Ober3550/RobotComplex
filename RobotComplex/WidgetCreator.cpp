@@ -358,9 +358,6 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move North",[&] {
 		if (program.selectedRobot)
 		{
-			//program.selectedRobot->facing = north;
-			if(creator->heldTick["Move North"] == world.tick)
-				program.rotateBot = 0;
 			program.moveBot = true;
 		}
 		else
@@ -376,7 +373,6 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move West",[&] {
 		if (program.selectedRobot)
 		{
-			//program.selectedRobot->facing = west;
 			if (creator->heldTick["Move West"] == world.tick)
 				program.rotateBot = -1;
 		}
@@ -393,7 +389,6 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move South",[&] {
 		if (program.selectedRobot)
 		{
-			//program.selectedRobot->facing = south;
 			if (creator->heldTick["Move South"] == world.tick)
 				program.rotateBot = 2;
 		}
@@ -410,7 +405,6 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Move East",[&] {
 		if (program.selectedRobot)
 		{
-			//program.selectedRobot->facing = east;
 			if (creator->heldTick["Move East"] == world.tick)
 				program.rotateBot = 1;
 		}
@@ -560,6 +554,219 @@ void WidgetCreator::CreateActionList()
 		
 	}
 
+	// Start Selection
+	userActions.insert({ "Start Selection", [&]{
+		if (program.cut || program.copy)
+		{
+			program.startedSelection = true;
+			program.startSelection = program.mouseHovering;
+		}
+		if (program.paste)
+		{
+			PasteSelection();
+		}
+	} });
+
+	// Place Element
+	userActions.insert({ "Place Element", [&] {
+		if (program.hoveringHotbar != -1)
+		{
+			program.hotbarIndex = program.hoveringHotbar;
+		}
+		else
+		{
+			if (GroundTile* withinMap = world.GetGroundTile(program.mouseHovering))
+			{
+				if (program.hotbarIndex == -1)
+				{
+					if (program.selectedRobot)
+						program.selectedRobot->stopped = true;
+					program.selectedRobot = nullptr;
+				}
+				else if (program.hotbar[program.hotbarIndex])
+				{
+					if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
+					{
+						if (LogicTile* existingLogic = world.GetLogicTile(program.mouseHovering))
+						{
+							if (existingLogic->logictype == hotbarLogic->logictype)
+							{
+								existingLogic->quantity++;
+								hotbarLogic->quantity--;
+							}
+							if (hotbarLogic->quantity == 0)
+							{
+								delete hotbarLogic;
+								program.hotbar[program.hotbarIndex] = nullptr;
+							}
+						}
+						else
+						{
+							LogicTile* logicPlace = hotbarLogic->Copy();
+							logicPlace->signal = 0;
+							logicPlace->pos = program.mouseHovering;
+							if (Robot* robot = world.GetRobot(program.mouseHovering))
+							{
+								logicPlace->DoRobotLogic(robot->pos);
+							}
+							world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
+							world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
+							world.updateQueueC.insert({ logicPlace->pos.CoordToEncoded(),1 });										// Queue update for placed element
+							for (int i = 0; i < 4; i++)
+							{
+								world.updateQueueC.insert({ logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+							}
+							program.selectedLogicTile = logicPlace;
+							hotbarLogic->quantity--;
+							if (hotbarLogic->quantity == 0)
+							{
+								delete hotbarLogic;
+								program.hotbar[program.hotbarIndex] = nullptr;
+							}
+						}
+					}
+					else if (Robot* hotbarRobot = dynamic_cast<Robot*> (program.hotbar[program.hotbarIndex]))
+					{
+						if (Robot* robot = world.GetRobot(program.mouseHovering))
+						{
+							// Don't do anything if a robot is already there
+						}
+						else
+						{
+							Robot* newRobot = hotbarRobot->Copy();
+							newRobot->pos = program.mouseHovering;
+							newRobot->stopped = true;
+							world.robots.insert({ newRobot->pos.CoordToEncoded(),*newRobot });
+							delete hotbarRobot;
+							program.hotbar[program.hotbarIndex] = nullptr;
+						}
+					}
+					else if (ItemTile* hotbarItem = dynamic_cast<ItemTile*> (program.hotbar[program.hotbarIndex]))
+					{
+						if (world.ChangeItem(program.mouseHovering, hotbarItem->itemTile, 1))
+						{
+							CraftingClass::TryCrafting(hotbarItem->itemTile, program.mouseHovering);
+							hotbarItem->quantity--;
+							if (hotbarItem->quantity == 0)
+							{
+								delete hotbarItem;
+								program.hotbar[program.hotbarIndex] = nullptr;
+							}
+						}
+					}
+				}
+			}
+		}
+	} });
+
+	// Remove Element
+	userActions.insert({ "Remove Element", [&] {
+		if (ItemTile* item = world.GetItemTile(program.mouseHovering))
+		{
+			// If you can take an item off then do so
+			if (world.ChangeItem(program.mouseHovering, item->itemTile, -1))
+			{
+				// Look through the hotbar if there's already a stack there
+				for (int i = 0; i < program.hotbar.size(); i++)
+				{
+					if (ItemTile* hotbarItem = dynamic_cast<ItemTile*> (program.hotbar[i]))
+					{
+						if (item->itemTile == hotbarItem->itemTile)
+						{
+							if (hotbarItem->quantity != UINT8_MAX)
+							{
+								hotbarItem->quantity++;
+								return;
+							}
+						}
+					}
+				}
+				for (int i = 0; i < program.hotbar.size(); i++)
+				{
+					if (program.hotbar[i] == nullptr)
+					{
+						ItemTile* newItem = new ItemTile();
+						newItem->itemTile = item->itemTile;
+						newItem->quantity = 1;
+						program.hotbar[i] = newItem;
+						return;
+					}
+				}
+				// If not go put it in an empty slot
+				if (program.hotbar.size() < program.hotbarSize)
+				{
+					ItemTile* newItem = new ItemTile();
+					newItem->itemTile = item->itemTile;
+					newItem->quantity = 1;
+					program.hotbar.emplace_back(newItem);
+				}
+				else
+				{
+					world.ChangeItem(program.mouseHovering, item->itemTile, 1);
+				}
+			}
+			return;
+		}
+		if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
+		{
+			// Look through the hotbar if there's already a stack there
+			for (int i = 0; i < program.hotbar.size(); i++)
+			{
+				if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[i]))
+				{
+					if (hotbarLogic->logictype == logic->logictype)
+					{
+						if (hotbarLogic->quantity != UINT8_MAX)
+						{
+							hotbarLogic->quantity++;
+							world.ChangeLogic(program.mouseHovering, -1);
+							return;
+						}
+					}
+				}
+			}
+			// If not go put it in an empty slot
+			for (int i = 0; i < program.hotbar.size(); i++)
+			{
+				if (program.hotbar[i] == nullptr)
+				{
+					LogicTile* hotbarLogic = logic->Copy();
+					program.hotbar[i] = hotbarLogic;
+					world.ChangeLogic(program.mouseHovering, -1);
+					return;
+				}
+			}
+			// If not go put it in an empty slot
+			if (program.hotbar.size() < program.hotbarSize)
+			{
+				LogicTile* hotbarLogic = logic->Copy();
+				program.hotbar.emplace_back(hotbarLogic);
+				world.ChangeLogic(program.mouseHovering, -1);
+			}
+			return;
+		}
+		if (Robot* robot = world.GetRobot(program.mouseHovering))
+		{
+			for (int i = 0; i < program.hotbar.size(); i++)
+			{
+				if (program.hotbar[i] == nullptr)
+				{
+					Robot* hotbarRobot = robot->Copy();
+					program.hotbar[i] = hotbarRobot;
+					world.ChangeRobot(program.mouseHovering, -1);
+					return;
+				}
+			}
+			if (program.hotbar.size() < program.hotbarSize)
+			{
+				Robot* hotbarRobot = robot->Copy();
+				program.hotbar.emplace_back(hotbarRobot);
+				world.ChangeRobot(program.mouseHovering, -1);
+			}
+			return;
+		}
+	} });
+
 	// Every tick
 	for (std::string action : userActionOrder)
 	{
@@ -569,8 +776,9 @@ void WidgetCreator::CreateActionList()
 	actionFrequency["Move East"] = 1;
 	actionFrequency["Move South"] = 1;
 	actionFrequency["Move West"] = 1;
-	actionFrequency["Right Mouse"] = 8;
-	actionFrequency["Left Mouse"] = 10;
+	actionFrequency["Remove Element"] = 8;
+	actionFrequency["Place Element"] = 10;
+	actionFrequency["Start Selection"] = 1;
 }
 
 void WidgetCreator::AddKeyMapFrame()
@@ -690,7 +898,7 @@ void WidgetCreator::UserInput(sf::Event input)
 		if (program.mouseHovering != program.prevMouseHovering)
 		{
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-				heldTick["Left Mouse"] = world.tick;
+				heldTick["Place Element"] = world.tick;
 		}
 			
 	}
@@ -698,22 +906,24 @@ void WidgetCreator::UserInput(sf::Event input)
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			heldTick["Left Mouse"] = world.tick;
+			heldTick["Start Selection"] = world.tick;
+			heldTick["Place Element"] = world.tick;
 		}
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 		{
-			heldTick["Right Mouse"] = world.tick;
+			heldTick["Remove Element"] = world.tick;
 		}
 	}
 	else if (input.type == sf::Event::MouseButtonReleased)
 	{
 		if (input.mouseButton.button == sf::Mouse::Button::Right)
 		{
-			heldTick["Right Mouse"] = 0;
+			heldTick["Remove Element"] = 0;
 		}
 		else if (input.mouseButton.button == sf::Mouse::Button::Left)
 		{
-			heldTick["Left Mouse"] = 0;
+			heldTick["Place Element"] = 0;
+			heldTick["Start Selection"] = 0;
 			if (program.startedSelection)
 			{
 				FinishedSelection(program.startSelection, program.mouseHovering);
@@ -824,214 +1034,12 @@ void WidgetCreator::MouseMoved()
 
 void WidgetCreator::LeftMousePressed()
 {
-	if (!program.gamePaused)
-	{
-		if (program.cut || program.copy)
-		{
-			program.startedSelection = true;
-			program.startSelection = program.mouseHovering;
-		}
-		if (program.paste)
-		{
-			PasteSelection();
-		}
-		if (program.hoveringHotbar != -1)
-		{
-			program.hotbarIndex = program.hoveringHotbar;
-		}
-		else
-		{
-			if (GroundTile * withinMap = world.GetGroundTile(program.mouseHovering))
-			{
-				if (program.hotbarIndex == -1)
-				{
-					if (program.selectedRobot)
-						program.selectedRobot->stopped = true;
-					program.selectedRobot = nullptr;
-				}
-				else if (program.hotbar[program.hotbarIndex])
-				{
-					if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
-					{
-						if (LogicTile* existingLogic = world.GetLogicTile(program.mouseHovering))
-						{
-							if (existingLogic->logictype == hotbarLogic->logictype)
-							{
-								existingLogic->quantity++;
-								hotbarLogic->quantity--;
-							}
-							if (hotbarLogic->quantity == 0)
-							{
-								delete hotbarLogic;
-								program.hotbar[program.hotbarIndex] = nullptr;
-							}
-						}
-						else
-						{
-							LogicTile* logicPlace = hotbarLogic->Copy();
-							logicPlace->signal = 0;
-							logicPlace->pos = program.mouseHovering;
-							if (Robot* robot = world.GetRobot(program.mouseHovering))
-							{
-								logicPlace->DoRobotLogic(robot->pos);
-							}
-							world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
-							world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
-							world.updateQueueC.insert({ logicPlace->pos.CoordToEncoded(),1 });										// Queue update for placed element
-							for (int i = 0; i < 4; i++)
-							{
-								world.updateQueueC.insert({ logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
-							}
-							program.selectedLogicTile = logicPlace;
-							hotbarLogic->quantity--;
-							if (hotbarLogic->quantity == 0)
-							{
-								delete hotbarLogic;
-								program.hotbar[program.hotbarIndex] = nullptr;
-							}
-						}
-					}
-					else if (Robot* hotbarRobot = dynamic_cast<Robot*> (program.hotbar[program.hotbarIndex]))
-					{
-						if (Robot* robot = world.GetRobot(program.mouseHovering))
-						{
-							// Don't do anything if a robot is already there
-						}
-						else
-						{
-							Robot* newRobot = hotbarRobot->Copy();
-							newRobot->pos = program.mouseHovering;
-							newRobot->stopped = true;
-							world.robots.insert({ newRobot->pos.CoordToEncoded(),*newRobot });
-							delete hotbarRobot;
-							program.hotbar[program.hotbarIndex] = nullptr;
-						}
-					}
-					else if (ItemTile* hotbarItem = dynamic_cast<ItemTile*> (program.hotbar[program.hotbarIndex]))
-					{
-						if (world.ChangeItem(program.mouseHovering, hotbarItem->itemTile, 1))
-						{
-							CraftingClass::TryCrafting(hotbarItem->itemTile, program.mouseHovering);
-							hotbarItem->quantity--;
-							if (hotbarItem->quantity == 0)
-							{
-								delete hotbarItem;
-								program.hotbar[program.hotbarIndex] = nullptr;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	
 }
 
 void WidgetCreator::RightMousePressed()
 {
-	if (ItemTile* item = world.GetItemTile(program.mouseHovering))
-	{
-		// If you can take an item off then do so
-		if (world.ChangeItem(program.mouseHovering, item->itemTile, -1))
-		{
-			// Look through the hotbar if there's already a stack there
-			for (int i = 0; i < program.hotbar.size(); i++)
-			{
-				if (ItemTile* hotbarItem = dynamic_cast<ItemTile*> (program.hotbar[i]))
-				{
-					if (item->itemTile == hotbarItem->itemTile)
-					{
-						if (hotbarItem->quantity != UINT8_MAX)
-						{
-							hotbarItem->quantity++;
-							return;
-						}
-					}
-				}
-			}
-			for (int i = 0; i < program.hotbar.size(); i++)
-			{
-				if (program.hotbar[i] == nullptr)
-				{
-					ItemTile* newItem = new ItemTile();
-					newItem->itemTile = item->itemTile;
-					newItem->quantity = 1;
-					program.hotbar[i] = newItem;
-					return;
-				}
-			}
-			// If not go put it in an empty slot
-			if (program.hotbar.size() < program.hotbarSize)
-			{
-				ItemTile* newItem = new ItemTile();
-				newItem->itemTile = item->itemTile;
-				newItem->quantity = 1;
-				program.hotbar.emplace_back(newItem);
-			}
-			else
-			{
-				world.ChangeItem(program.mouseHovering, item->itemTile, 1);
-			}
-		}
-		return;
-	}
-	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
-	{
-		// Look through the hotbar if there's already a stack there
-		for (int i = 0; i < program.hotbar.size(); i++)
-		{
-			if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[i]))
-			{
-				if (hotbarLogic->logictype == logic->logictype)
-				{
-					if (hotbarLogic->quantity != UINT8_MAX)
-					{
-						hotbarLogic->quantity++;
-						world.ChangeLogic(program.mouseHovering, -1);
-						return;
-					}
-				}
-			}
-		}
-		// If not go put it in an empty slot
-		for (int i = 0; i < program.hotbar.size(); i++)
-		{
-			if (program.hotbar[i] == nullptr)
-			{
-				LogicTile* hotbarLogic = logic->Copy();
-				program.hotbar[i] = hotbarLogic;
-				world.ChangeLogic(program.mouseHovering, -1);
-				return;
-			}
-		}
-		// If not go put it in an empty slot
-		if (program.hotbar.size() < program.hotbarSize)
-		{
-			LogicTile* hotbarLogic = logic->Copy();
-			program.hotbar.emplace_back(hotbarLogic);
-			world.ChangeLogic(program.mouseHovering, -1);
-		}
-		return;
-	}
-	if (Robot* robot = world.GetRobot(program.mouseHovering))
-	{
-		for (int i = 0; i < program.hotbar.size(); i++)
-		{
-			if (program.hotbar[i] == nullptr)
-			{
-				Robot* hotbarRobot = robot->Copy();
-				program.hotbar[i] = hotbarRobot;
-				world.ChangeRobot(program.mouseHovering, -1);
-				return;
-			}
-		}
-		if (program.hotbar.size() < program.hotbarSize)
-		{
-			Robot* hotbarRobot = robot->Copy();
-			program.hotbar.emplace_back(hotbarRobot);
-			world.ChangeRobot(program.mouseHovering, -1);
-		}
-		return;
-	}
+	
 }
 
 void WidgetCreator::FinishedSelection(Pos start, Pos end)
@@ -1180,17 +1188,17 @@ void WidgetCreator::PerformActions()
 			{
 				if ((world.tick - action.second) % actionFrequency[action.first] == 0)
 				{
-					if (action.first == "Left Mouse" && world.tick == action.second)
+					if (std::function<void()>* func = creator->userActions.GetValue(action.first))
 					{
-						LeftMousePressed();
-					}
-					else if (action.first == "Right Mouse")
-					{
-						RightMousePressed();
-					}
-					else if (std::function<void()>* func = creator->userActions.GetValue(action.first))
-					{
-						(*func)();
+						if (action.first == "Start Selection")
+						{
+							if(world.tick == action.second)
+								(*func)();
+						}
+						else
+						{
+							(*func)();
+						}
 					}
 				}
 			}
@@ -1212,7 +1220,15 @@ void WidgetCreator::PerformActions()
 		{
 			if (std::function<void()>* func = creator->userActions.GetValue(mask[maxInd]))
 			{
-				(*func)();
+				if (mask[maxInd] == "Move North" && program.selectedRobot)
+				{
+					if (max - 1 == 0 || max > 20)
+						(*func)();
+				}
+				else
+				{
+					(*func)();
+				}
 			}
 		}
 	}
