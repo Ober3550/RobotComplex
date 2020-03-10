@@ -933,7 +933,6 @@ void WidgetCreator::RightMousePressed()
 		// If you can take an item off then do so
 		if (world.ChangeItem(program.mouseHovering, item->itemTile, -1))
 		{
-			bool foundSlot = false;
 			// Look through the hotbar if there's already a stack there
 			for (int i = 0; i < program.hotbar.size(); i++)
 			{
@@ -944,46 +943,39 @@ void WidgetCreator::RightMousePressed()
 						if (hotbarItem->quantity != UINT8_MAX)
 						{
 							hotbarItem->quantity++;
-							foundSlot = true;
-							break;
+							return;
 						}
 					}
 				}
 			}
-			// If not go put it in an empty slot
-			if (!foundSlot)
+			for (int i = 0; i < program.hotbar.size(); i++)
 			{
-				for (int i = 0; i < program.hotbar.size(); i++)
+				if (program.hotbar[i] == nullptr)
 				{
-					if (program.hotbar[i] == nullptr)
-					{
-						ItemTile* newItem = new ItemTile();
-						newItem->itemTile = item->itemTile;
-						newItem->quantity = 1;
-						program.hotbar[i] = newItem;
-						break;
-					}
+					ItemTile* newItem = new ItemTile();
+					newItem->itemTile = item->itemTile;
+					newItem->quantity = 1;
+					program.hotbar[i] = newItem;
+					return;
 				}
+			}
+			// If not go put it in an empty slot
+			if (program.hotbar.size() < program.hotbarSize)
+			{
+				ItemTile* newItem = new ItemTile();
+				newItem->itemTile = item->itemTile;
+				newItem->quantity = 1;
+				program.hotbar.emplace_back(newItem);
+			}
+			else
+			{
+				world.ChangeItem(program.mouseHovering, item->itemTile, 1);
 			}
 		}
 		return;
 	}
 	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
 	{
-		if (logic->quantity > 0)
-		{
-			logic->quantity--;
-		}
-		if (logic->quantity == 0)
-		{
-			world.logictiles.erase(program.mouseHovering.CoordToEncoded());
-			for (int i = 0; i < 4; i++)
-			{
-				world.updateQueueC.insert({ program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded(),1 });
-			}
-			program.selectedLogicTile = nullptr;
-		}
-		bool foundSlot = false;
 		// Look through the hotbar if there's already a stack there
 		for (int i = 0; i < program.hotbar.size(); i++)
 		{
@@ -994,40 +986,49 @@ void WidgetCreator::RightMousePressed()
 					if (hotbarLogic->quantity != UINT8_MAX)
 					{
 						hotbarLogic->quantity++;
-						foundSlot = true;
-						break;
+						world.ChangeLogic(program.mouseHovering, -1);
+						return;
 					}
 				}
 			}
 		}
 		// If not go put it in an empty slot
-		if (!foundSlot)
+		for (int i = 0; i < program.hotbar.size(); i++)
 		{
-			for (int i = 0; i < program.hotbar.size(); i++)
+			if (program.hotbar[i] == nullptr)
 			{
-				if (program.hotbar[i] == nullptr)
-				{
-					LogicTile* hotbarLogic = logic->Copy();
-					program.hotbar[i] = hotbarLogic;
-					break;
-				}
+				LogicTile* hotbarLogic = logic->Copy();
+				program.hotbar[i] = hotbarLogic;
+				world.ChangeLogic(program.mouseHovering, -1);
+				return;
 			}
+		}
+		// If not go put it in an empty slot
+		if (program.hotbar.size() < program.hotbarSize)
+		{
+			LogicTile* hotbarLogic = logic->Copy();
+			program.hotbar.emplace_back(hotbarLogic);
+			world.ChangeLogic(program.mouseHovering, -1);
 		}
 		return;
 	}
 	if (Robot* robot = world.GetRobot(program.mouseHovering))
 	{
-		if (program.selectedRobot == robot)
-			program.selectedRobot = nullptr;
-		world.robots.erase(program.mouseHovering.CoordToEncoded());
 		for (int i = 0; i < program.hotbar.size(); i++)
 		{
 			if (program.hotbar[i] == nullptr)
 			{
 				Robot* hotbarRobot = robot->Copy();
 				program.hotbar[i] = hotbarRobot;
-				break;
+				world.ChangeRobot(program.mouseHovering, -1);
+				return;
 			}
+		}
+		if (program.hotbar.size() < program.hotbarSize)
+		{
+			Robot* hotbarRobot = robot->Copy();
+			program.hotbar.emplace_back(hotbarRobot);
+			world.ChangeRobot(program.mouseHovering, -1);
 		}
 		return;
 	}
@@ -1105,12 +1106,12 @@ void WidgetCreator::PasteSelection()
 
 void WidgetCreator::SaveProgramSettings()
 {
-	if (!CreateDirectory("saves", NULL) && ERROR_ALREADY_EXISTS != GetLastError())
-		return;
+	world.Serialize(world.name);
 	std::ofstream myfile;
 	myfile.open("saves/config.txt", std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())
 	{
+		myfile << world.name + "\r\n";
 		for (std::pair<sf::Event::KeyEvent, std::string> action : actionMap)
 		{
 			myfile << action.second + ":" + KeyNames::toString(action.first) + "\r\n";
@@ -1129,18 +1130,26 @@ bool WidgetCreator::LoadProgramSettings()
 	int i = 0;
 	while (std::getline(myfile, str))
 	{
-		std::vector<std::string> splitLine;
-		split(&splitLine, str, ':');
-		if (splitLine.size() != 0)
+		if (i == 0)
 		{
-			if (sf::Event::KeyEvent* valid = KeyNames::toEvent(splitLine[1]))
+			world.name = str;
+		}
+		else if (i > 0)
+		{
+			std::vector<std::string> splitLine;
+			split(&splitLine, str, ':');
+			if (splitLine.size() != 0)
 			{
-				actionMap.insert({ *valid, splitLine[0] });
+				if (sf::Event::KeyEvent* valid = KeyNames::toEvent(splitLine[1]))
+				{
+					actionMap.insert({ *valid, splitLine[0] });
+				}
 			}
 		}
 		i++;
 	}
 	myfile.close();
+	world.Deserialize(world.name);
 	return true;
 }
 
@@ -1171,7 +1180,7 @@ void WidgetCreator::PerformActions()
 			{
 				if ((world.tick - action.second) % actionFrequency[action.first] == 0)
 				{
-					if (action.first == "Left Mouse")
+					if (action.first == "Left Mouse" && world.tick == action.second)
 					{
 						LeftMousePressed();
 					}

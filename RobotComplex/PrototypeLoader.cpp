@@ -374,8 +374,4 @@ void LoadLogicToHotbar()
 	program.hotbar.emplace_back(plusone);
 	program.hotbar.emplace_back(shover);
 	program.hotbar.emplace_back(toggle);
-	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(nullptr);
-	program.hotbar.emplace_back(nullptr);
 }

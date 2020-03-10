@@ -54,6 +54,12 @@ LogicTile* LogicTile::Factory(uint16_t classType)
 		return new WireBridge();
 	case comparer:
 		return new Comparer();
+	case plusone:
+		return new PlusOne();
+	case shover:
+		return new Shover();
+	case toggle:
+		return new Toggle();
 	}
 	return nullptr;
 }

@@ -36,6 +36,7 @@ void WorldSave::Serialize(std::string filename)
 void WorldSave::Deserialize(std::string filename)
 {
 	this->clear();
+	world.name = filename;
 	DeserializeLogicStructure("saves/" + filename + "/logicStructure.txt");
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
@@ -52,6 +53,36 @@ void WorldSave::Deserialize(std::string filename)
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
 	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin");
+}
+
+void WorldSave::clear()
+{
+	platforms.clear();
+	nextPlatforms.clear();
+	items.clear();
+	nextItemPos.clear();
+	itemPrevMoved.clear();
+	robots.clear();
+	nextRobotPos.clear();
+	for (std::pair<uint64_t, LogicTile*> logic : logictiles)
+	{
+		delete logic.second;
+	}
+	logictiles.clear();
+	worldChunks.clear();
+	craftingQueue.clear();
+	updateQueueA.clear();
+	updateQueueB.clear();
+	updateQueueC.clear();
+	updateQueueD.clear();
+	for (ParentTile* element: program.hotbar)
+	{
+		delete element;
+	}
+	program.hotbar.clear();
+	name = "New World";
+	tick = 0;
+	seed = 0;
 }
 
 void WorldSave::SerializeItemNames(std::string filename)
