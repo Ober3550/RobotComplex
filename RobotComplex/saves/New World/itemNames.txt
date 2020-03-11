@@ -13,7 +13,6 @@ copper_plate
 copper_wire
 iron_plate
 iron_gear
-iron_rod
 wire
 pressureplate
 redirector
@@ -28,3 +27,4 @@ comparer
 plusone
 shover
 toggle
+robot

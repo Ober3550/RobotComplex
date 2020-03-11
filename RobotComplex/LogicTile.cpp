@@ -293,9 +293,7 @@ void Redirector::DoRobotLogic(Pos robotRef)
 }
 std::string Redirector::GetTooltip()
 {
-	if(this->signal)
-		return program.logicTooltips[1][0];
-	return program.logicTooltips[1][1];
+	return program.logicTooltips[1][0];
 }
 
 void PressurePlate::DoItemLogic()

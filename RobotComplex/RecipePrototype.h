@@ -22,4 +22,11 @@ public:
 		this->craftingTime = craftingTime;
 		this->animation = animation;
 	}
+	RecipeProto()
+	{
+		this->recipe;
+		this->recipeWidth = 1;
+		this->craftingTime = 1;
+		this->animation = "";
+	}
 };

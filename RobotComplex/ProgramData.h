@@ -15,11 +15,13 @@
 #include "MySet.h"
 #include "Align.h"
 #include "MyVector.h"
+#include "RecipePrototype.h"
 
 class ProgramData {
 public:
 	MyMap<uint16_t, std::vector<uint16_t>> itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
 	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
+	MyMap<std::string, RecipeProto> recipePrototypes;
 	
 	std::vector<std::string> itemPrototypes;
 	std::vector<std::string> itemTooltips;

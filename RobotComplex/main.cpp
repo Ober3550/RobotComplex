@@ -73,13 +73,13 @@ void initializeAgui(sf::RenderTarget& target)
 	//Set the graphics handler
 	gui->setGraphics(graphicsHandler);
 	//Set the font
-	std::string font = "Assets/DejaVuSans.ttf";
+	std::string font = "assets/DejaVuSans.ttf";
 	defaultFont = agui::Font::load(font, 16);
 	program.guiFont.loadFromFile(font);
 	//Setting a global font is required and failure to do so will crash.
 	agui::Widget::setGlobalFont(defaultFont);
 	//Set icon image
-	assert(icon.loadFromFile("Assets/robotIcon.png"));
+	assert(icon.loadFromFile("assets/robotIcon.png"));
 }
 
 void UpdateWorld()

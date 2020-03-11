@@ -39,6 +39,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_15025FA9DAAD482093C17D48832AC2E3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1AC1BD04D6CD4FEFA405077A27F1B91F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -255,6 +261,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D2AEEDA64E944C118711A9B89151903A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D83D33387C52414CB05DE883061E1B56"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -436,6 +448,26 @@
             "TargetName" = "8:robotIcon.png"
             "Tag" = "8:"
             "Folder" = "8:_634245BD6DF6467D8D9B8241CCBBCB78"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_15025FA9DAAD482093C17D48832AC2E3"
+            {
+            "SourcePath" = "8:..\\RobotComplex\\data\\recipes.lua"
+            "TargetName" = "8:recipes.lua"
+            "Tag" = "8:"
+            "Folder" = "8:_B7D3C63E4941414F95519A528F1DE91E"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1150,6 +1182,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D2AEEDA64E944C118711A9B89151903A"
+            {
+            "SourcePath" = "8:..\\RobotComplex\\data\\items.lua"
+            "TargetName" = "8:items.lua"
+            "Tag" = "8:"
+            "Folder" = "8:_B7D3C63E4941414F95519A528F1DE91E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D83D33387C52414CB05DE883061E1B56"
             {
             "SourcePath" = "8:..\\RobotComplex\\Assets\\items\\iron_rod.png"
@@ -1290,7 +1342,7 @@
                 {
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_634245BD6DF6467D8D9B8241CCBBCB78"
                     {
-                    "Name" = "8:Assets"
+                    "Name" = "8:assets"
                     "AlwaysCreate" = "11:FALSE"
                     "Condition" = "8:"
                     "Transitive" = "11:FALSE"
@@ -1330,6 +1382,28 @@
                                 {
                                 }
                             }
+                        }
+                    }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_67C2EC3B217B4E59A51ACB707C2E5F0A"
+                    {
+                    "Name" = "8:saves"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_1B83FB1202234C979D2B172A7A668A3B"
+                        "Folders"
+                        {
+                        }
+                    }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_B7D3C63E4941414F95519A528F1DE91E"
+                    {
+                    "Name" = "8:data"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_11DC8D74E8DF4A88BFAEDD12752245CE"
+                        "Folders"
+                        {
                         }
                     }
                 }
