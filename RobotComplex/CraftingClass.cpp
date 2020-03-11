@@ -141,46 +141,15 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 					{
 						if (recipeComp.itemTile == program.itemPrototypes.size() - 1)
 						{
-							if (recipeComp.resultState > 0)
-							{
-								Robot robot;
-								robot.stopped = true;
-								robot.pos = alterPos;
-								world.robots.insert({ alterPos.CoordToEncoded(),robot });
-							}
-							else if(recipeComp.resultState < 0)
-							{
-								world.robots.erase(alterPos.CoordToEncoded());
-							}
+							// If this fails the check function failed to return that 
+							// there was no empty position or robot in the position required
+							assert(world.ChangeRobot(alterPos, recipeComp.resultState));
 						}
 						else
 						{
-							if (recipeComp.resultState > 0)
-							{
-								if (LogicTile* logic = world.GetLogicTile(alterPos.CoordToEncoded()))
-								{
-									logic->quantity += recipeComp.resultState;
-								}
-								else
-								{
-									LogicTypes logicType = LogicTypes(int(recipeComp.itemTile) - program.regItemsEnd);
-									LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
-									logicPlace->pos = alterPos;
-									world.logictiles.insert({ alterPos.CoordToEncoded(),logicPlace });
-								}
-							}
-							else if (recipeComp.resultState < 0)
-							{
-								if (LogicTile* logic = world.GetLogicTile(alterPos.CoordToEncoded()))
-								{
-									logic->quantity += recipeComp.resultState;
-									if (logic->quantity == 0)
-									{
-										delete logic;
-										world.logictiles.erase(alterPos.CoordToEncoded());
-									}
-								}
-							}
+							// If this fails the check function failed to return that 
+							// there was no empty position or logic tile in the position required
+							assert(world.ChangeLogic(alterPos, int(recipeComp.itemTile) - program.regItemsEnd, recipeComp.resultState));
 						}
 					}
 					else

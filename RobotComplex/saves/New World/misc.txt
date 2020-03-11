@@ -1,1 +1,1 @@
-Camera Pos,-1,572
+Camera Pos,8672,3488

@@ -11,8 +11,3 @@ public:
 	AnimationType animationType;
 	Pos animationOffset;
 };
-/*Animation newAnimation;
-	newAnimation.animationSpeed = 10;
-	newAnimation.animationType = ping;
-	newAnimation.frameWidth = 32;
-	newAnimation.animationOffset = Pos{ 32,0 };*/

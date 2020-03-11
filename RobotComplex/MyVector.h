@@ -66,7 +66,7 @@ public:
 		if (key > this->size())
 			return nullptr;
 		else
-			return &(this->operator[](key));
+			return &(this->operator[](size_t(key)));
 	}
 	void Serialize(std::string filename)
 	{
@@ -112,7 +112,6 @@ public:
 		{
 			myfile.seekg(0, std::ios::beg);
 			ElementTypes* newClass = new ElementTypes();
-			uint64_t key;
 			while (!myfile.eof()) {
 				myfile.read((char*)newClass, sizeof(ElementTypes));
 				ParentTile* newElement = ParentTile::Factory(*newClass, &myfile);
@@ -122,6 +121,7 @@ public:
 				}
 			}
 			// Remove the last element cause it's usually junk
+			delete this->back();
 			this->pop_back();
 			myfile.close();
 		}
