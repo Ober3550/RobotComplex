@@ -135,5 +135,6 @@ public:
 	void CheckItemsMoved();
 	void MoveBots();
 	void UpdateMap();
+	void RecalculateMousePos();
 };
 extern ProgramData program;
