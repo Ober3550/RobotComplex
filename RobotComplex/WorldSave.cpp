@@ -62,9 +62,11 @@ void WorldSave::GenerateOre(Pos pos)
 					{
 						int distance = pow(generate.x - x, 2) + pow(generate.y - y, 2);
 						int quantity = size - sqrt(distance);
+						if (quantity < 0)
+							quantity = 0;
 						if (quantity > 0)
 						{
-							newItem.quantity = quantity;
+							newItem.quantity = quantity * 7;
 							Pos newPos = Pos{ x, y };
 							world.items.insert({ newPos.CoordToEncoded(), newItem });
 						}
