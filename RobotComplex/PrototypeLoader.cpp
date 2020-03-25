@@ -130,7 +130,10 @@ void LoadPrototypes()
 		}
 		program.itemTooltips.emplace_back(temp);
 	}
-	for (int i = 0; i < program.regItemsEnd; i++)
+	itemTextures.emplace_back(&sf::Texture());
+	itemTextures.emplace_back(&sf::Texture());
+	itemTextures.emplace_back(&sf::Texture());
+	for (int i = 3; i < program.regItemsEnd; i++)
 	{
 		itemTextures.emplace_back(LoadTexture("items/" + program.itemPrototypes[i] + ".png"));
 	}

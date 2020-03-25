@@ -1005,7 +1005,7 @@ void WidgetCreator::MouseMoved()
 			bool foundLogic = false;
 			program.hoveringHotbar = -1;
 			program.selectedHotbar = nullptr;
-			for (uint8_t i = 0; i < program.hotbarSlots.size(); ++i)
+			for (uint8_t i = 0; i < program.hotbar.size(); ++i)
 			{
 				sf::RectangleShape rect = program.hotbarSlots[i];
 				sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
