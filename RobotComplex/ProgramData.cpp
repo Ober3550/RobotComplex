@@ -392,17 +392,24 @@ void ProgramData::DrawHotbar()
 		int temp = program.hotbarSize;
 		if (temp > 10)
 			temp = 10;
-		int x = int(MyMod(i,10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		int y = int(program.windowHeight / 2.f) - (1+i/10) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		sf::RectangleShape hotbarSlot;
-		if(i == program.hotbarIndex)
+		if (i == program.hotbarIndex)
 			hotbarSlot.setFillColor(sf::Color(200, 200, 200, 100));
 		else
 			hotbarSlot.setFillColor(sf::Color(50, 50, 50, 100));
 		hotbarSlot.setSize(sf::Vector2f(GC::hotbarSlotSize, GC::hotbarSlotSize));
 		hotbarSlot.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
 		program.hotbarSlots.emplace_back(hotbarSlot);
-
+	}
+	for (uint8_t i = 0; i < program.hotbar.size(); ++i)
+	{
+		int temp = program.hotbarSize;
+		if (temp > 10)
+			temp = 10;
+		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		if (program.hotbar[i] && i < program.hotbar.size())
 		{
 			if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[i]))

@@ -1,0 +1,14 @@
+wire:12
+pressureplate:12
+redirector:12
+inverter:12
+booster:12
+counter:12
+repeater:12
+gate:12
+belt:12
+wirebridge:13
+comparer:12
+plusone:12
+shover:12
+toggle:12
