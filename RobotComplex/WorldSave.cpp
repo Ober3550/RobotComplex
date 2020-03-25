@@ -62,9 +62,11 @@ void WorldSave::GenerateOre(Pos pos)
 					{
 						int distance = pow(generate.x - x, 2) + pow(generate.y - y, 2);
 						int quantity = size - sqrt(distance);
+						if (quantity < 0)
+							quantity = 0;
 						if (quantity > 0)
 						{
-							newItem.quantity = quantity;
+							newItem.quantity = quantity * 7;
 							Pos newPos = Pos{ x, y };
 							world.items.insert({ newPos.CoordToEncoded(), newItem });
 						}
@@ -302,31 +304,65 @@ void WorldSave::MovePlatform(Pos pos, Facing toward)
 	}
 }
 
-void WorldSave::ChangeLogic(Pos pos, int quantity)
+bool WorldSave::ChangeLogic(Pos pos, uint8_t logicType, int quantity)
 {
 	if (LogicTile* logic = world.GetLogicTile(pos))
 	{
-		if (logic->quantity > 0)
+		if (logic->quantity + quantity < 0 || logic->quantity + quantity > UINT8_MAX)
+			return false;
+		else
 		{
-			logic->quantity+=quantity;
+			logic->quantity += quantity;
 		}
 		if (logic->quantity == 0)
 		{
+			if (program.selectedLogicTile == logic)
+				program.selectedLogicTile = nullptr;
+			delete logic;
 			world.logictiles.erase(pos.CoordToEncoded());
 			for (int i = 0; i < 4; i++)
 			{
 				world.updateQueueC.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 			}
-			program.selectedLogicTile = nullptr;
 		}
 	}
+	else
+	{
+		if (quantity < 0)
+			return false;
+		if (quantity > 0)
+		{
+			LogicTypes logicType = LogicTypes();
+			LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
+			logicPlace->pos = pos;
+			logicPlace->quantity = quantity;
+			world.logictiles.insert({ pos.CoordToEncoded(),logicPlace });
+		}
+	}
+	return true;
 }
 
-void WorldSave::ChangeRobot(Pos pos, int quantity)
+bool WorldSave::ChangeRobot(Pos pos, int quantity)
 {
 	if (Robot* robot = world.GetRobot(pos))
 	{
-		program.selectedRobot = nullptr;
+		if (quantity > 0)
+			return false;
+		if(robot == program.selectedRobot)
+			program.selectedRobot = nullptr;
 		world.robots.erase(pos.CoordToEncoded());
 	}
+	else
+	{
+		if (quantity > 0)
+		{
+			Robot newRobot;
+			newRobot.pos = pos;
+			newRobot.stopped = true;
+			world.robots.insert({ pos.CoordToEncoded(),newRobot });
+		}
+		else if (quantity < 0)
+			return false;
+	}
+	return true;
 }

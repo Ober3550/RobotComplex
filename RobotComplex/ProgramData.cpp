@@ -233,14 +233,12 @@ void ProgramData::RecreateAnimationSprites(uint64_t encodedPos, float x, float y
 void ProgramData::UpdateElementExists()
 {
 	elementExists.clear();
-	for (auto elem : world.platforms)
-	{
-		elementExists.insert({ elem.first });
-	}
+	/*
 	for (auto elem : world.items)
 	{
 		elementExists.insert({ elem.first });
 	}
+	*/
 	for (auto elem : world.logictiles)
 	{
 		elementExists.insert({ elem.first });
@@ -299,9 +297,10 @@ void ProgramData::RecreateSprites() {
 			uint64_t encodedPos = tilePos.CoordToEncoded();
 			if (program.redrawGround)
 				RecreateGroundSprites(tilePos, float(screenPos.x), float(screenPos.y));
+			if (ItemTile* test = world.items.GetValue(tilePos))
+				RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 			if (elementExists.find(encodedPos) != elementExists.end()) {
 				//RecreatePlatformSprites(encodedPos, float(screenPos.x), float(screenPos.y));
-				RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateLogicSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateRobotSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 				RecreateAnimationSprites(encodedPos, float(screenPos.x), float(screenPos.y));
@@ -388,30 +387,23 @@ void ProgramData::DrawHotbar()
 {
 	program.hotbarSprites.clear();
 	program.hotbarSlots.clear();
-	for (uint8_t i = 0; i < program.hotbarSize; i++)
+	for (uint8_t i = 0; i < program.hotbarSize; ++i)
 	{
 		int temp = program.hotbarSize;
 		if (temp > 10)
 			temp = 10;
-		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int x = int(MyMod(i,10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		int y = int(program.windowHeight / 2.f) - (1+i/10) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		sf::RectangleShape hotbarSlot;
-		if (i == program.hotbarIndex)
+		if(i == program.hotbarIndex)
 			hotbarSlot.setFillColor(sf::Color(200, 200, 200, 100));
 		else
 			hotbarSlot.setFillColor(sf::Color(50, 50, 50, 100));
 		hotbarSlot.setSize(sf::Vector2f(GC::hotbarSlotSize, GC::hotbarSlotSize));
 		hotbarSlot.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
 		program.hotbarSlots.emplace_back(hotbarSlot);
-	}
-	for (uint8_t i = 0; i < program.hotbarSize && i < program.hotbar.size(); ++i)
-	{
-		int temp = program.hotbarSize;
-		if (temp > 10)
-			temp = 10;
-		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		if (program.hotbar[i])
+
+		if (program.hotbar[i] && i < program.hotbar.size())
 		{
 			if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[i]))
 			{
@@ -423,7 +415,7 @@ void ProgramData::DrawHotbar()
 			}
 			else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
 			{
-				robot->facing = Facing(south);
+				robot->facing = program.placeRotation;
 				robot->DrawTile(&program.hotbarSprites, int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f, 0, sf::Color(250, 191, 38, 255));
 			}
 			else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
@@ -616,7 +608,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 			program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
 			program.prevCameraPos = program.cameraPos;
 			// Recalculate the possition of the mouse and what the new selection is after moving
-			program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
+			program.RecalculateMousePos();
 		}
 		program.textOverlay.clear();
 		program.unscaledBoxes.clear();
@@ -943,5 +935,10 @@ void ProgramData::DrawSelectedRegion()
 			DrawSelectedBox(&program.scaledBoxes, program.startSelection, program.mouseHovering);
 		}
 	}
+}
+
+void ProgramData::RecalculateMousePos()
+{
+	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 }
 

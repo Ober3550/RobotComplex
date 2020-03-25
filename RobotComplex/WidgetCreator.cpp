@@ -719,7 +719,7 @@ void WidgetCreator::CreateActionList()
 						if (hotbarLogic->quantity != UINT8_MAX)
 						{
 							hotbarLogic->quantity++;
-							world.ChangeLogic(program.mouseHovering, -1);
+							assert(world.ChangeLogic(program.mouseHovering, logic->logictype, -1));
 							return;
 						}
 					}
@@ -732,7 +732,7 @@ void WidgetCreator::CreateActionList()
 				{
 					LogicTile* hotbarLogic = logic->Copy();
 					program.hotbar[i] = hotbarLogic;
-					world.ChangeLogic(program.mouseHovering, -1);
+					assert(world.ChangeLogic(program.mouseHovering, logic->logictype, -1));
 					return;
 				}
 			}
@@ -741,7 +741,7 @@ void WidgetCreator::CreateActionList()
 			{
 				LogicTile* hotbarLogic = logic->Copy();
 				program.hotbar.emplace_back(hotbarLogic);
-				world.ChangeLogic(program.mouseHovering, -1);
+				assert(world.ChangeLogic(program.mouseHovering, logic->logictype, -1));
 			}
 			return;
 		}
@@ -768,17 +768,12 @@ void WidgetCreator::CreateActionList()
 	} });
 
 	// Every tick
-	for (std::string action : userActionOrder)
-	{
-		actionFrequency.insert({ action, 3600 });
-	}
 	actionFrequency["Move North"] = 1;
 	actionFrequency["Move East"] = 1;
 	actionFrequency["Move South"] = 1;
 	actionFrequency["Move West"] = 1;
 	actionFrequency["Remove Element"] = 8;
 	actionFrequency["Place Element"] = 10;
-	actionFrequency["Start Selection"] = 1;
 }
 
 void WidgetCreator::AddKeyMapFrame()
@@ -884,7 +879,7 @@ void WidgetCreator::UserInput(sf::Event input)
 		{
 			MapNewButton(input.key);
 		}
-		if (std::string* action = actionMap.GetValue(input.key))
+		else if (std::string* action = actionMap.GetValue(input.key))
 		{
 			heldTick[*action] = 0;
 		}
@@ -942,6 +937,7 @@ void WidgetCreator::UserInput(sf::Event input)
 				if (program.scale > 35.0f)
 					program.scale = 35.0f;
 				program.zoom = 0.5f + program.scale / 10.0f;
+				program.RecalculateMousePos();
 			}
 		}
 	}
@@ -1186,16 +1182,23 @@ void WidgetCreator::PerformActions()
 			}
 			if (!masked)
 			{
-				if ((world.tick - action.second) % actionFrequency[action.first] == 0)
+				// If an action has a frequency it'll be repeated at that frequency while the action is held
+				if (int* frequency = actionFrequency.GetValue(action.first))
 				{
-					if (std::function<void()>* func = creator->userActions.GetValue(action.first))
+					if ((world.tick - action.second) % actionFrequency[action.first] == 0)
 					{
-						if (action.first == "Start Selection")
+						if (std::function<void()>* func = creator->userActions.GetValue(action.first))
 						{
-							if(world.tick == action.second)
-								(*func)();
+							(*func)();
 						}
-						else
+					}
+				}
+				else
+				{
+					// If an action doesn't have a frequency assume that it'll only be activated on the first tick
+					if (action.second == world.tick)
+					{
+						if (std::function<void()>* func = creator->userActions.GetValue(action.first))
 						{
 							(*func)();
 						}
