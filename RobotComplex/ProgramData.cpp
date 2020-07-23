@@ -78,14 +78,17 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 }
 void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float y, uint8_t flags)
 {
-	sf::Sprite sprite;
-	sprite.setTexture(*itemTextures[item.itemTile]);
-	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
-	sprite.setPosition(x + 16.f, y + 16.f);
-	sprite.setScale(sf::Vector2f(1.5f, 1.5f));
-	if (flags >> 7 & 1)
-		sprite.setColor(sf::Color(255, 255, 255, 128));
-	appendTo->emplace_back(sprite);
+	if (item.itemTile < itemTextures.size())
+	{
+		sf::Sprite sprite;
+		sprite.setTexture(*itemTextures[item.itemTile]);
+		sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
+		sprite.setPosition(x + 16.f, y + 16.f);
+		sprite.setScale(sf::Vector2f(1.5f, 1.5f));
+		if (flags >> 7 & 1)
+			sprite.setColor(sf::Color(255, 255, 255, 128));
+		appendTo->emplace_back(sprite);
+	}
 }
 void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 {
@@ -140,7 +143,8 @@ void ProgramData::RecreateLogicSprites(uint64_t encodedPos, float x, float y)
 				y += int(float(difference.y) * float(GC::tileSize) * step);
 			}
 		}
-		logic->DrawTile(&program.logicSprites, x, y, 1.0f, uint8_t(program.showSignalStrength), sf::Color(255,255,255,255));
+		logic->DrawLogic(Pos::EncodedToCoord(encodedPos), &program.logicSprites, &world.logicTiles, x, y, 1.0f, uint8_t(program.showSignalStrength));
+		//logic->DrawTile(&program.logicSprites, x, y, 1.0f, uint8_t(program.showSignalStrength), sf::Color(255,255,255,255));
 	}
 }
 void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
@@ -182,27 +186,10 @@ void ProgramData::RecreateGhostSprites(uint64_t encodedPos, float x, float y)
 {
 	if (program.paste)
 	{
-		for (ParentTile* elem : program.copyList)
+		auto kv = program.copyMap.find((Pos::EncodedToCoord(encodedPos) - program.mouseHovering).CoordToEncoded());
+		if (kv != program.copyMap.end())
 		{
-			if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
-			{
-				if ((ghost->pos + program.mouseHovering - originSelection).CoordToEncoded() == encodedPos)
-				{
-					ghost->DrawTile(&program.logicSprites, x, y, 1.f, 128, sf::Color(255,255,255,128));
-				}
-			}
-			else if (Robot* ghost = dynamic_cast<Robot*> (elem))
-			{
-
-			}
-			else if (ItemTileWPOS* ghost = dynamic_cast<ItemTileWPOS*> (elem))
-			{
-				if ((ghost->pos + program.mouseHovering - originSelection).CoordToEncoded() == encodedPos)
-				{
-
-					DrawItem(&program.itemSprites, ghost->itemTile, x, y, 128);
-				}
-			}
+			kv->second.DrawLogic(Pos::EncodedToCoord(kv->first), &program.logicSprites, &program.copyMap, x, y, 1.f, 128);
 		}
 	}
 }
@@ -239,7 +226,7 @@ void ProgramData::UpdateElementExists()
 		elementExists.insert({ elem.first });
 	}
 	*/
-	for (auto elem : world.logictiles)
+	for (auto elem : world.logicTiles)
 	{
 		elementExists.insert({ elem.first });
 	}
@@ -253,20 +240,9 @@ void ProgramData::UpdateElementExists()
 	}
 	if (program.paste)
 	{
-		for (auto elem : program.copyList)
+		for (auto kv : program.copyMap)
 		{
-			if (LogicTile* ghost = dynamic_cast<LogicTile*> (elem))
-			{
-				elementExists.insert({ (ghost->pos + program.mouseHovering - program.originSelection).CoordToEncoded() });
-			}
-			else if (Robot* ghost = dynamic_cast<Robot*> (elem))
-			{
-				elementExists.insert({ (ghost->pos + program.mouseHovering - program.originSelection).CoordToEncoded() });
-			}
-			else if (ItemTileWPOS* ghost = dynamic_cast<ItemTileWPOS*> (elem))
-			{
-				elementExists.insert({ (ghost->pos + program.mouseHovering - program.originSelection).CoordToEncoded() });
-			}
+			elementExists.insert({ (Pos::EncodedToCoord(kv.first) + program.mouseHovering).CoordToEncoded() });
 		}
 	}
 }
@@ -334,7 +310,7 @@ void ProgramData::DrawTooltips()
 	}
 	else if (program.selectedLogicTile)
 	{
-		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedLogicTile->GetTooltip(), Align::centre);
+		//CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedLogicTile->GetTooltip(), Align::centre);
 	}
 }
 
@@ -369,7 +345,7 @@ void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos
 	selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
 	selectionBox.setOutlineColor(sf::Color(255, 255, 0, 255));
 	selectionBox.setOutlineThickness(2);
-	Pos drawPos = pos * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+	Pos drawPos = pos * (int)(GC::tileSize) - Pos{ GC::halfTileSize,GC::halfTileSize };
 	selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
 	appendTo->emplace_back(selectionBox);
 }
@@ -395,7 +371,7 @@ void ProgramData::DrawHotbar()
 		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		sf::RectangleShape hotbarSlot;
-		if (i == program.hotbarIndex)
+		if (i + 1 == program.hotbarIndex)
 			hotbarSlot.setFillColor(sf::Color(200, 200, 200, 100));
 		else
 			hotbarSlot.setFillColor(sf::Color(50, 50, 50, 100));
@@ -403,35 +379,29 @@ void ProgramData::DrawHotbar()
 		hotbarSlot.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
 		program.hotbarSlots.emplace_back(hotbarSlot);
 	}
-	for (uint8_t i = 0; i < program.hotbar.size(); ++i)
+	for (auto kv : program.hotbar)
 	{
-		int temp = program.hotbarSize;
-		if (temp > 10)
-			temp = 10;
-		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
+		ItemTile item = kv.second;
+		uint16_t i = kv.first;
+		int x = int(MyMod(i - 1, 10) - 10 / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
 		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		if (program.hotbar[i] && i < program.hotbar.size())
+		if (item.itemTile <= program.itemsEnd)
 		{
-			if (LogicTile* logic = dynamic_cast<LogicTile*> (program.hotbar[i]))
-			{
-				logic->pos = Pos{ INT_MAX,INT_MAX };
-				logic->signal = GC::startSignalStrength;
-				logic->facing = program.placeRotation;
-				logic->colorClass = program.placeColor;
-				logic->DrawTile(&program.hotbarSprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.0f, 2, sf::Color(255, 255, 255, 255));
-			}
-			else if (Robot* robot = dynamic_cast<Robot*> (program.hotbar[i]))
-			{
-				robot->facing = program.placeRotation;
-				robot->DrawTile(&program.hotbarSprites, int(x - GC::halfTileSize), int(y - GC::halfTileSize), 1.0f, 0, sf::Color(250, 191, 38, 255));
-			}
-			else if (ItemTile* item = dynamic_cast<ItemTile*> (program.hotbar[i]))
-			{
-				DrawItem(&program.hotbarSprites, *item, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 0);
-				if (item->quantity > 1)
-					CreateSmallText(&program.hotbarSprites, std::to_string(item->quantity), float(x), float(y), 2.f, Align::right);
-			}
+			DrawItem(&program.hotbarSprites, item, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 0);
 		}
+		else if (item.itemTile < program.itemsEnd + 255)
+		{
+			LogicTile logic = LogicTile(item.itemTile - program.itemsEnd);
+			logic.color = program.placeColor;
+			logic.signal = 1;
+			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, &program.hotbarSprites, &world.logicTiles, x - GC::halfTileSize, y - GC::halfTileSize, 1.0, 0);
+		}
+		else if (item.itemTile == program.itemsEnd + 255)
+		{
+			
+		}
+		if (item.quantity > 1)
+			CreateSmallText(&program.hotbarSprites, std::to_string(item.quantity), float(x), float(y), 2.f, Align::right);
 	}
 }
 void ProgramData::CreateText(float x, float y, std::string input, Align align)
@@ -541,7 +511,7 @@ void ProgramData::DrawDebugHUD()
 	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
 
-	sprintf_s(buffer, "Logic Count: %d", world.logictiles.size());
+	sprintf_s(buffer, "Logic Count: %d", world.logicTiles.size());
 	displayValue = buffer;
 	CreateText(-program.halfWindowWidth, -program.halfWindowHeight + lineSpace * lineNum, displayValue, Align::left);
 	lineNum++;
@@ -621,7 +591,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		program.unscaledBoxes.clear();
 		program.scaledBoxes.clear();
 		RecreateSprites();
-		if (program.selectedLogicTile && program.hoveringHotbar == -1)
+		if (program.selectedLogicTile && program.hoveringHotbar == 0)
 			DrawSelectedBox(&program.scaledBoxes,program.mouseHovering);
 		DrawAlignment();
 		DrawSelectedRegion();
@@ -709,14 +679,13 @@ void ProgramData::MovePlatform(Pos pos, Facing toward)
 			world.robots.erase(pos.CoordToEncoded());
 		}
 		//Get value doesn't create a new instance if the value isn't there
-		if (int* update = world.updateQueueC.GetValue(pos.CoordToEncoded()))
+		if (int* update = world.updateNext.GetValue(pos.CoordToEncoded()))
 		{
-			world.updateQueueC[newPos.CoordToEncoded()] = world.updateQueueC[pos.CoordToEncoded()];
-			world.updateQueueC.erase(pos.CoordToEncoded());
+			world.updateNext[newPos.CoordToEncoded()] = world.updateNext[pos.CoordToEncoded()];
+			world.updateNext.erase(pos.CoordToEncoded());
 		}
-		world.logictiles[newPos.CoordToEncoded()] = world.logictiles[pos.CoordToEncoded()];
-		world.logictiles[newPos.CoordToEncoded()]->pos = newPos;
-		world.logictiles.erase(pos.CoordToEncoded());
+		world.logicTiles[newPos.CoordToEncoded()] = world.logicTiles[pos.CoordToEncoded()];
+		world.logicTiles.erase(pos.CoordToEncoded());
 		world.nextPlatforms.erase(pos.CoordToEncoded());
 	}
 }
@@ -749,17 +718,19 @@ void ProgramData::SwapBots()
 			world.robots.erase(pos.CoordToEncoded());
 
 			// If the robot landed on a logic tile, apply its logic this tick
+			/*
 			if (auto temp = world.logictiles.GetValue(newPos.CoordToEncoded()))
 			{
 				LogicTile* logicTile = *temp;
 				logicTile->DoRobotLogic(newPos);
 			}
+			*/
 
 			// If the robot left a logic tile, update its logic
-			if (auto temp = world.logictiles.GetValue(pos.CoordToEncoded()))
+			if (auto temp = world.logicTiles.GetValue(pos.CoordToEncoded()))
 			{
-				LogicTile* logicTile = *temp;
-				logicTile->DoRobotLogic(pos);
+				//LogicTile* logicTile = *temp;
+				//logicTile->DoRobotLogic(pos);
 			}
 		}
 	}
@@ -840,43 +811,50 @@ void ProgramData::CheckItemsMoved()
 void ProgramData::UpdateMap()
 {
 	world.platforms.clear();
-	world.updateQueueA.clear();
+	world.updateCurr.clear();
 	// Update all the logic tiles that were queued to finish this tick
 	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
-	for (auto iter = world.updateQueueC.begin(); iter != world.updateQueueC.end(); )
+	std::vector<uint64_t> removeList;
+	for (auto iter : world.updateNext)
 	{
-		iter->second--;
+		iter.second--;
 		// Erase all 0 tick recipes from craftingQueue
-		if (iter->second == 0)
+		if (iter.second == 0)
 		{
-			world.updateQueueA.insert({ iter->first });
-			iter = world.updateQueueC.erase(iter);
+			world.updateCurr.insert({ iter.first });
+			removeList.emplace_back(iter.first);
 		}
-		else
-			++iter;
+	}
+	for (uint64_t key : removeList)
+	{
+		world.updateNext.erase(key);
 	}
 	do {
-		for (uint64_t kv : world.updateQueueA)
+		for (uint64_t kv : world.updateCurr)
 		{
-			if (LogicTile* logic = world.GetLogicTile(kv))
+			auto logic = world.logicTiles.find(kv);
+			if (logic != world.logicTiles.end())
 			{
-				logic->DoWireLogic();
+				logic->second.DoWireLogic(Pos::EncodedToCoord(logic->first));
 			}
 		}
-		world.updateQueueA = MySet<uint64_t>(world.updateQueueB);
-		world.updateQueueB.clear();
-	} while (world.updateQueueA.size() != 0);
+		world.updateCurr = MySet<uint64_t>(world.updateProp);
+		world.updateProp.clear();
+	} while (world.updateCurr.size() != 0);
+	removeList.clear();
 	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
-	for (auto iter = world.craftingQueue.begin(); iter != world.craftingQueue.end(); )
+	for (auto iter : world.craftingQueue)
 	{
-		iter->second.ticks--;
+		iter.second.ticks--;
 		// Erase all 0 tick recipes from craftingQueue
-		if (iter->second.ticks == 0)
-			program.craftingRecipes[iter->second.craftingRecipe].SuccessfulCraft(iter->second.pos);
-		if (iter->second.ticks == 0) // Check twice because SuccessfulCraft() may add ticks to queue a new craft
-			iter = world.craftingQueue.erase(iter);
-		else
-			++iter;
+		if (iter.second.ticks == 0)
+			program.craftingRecipes[iter.second.craftingRecipe].SuccessfulCraft(iter.second.pos);
+		if (iter.second.ticks == 0) // Check twice because SuccessfulCraft() may add ticks to queue a new craft
+			removeList.emplace_back(iter.first);
+	}
+	for (uint64_t key : removeList)
+	{
+		world.craftingQueue.erase(key);
 	}
 	world.prevItemMovingTo = world.itemMovingTo;
 	world.itemMovingTo.clear();
@@ -891,7 +869,7 @@ void ProgramData::UpdateMap()
 	{
 		if (LogicTile* logic = world.GetLogicTile(kv))
 		{
-			logic->DoItemLogic();
+			//logic->DoItemLogic();
 		}
 	}
 	world.updateQueueD.clear();
@@ -910,15 +888,6 @@ void ProgramData::DrawAlignment()
 				drawLine = true;
 			rotation = program.selectedLogicTile->facing;
 		}
-		else if (program.hotbarIndex != -1)
-		{
-			if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
-			{
-				if (hotbarLogic->ShowAlign())
-					drawLine = true;
-				rotation = hotbarLogic->facing;
-			}
-		}
 		if (drawLine)
 		{
 			sf::RectangleShape selectionBox;
@@ -926,7 +895,7 @@ void ProgramData::DrawAlignment()
 			selectionBox.setOrigin(sf::Vector2f(2, 1024 * program.zoom + GC::halfTileSize));
 			selectionBox.rotate(rotation * 90.f);
 			selectionBox.setFillColor(sf::Color(255, 255, 0, 255));
-			Pos drawPos = program.mouseHovering * GC::tileSize;
+			Pos drawPos = program.mouseHovering * (int)GC::tileSize;
 			selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
 			program.scaledBoxes.emplace_back(selectionBox);
 		}

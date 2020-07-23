@@ -13,6 +13,7 @@
 #include "Textures.h"
 //static constexpr uint8_t colorClass = 1;
 
+/*
 void LogicTile::DrawSpriteFromProperties(SpriteVector* appendTo, float x, float y, float s, sf::Texture* texture, sf::IntRect subRect, int rotation, bool inverse)
 {
 	// Output Sprite
@@ -748,3 +749,4 @@ void Toggle::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t
 	DrawSignalStrength(appendTo, x, y, s, this->signal, flags);
 	DrawQuantity(appendTo, x, y, s, this->quantity, flags);
 }
+*/

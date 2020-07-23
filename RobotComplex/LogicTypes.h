@@ -1,24 +1,47 @@
 #pragma once
 #include <cstdint>
-#include <vector>
+#include <unordered_map>
 #include <string>
-static const std::vector<std::string> logicTypes =
-{
-	"wire",
-	"pressureplate",
-	"redirector",
-	"inverter",
-	"booster",
-	"counter",
-	"repeater",
-	"gate",
-	"belt",
-	"wirebridge",
-	"comparer",
-	"plusone",
-	"shover",
-	"toggle"
+static const std::unordered_map<uint8_t, std::string> logicTypes = {
+	{1,"wire"},
+	{2,"redirector"},
+	{3,"gate"},
+	{4,"belt"},
+	{5,"shover"},
+	{6,"wirebridge"},
+	{128,"inverter"},
+	{129,"pressureplate"},
+	{130,"booster"},
+	{131,"counter"},
+	{132,"repeater"},
+	{133,"comparer"},
+	{134,"plusone"},
+	{135,"toggle"}
 };
+
+
+enum LogicType : uint8_t {
+	// Wire Logic
+	wire = 1,
+	redirector,
+	gate,
+	belt,
+	shover,
+	wirebridge,
+
+	// Unidirectional Output
+	inverter = 128,
+	pressureplate,
+	booster,
+	counter,
+	repeater,
+	comparer,
+	plusone,
+	toggle
+};
+
+const uint8_t UNI_DIR = 0b10000000;
+/*
 enum LogicTypes : uint8_t {
 	wire = 0,
 	pressureplate = 1,
@@ -35,3 +58,4 @@ enum LogicTypes : uint8_t {
 	shover = 12,
 	toggle = 13
 };
+*/

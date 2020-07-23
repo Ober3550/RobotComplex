@@ -113,12 +113,12 @@
       <Optimization>MaxSpeed</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\RobotComplex\Agui\include;$(SolutionDir)\RobotComplex\SFML-2.5.1\include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;gdi32.lib;kernel32.lib;user32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\RobotComplex\Agui\lib\Debug;$(SolutionDir)\RobotComplex\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Abseil.lib;FastNoise.lib;sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;gdi32.lib;kernel32.lib;user32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)Agui.lib;;Agui.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Release;$(SolutionDir)\RobotComplex\Agui\lib\Debug;$(SolutionDir)\RobotComplex\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,12 +127,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\SFML-2.5.1\include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;gdi32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Abseil.lib;FastNoise.lib;sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;gdi32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)Agui.lib;;Agui.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Release;C:\Program Files\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,14 +143,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\RobotComplex\Agui\include;$(SolutionDir)\RobotComplex\SFML-2.5.1\include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\RobotComplex\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Abseil.lib;FastNoise.lib;Agui.lib;sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Release;$(SolutionDir)SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='AguiExample|Win32'">
@@ -161,14 +161,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\SFML-2.5.1\include;C:\Program Files (x86)\Agui\include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>agui.lib;agui_sfml2.lib;sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\SFML-2.5.1\lib;C:\Users\ober3\Desktop\C++ Setup\Agui-build\Release;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Abseil.lib;FastNoise.lib;agui.lib;agui_sfml2.lib;sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)Agui.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Release;C:\Program Files (x86)\SFML-2.5.1\lib;C:\Users\ober3\Desktop\C++ Setup\Agui-build\Release;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -179,14 +179,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\SFML-2.5.1\include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Abseil.lib;FastNoise.lib;Agui.lib;sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Release;C:\Program Files\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='AguiExample|x64'">
@@ -197,103 +197,21 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\SFML-2.5.1\include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Abseil.lib;FastNoise.lib;sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;winmm.lib;gdi32.lib;ogg.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;freetype.lib;%(AdditionalDependencies)Agui.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Release;C:\Program Files\SFML-2.5.1\lib;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Agui\src\Agui\ActionEvent.cpp" />
-    <ClCompile Include="Agui\src\Agui\ActionListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Font.cpp" />
-    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2FontLoader.cpp" />
-    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Graphics.cpp" />
-    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Image.cpp" />
-    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2ImageLoader.cpp" />
-    <ClCompile Include="Agui\src\Agui\Backends\SFML2\SFML2Input.cpp" />
-    <ClCompile Include="Agui\src\Agui\BaseTypes.cpp" />
-    <ClCompile Include="Agui\src\Agui\BlinkingEvent.cpp" />
-    <ClCompile Include="Agui\src\Agui\BorderLayout.cpp" />
-    <ClCompile Include="Agui\src\Agui\Clipboard\Clipboard.cpp" />
-    <ClCompile Include="Agui\src\Agui\Clipboard\WinClipboard.cpp" />
-    <ClCompile Include="Agui\src\Agui\Color.cpp" />
-    <ClCompile Include="Agui\src\Agui\CursorProvider.cpp" />
-    <ClCompile Include="Agui\src\Agui\Dimension.cpp" />
-    <ClCompile Include="Agui\src\Agui\EmptyWidget.cpp" />
-    <ClCompile Include="Agui\src\Agui\EventArgs.cpp" />
-    <ClCompile Include="Agui\src\Agui\FlowLayout.cpp" />
-    <ClCompile Include="Agui\src\Agui\FocusListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\FocusManager.cpp" />
-    <ClCompile Include="Agui\src\Agui\Font.cpp" />
-    <ClCompile Include="Agui\src\Agui\Graphics.cpp" />
-    <ClCompile Include="Agui\src\Agui\GridLayout.cpp" />
-    <ClCompile Include="Agui\src\Agui\Gui.cpp" />
-    <ClCompile Include="Agui\src\Agui\Image.cpp" />
-    <ClCompile Include="Agui\src\Agui\Input.cpp" />
-    <ClCompile Include="Agui\src\Agui\KeyboardListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Layout.cpp" />
-    <ClCompile Include="Agui\src\Agui\MouseListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Point.cpp" />
-    <ClCompile Include="Agui\src\Agui\Rectangle.cpp" />
-    <ClCompile Include="Agui\src\Agui\ResizableBorderLayout.cpp" />
-    <ClCompile Include="Agui\src\Agui\ResizableText.cpp" />
-    <ClCompile Include="Agui\src\Agui\SelectionListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\TableLayout.cpp" />
-    <ClCompile Include="Agui\src\Agui\TapListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\TopContainer.cpp" />
-    <ClCompile Include="Agui\src\Agui\Transform.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widget.cpp" />
-    <ClCompile Include="Agui\src\Agui\WidgetListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Button\Button.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Button\ButtonGroup.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Button\ButtonListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\CheckBox\CheckBox.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\CheckBox\CheckBoxListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\DropDown\DropDown.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\DropDown\DropDownListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Frame\Frame.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Frame\FrameListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ImageWidget\ImageWidget.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Label\Label.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Label\LabelListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ListBox\ListBox.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ListBox\ListBoxListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\PopUp\PopUpMenu.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\PopUp\PopUpMenuItem.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\RadioButton\RadioButton.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\RadioButton\RadioButtonGroup.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\RadioButton\RadioButtonListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\HScrollBar.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\HScrollBarListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\VScrollBar.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ScrollBar\VScrollBarListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ScrollPane\ScrollPane.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Slider\Slider.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Slider\SliderListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Tab\Tab.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Tab\TabbedPane.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\Tab\TabbedPaneListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\TextBox\ExtendedTextBox.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\TextBox\TextBox.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\TextBox\TextBoxListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\TextField\TextField.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\TextField\TextFieldListener.cpp" />
-    <ClCompile Include="Agui\src\Agui\Widgets\ToolTip\ToolTip.cpp" />
     <ClCompile Include="CraftingClass.cpp" />
     <ClCompile Include="CraftingProcess.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx2.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx512.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_internal.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_neon.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse2.cpp" />
-    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse41.cpp" />
     <ClCompile Include="FileLength.cpp" />
+    <ClCompile Include="FindInVector.cpp" />
     <ClCompile Include="GetFileNamesInFolder.cpp" />
     <ClCompile Include="ItemTile.cpp" />
     <ClCompile Include="ItemTileWPOS.cpp" />
@@ -314,90 +232,6 @@
     <ClCompile Include="WorldSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Agui\include\Agui\ActionEvent.hpp" />
-    <ClInclude Include="Agui\include\Agui\ActionListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Agui.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Font.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2FontLoader.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Graphics.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Image.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2ImageLoader.hpp" />
-    <ClInclude Include="Agui\include\Agui\Backends\SFML2\SFML2Input.hpp" />
-    <ClInclude Include="Agui\include\Agui\BaseTypes.hpp" />
-    <ClInclude Include="Agui\include\Agui\BlinkingEvent.hpp" />
-    <ClInclude Include="Agui\include\Agui\BorderLayout.hpp" />
-    <ClInclude Include="Agui\include\Agui\Clipboard\Clipboard.hpp" />
-    <ClInclude Include="Agui\include\Agui\Clipboard\OSXClipboard.hpp" />
-    <ClInclude Include="Agui\include\Agui\Clipboard\WinClipboard.hpp" />
-    <ClInclude Include="Agui\include\Agui\Color.hpp" />
-    <ClInclude Include="Agui\include\Agui\CursorProvider.hpp" />
-    <ClInclude Include="Agui\include\Agui\Dimension.hpp" />
-    <ClInclude Include="Agui\include\Agui\EmptyWidget.hpp" />
-    <ClInclude Include="Agui\include\Agui\Enumerations.hpp" />
-    <ClInclude Include="Agui\include\Agui\EventArgs.hpp" />
-    <ClInclude Include="Agui\include\Agui\FlowLayout.hpp" />
-    <ClInclude Include="Agui\include\Agui\FocusListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\FocusManager.hpp" />
-    <ClInclude Include="Agui\include\Agui\Font.hpp" />
-    <ClInclude Include="Agui\include\Agui\FontLoader.hpp" />
-    <ClInclude Include="Agui\include\Agui\Graphics.hpp" />
-    <ClInclude Include="Agui\include\Agui\GridLayout.hpp" />
-    <ClInclude Include="Agui\include\Agui\Gui.hpp" />
-    <ClInclude Include="Agui\include\Agui\Image.hpp" />
-    <ClInclude Include="Agui\include\Agui\ImageLoader.hpp" />
-    <ClInclude Include="Agui\include\Agui\Input.hpp" />
-    <ClInclude Include="Agui\include\Agui\KeyboardListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Layout.hpp" />
-    <ClInclude Include="Agui\include\Agui\MouseListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Platform.hpp" />
-    <ClInclude Include="Agui\include\Agui\Point.hpp" />
-    <ClInclude Include="Agui\include\Agui\Rectangle.hpp" />
-    <ClInclude Include="Agui\include\Agui\ResizableBorderLayout.hpp" />
-    <ClInclude Include="Agui\include\Agui\ResizableText.hpp" />
-    <ClInclude Include="Agui\include\Agui\SelectionListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\TableLayout.hpp" />
-    <ClInclude Include="Agui\include\Agui\TapListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\TopContainer.hpp" />
-    <ClInclude Include="Agui\include\Agui\Transform.hpp" />
-    <ClInclude Include="Agui\include\Agui\UTF8.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widget.hpp" />
-    <ClInclude Include="Agui\include\Agui\WidgetListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Button\Button.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Button\ButtonGroup.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Button\ButtonListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\CheckBox\CheckBox.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\CheckBox\CheckBoxListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\DropDown\DropDown.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\DropDown\DropDownListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Frame\Frame.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Frame\FrameListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ImageWidget\ImageWidget.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Label\Label.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Label\LabelListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ListBox\ListBox.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ListBox\ListBoxListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\PopUp\PopUpMenu.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\PopUp\PopUpMenuItem.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\RadioButton\RadioButton.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\RadioButton\RadioButtonGroup.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\RadioButton\RadioButtonListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\HScrollBar.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\HScrollBarListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\VScrollBar.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ScrollBar\VScrollBarListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ScrollPane\ScrollPane.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Slider\Slider.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Slider\SliderListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Tab\Tab.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Tab\TabbedPane.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\Tab\TabbedPaneListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\TextBox\ExtendedTextBox.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\TextBox\TextBox.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\TextBox\TextBoxListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\TextField\TextField.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\TextField\TextFieldListener.hpp" />
-    <ClInclude Include="Agui\include\Agui\Widgets\ToolTip\ToolTip.hpp" />
     <ClInclude Include="Align.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationType.h" />
@@ -407,8 +241,6 @@
     <ClInclude Include="CraftingSuccess.h" />
     <ClInclude Include="ElementTypes.h" />
     <ClInclude Include="Facing.h" />
-    <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD.h" />
-    <ClInclude Include="FastNoiseSIMD\FastNoiseSIMD_internal.h" />
     <ClInclude Include="FindInVector.h" />
     <ClInclude Include="GetFileLength.h" />
     <ClInclude Include="GetFileNamesInFolder.h" />
@@ -441,7 +273,6 @@
     <ClInclude Include="WorldSave.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Agui\src\Agui\Clipboard\OSXClipboard.mm" />
     <None Include="data\items.lua" />
     <None Include="data\recipes.lua" />
   </ItemGroup>

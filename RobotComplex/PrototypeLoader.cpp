@@ -108,10 +108,14 @@ void LoadPrototypes()
 		}
 	}
 
-	program.regItemsEnd = program.itemPrototypes.size();
+	program.itemsEnd = program.itemPrototypes.size() - 1;
 	// Add logical elements to the end of the list to allow for crafting them
-	for (std::string logic : logicTypes)
-		program.itemPrototypes.emplace_back(logic);
+	for (auto logic : logicTypes)
+	{
+		logicTextures.emplace(logic.first, LoadTexture("logic/"+logic.second+".png"));
+		program.itemPrototypes.emplace_back(logic.second);
+	}
+		
 	program.itemPrototypes.emplace_back("robot");
 
 
@@ -133,7 +137,7 @@ void LoadPrototypes()
 	itemTextures.emplace_back(&sf::Texture());
 	itemTextures.emplace_back(&sf::Texture());
 	itemTextures.emplace_back(&sf::Texture());
-	for (int i = 3; i < program.regItemsEnd; i++)
+	for (int i = 3; i <= program.itemsEnd; i++)
 	{
 		itemTextures.emplace_back(LoadTexture("items/" + program.itemPrototypes[i] + ".png"));
 	}
@@ -303,55 +307,43 @@ void LoadPrototypes()
 	}
 }
 
+/*
+	// Wire Logic
+	wire = 1,
+	redirector,
+	gate,
+	belt,
+	shover,
+	wirebridge,
+
+	// Unidirectional Output
+	inverter = 128,
+	pressureplate,
+	booster,
+	counter,
+	repeater,
+	comparer,
+	plusone,
+	toggle
+*/
 void LoadLogicToHotbar()
 {
-	Redirector* redirect = new Redirector();
-	Gate* gate = new Gate();
-	PressurePlate* pressureplate = new PressurePlate();
-	Wire* wire = new Wire();
-	Inverter* inverter = new Inverter();
-	Booster* booster = new Booster();
-	Belt* belt = new Belt();
-	WireBridge* wireBridge = new WireBridge();
-	Comparer* comparer = new Comparer();
-	Robot* robot = new Robot();
-	Robot* robot2 = new Robot();
-	ItemTile* item = new ItemTile(4);
-	ItemTile* item2 = new ItemTile(3);
-	PlusOne* plusone = new PlusOne();
-	Shover* shover = new Shover();
-	Toggle* toggle = new Toggle();
+	uint8_t godQuantity = 200;
+	ItemTile wire				= ItemTile(program.itemsEnd + 1,	godQuantity);
+	ItemTile redirect			= ItemTile(program.itemsEnd + 2,	godQuantity);
+	ItemTile gate				= ItemTile(program.itemsEnd + 3,	godQuantity);
+	ItemTile belt				= ItemTile(program.itemsEnd + 4,	godQuantity);
+	ItemTile shover				= ItemTile(program.itemsEnd + 5,	godQuantity);
+	ItemTile wireBridge			= ItemTile(program.itemsEnd + 6,	godQuantity);
+	ItemTile inverter			= ItemTile(program.itemsEnd + 128,  godQuantity);
+	ItemTile pressureplate		= ItemTile(program.itemsEnd + 129,  godQuantity);
+	ItemTile booster			= ItemTile(program.itemsEnd + 130,  godQuantity);
+	ItemTile comparer			= ItemTile(program.itemsEnd + 133,  godQuantity);
+	ItemTile plusone			= ItemTile(program.itemsEnd + 134,  godQuantity);
+	ItemTile toggle				= ItemTile(program.itemsEnd + 135,  godQuantity);
+	ItemTile item				= ItemTile(4,	godQuantity);
+	ItemTile item2				= ItemTile(3,	godQuantity);
 
-	int godQuantity = 200;
-	redirect->quantity = godQuantity;
-	gate->quantity = godQuantity;
-	pressureplate->quantity = godQuantity;
-	wire->quantity = godQuantity;
-	inverter->quantity = godQuantity;
-	booster->quantity = godQuantity;
-	belt->quantity = godQuantity;
-	wireBridge->quantity = godQuantity;
-	comparer->quantity = godQuantity;
-	item->quantity = godQuantity;
-	item2->quantity = godQuantity;
-	plusone->quantity = godQuantity;
-	shover->quantity = godQuantity;
-	toggle->quantity = godQuantity;
-
-	program.hotbar.emplace_back(redirect);
-	program.hotbar.emplace_back(belt);
-	program.hotbar.emplace_back(pressureplate);
-	program.hotbar.emplace_back(gate);
-	program.hotbar.emplace_back(wire);
-	program.hotbar.emplace_back(wireBridge);
-	program.hotbar.emplace_back(inverter);
-	program.hotbar.emplace_back(booster);
-	program.hotbar.emplace_back(comparer);
-	program.hotbar.emplace_back(robot);
-	program.hotbar.emplace_back(robot2);
-	program.hotbar.emplace_back(item);
-	program.hotbar.emplace_back(item2);
-	program.hotbar.emplace_back(plusone);
-	program.hotbar.emplace_back(shover);
-	program.hotbar.emplace_back(toggle);
+	program.hotbar.insert({1, wire});
+	program.hotbar.insert({ 2, inverter });
 }

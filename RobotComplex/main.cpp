@@ -25,24 +25,25 @@ std::thread worldUpdate;
 
 sf::Texture* groundTexture;
 std::vector<sf::Texture*> itemTextures;
+std::unordered_map<uint8_t, sf::Texture*> logicTextures;
 std::vector<sf::Texture*> animationTextures;
 sf::Texture* robotTexture = LoadTexture("robotNew.png");
 sf::Texture* font = LoadTexture("font.png");
 
-sf::Texture* LogicTile::texture = LoadTexture("blank.png");
-sf::Texture* Wire::texture = LoadTexture("logic/wire.png");
-sf::Texture* PressurePlate::texture = LoadTexture("logic/pressureplate.png");
-sf::Texture* Redirector::texture = LoadTexture("logic/redirector.png");
-sf::Texture* Inverter::texture = LoadTexture("logic/inverter.png");
-sf::Texture* Booster::texture = LoadTexture("logic/booster.png");
-sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
-sf::Texture* Comparer::texture = LoadTexture("logic/comparer.png");
-sf::Texture* Gate::texture = LoadTexture("logic/holder.png");
-sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
-sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
-sf::Texture* PlusOne::texture = LoadTexture("logic/plusone.png");
-sf::Texture* Shover::texture = LoadTexture("logic/shover.png");
-sf::Texture* Toggle::texture = LoadTexture("logic/inverter.png");
+//sf::Texture* LogicTile::texture = LoadTexture("blank.png");
+//sf::Texture* Wire::texture = LoadTexture("logic/wire.png");
+//sf::Texture* PressurePlate::texture = LoadTexture("logic/pressureplate.png");
+//sf::Texture* Redirector::texture = LoadTexture("logic/redirector.png");
+//sf::Texture* Inverter::texture = LoadTexture("logic/inverter.png");
+//sf::Texture* Booster::texture = LoadTexture("logic/booster.png");
+//sf::Texture* Repeater::texture = LoadTexture("logic/inverter.png");
+//sf::Texture* Comparer::texture = LoadTexture("logic/comparer.png");
+//sf::Texture* Gate::texture = LoadTexture("logic/holder.png");
+//sf::Texture* Counter::texture = LoadTexture("logic/counter.png");
+//sf::Texture* Belt::texture = LoadTexture("logic/belt.png");
+//sf::Texture* PlusOne::texture = LoadTexture("logic/plusone.png");
+//sf::Texture* Shover::texture = LoadTexture("logic/shover.png");
+//sf::Texture* Toggle::texture = LoadTexture("logic/inverter.png");
 sf::Image icon;
 
 std::vector<sf::Event> eventHistory;
@@ -219,17 +220,20 @@ int main()
 	ShowWindow(windowHandle, SW_MAXIMIZE);
 	maximize = true;
 	initializeAgui(window);
-	MapUpdate.launch();
+	
 	program.running = true;
+	MapUpdate.launch();
 
 	while (window.isOpen() && program.running)
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
+			if (!program.running)
+				goto shutdown;
 			if (event.type == sf::Event::Closed)
 			{
-				window.close();
+				program.running = false;
 			}
 			else if (event.type == sf::Event::Resized)
 			{
@@ -279,8 +283,8 @@ int main()
 			program.frameRate = GC::FRAMERATE;
 		program.frameRate = (program.frameRate + float(CLOCKS_PER_SEC) / float(endUpdate - beginUpdate)) * 0.5;
 	}
+shutdown:;
 	creator->SaveProgramSettings();
-	program.running = false;
 	MapUpdate.wait();
 	return 0;
 }

@@ -49,6 +49,7 @@ WidgetCreator::WidgetCreator(agui::Gui *guiInstance, sf::RenderWindow* windowRef
 	AddMainFrame();
 	AddSaveFrame();
 	AddNewWorldFrame();
+	AddCraftingFrame();
 	if (!LoadProgramSettings())
 	{
 		LoadDefaultKeyMapping();
@@ -225,6 +226,8 @@ void WidgetCreator::AddNewWorldFrame()
 	newWorldFrame.add(&worldNameTitle);
 	worldNameTitle.setSize(gridSize * frameWidth / 2, gridSize);
 	worldNameTitle.setLocation(0.2 * gridSize * frameWidth, (float(row) + 0.25) * gridSize);
+
+
 	newWorldFrame.add(&worldName);
 	worldName.setFocusable(true);
 	worldName.setSize(gridSize * frameWidth / 2, gridSize);
@@ -345,10 +348,10 @@ void WidgetCreator::LoadDefaultKeyMapping()
 	keyPress = { sf::Keyboard::F3, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	actionMap.insert({ keyPress, "Show Debug Info" });
 
-	for (int i = 0; i < 20; i++)
+	for (int i = 1; i < 21; i++)
 	{
-		keyPress = { sf::Keyboard::Key(int(sf::Keyboard::Num0) + MyMod(i + 1,10)), /*alt*/ false, /*ctrl*/ false, /*shift*/ i > 9, /*system*/ false };
-		actionMap.insert({ keyPress, "Hotbar " + std::to_string(i + 1) });
+		keyPress = { sf::Keyboard::Key(int(sf::Keyboard::Num0) + MyMod(i + 1,10)), /*alt*/ false, /*ctrl*/ false, /*shift*/ i > 10, /*system*/ false };
+		actionMap.insert({ keyPress, "Hotbar " + std::to_string(i) });
 	}
 }
 void WidgetCreator::CreateActionList()
@@ -427,7 +430,7 @@ void WidgetCreator::CreateActionList()
 			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert({program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(), 1});
+				world.updateNext.insert({ program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded(), 1});
 			}
 		}
 		else
@@ -446,7 +449,7 @@ void WidgetCreator::CreateActionList()
 			program.selectedLogicTile->facing = program.placeRotation;
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert({ program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(), 1 });
+				world.updateNext.insert({ program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded(), 1 });
 			}
 		}
 		else
@@ -461,7 +464,7 @@ void WidgetCreator::CreateActionList()
 		if (program.selectedRobot)
 			program.selectedRobot->stopped = true;
 		program.selectedRobot = nullptr;
-		program.hotbarIndex = -1;
+		program.hotbarIndex = 0;
 		program.paste = false;
 		program.copy = false;
 		program.cut = false;
@@ -472,10 +475,10 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Remove Logic",[&] {
 		if (program.selectedLogicTile)
 		{
-			world.logictiles.erase(program.selectedLogicTile->pos.CoordToEncoded());
+			world.logicTiles.erase(program.mouseHovering.CoordToEncoded());
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert({ program.selectedLogicTile->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+				world.updateNext.insert({ program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 			}
 			program.selectedLogicTile = nullptr;
 		}
@@ -489,7 +492,7 @@ void WidgetCreator::CreateActionList()
 			program.selectedRobot->stopped = false;
 			if (LogicTile* logic = world.GetLogicTile(program.selectedRobot->pos))
 			{
-				logic->DoRobotLogic(program.selectedRobot->pos);
+				//logic->DoRobotLogic(program.selectedRobot->pos);
 			}
 			program.selectedRobot = nullptr;
 		}
@@ -500,7 +503,7 @@ void WidgetCreator::CreateActionList()
 	userActions.insert({ "Swap hotbar",[&] {
 		for (int i = 0; i < 10; i++)
 		{
-			ParentTile* temp = program.hotbar[i];
+			ItemTile temp = program.hotbar[i];
 			program.hotbar[i] = program.hotbar[i + 10];
 			program.hotbar[i + 10] = temp;
 		}
@@ -524,14 +527,14 @@ void WidgetCreator::CreateActionList()
 	//Ctrl + C
 	userActionOrder.push_back("Copy");
 	userActions.insert({ "Copy",[&] {
-		program.hotbarIndex = -1;
+		program.hotbarIndex = 0;
 		program.copy = true;
 	} });
 	
 	//Ctrl + X
 	userActionOrder.push_back("Cut");
 	userActions.insert({ "Cut",[&] {
-		program.hotbarIndex = -1;
+		program.hotbarIndex = 0;
 		program.cut = true;
 	} });
 	
@@ -547,11 +550,10 @@ void WidgetCreator::CreateActionList()
 		program.showDebugInfo = !program.showDebugInfo;
 	} });
 	
-	for (int i = 0; i < 20; i++)
+	for (int i = 1; i < 21; i++)
 	{
-		userActionOrder.push_back("Hotbar " + std::to_string(i + 1));
-		userActions.insert({ "Hotbar "+std::to_string(i+1),[i] {program.hotbarIndex = i; } });
-		
+		userActionOrder.push_back("Hotbar " + std::to_string(i));
+		userActions.insert({ "Hotbar "+std::to_string(i),[i] {program.hotbarIndex = i; } });
 	}
 
 	// Start Selection
@@ -569,7 +571,7 @@ void WidgetCreator::CreateActionList()
 
 	// Place Element
 	userActions.insert({ "Place Element", [&] {
-		if (program.hoveringHotbar != -1)
+		if (program.hoveringHotbar != 0)
 		{
 			program.hotbarIndex = program.hoveringHotbar;
 		}
@@ -577,80 +579,24 @@ void WidgetCreator::CreateActionList()
 		{
 			if (GroundTile* withinMap = world.GetGroundTile(program.mouseHovering))
 			{
-				if (program.hotbarIndex == -1)
+				if (program.hotbarIndex == 0)
 				{
 					if (program.selectedRobot)
 						program.selectedRobot->stopped = true;
 					program.selectedRobot = nullptr;
 				}
-				else if (program.hotbar[program.hotbarIndex])
+				else
 				{
-					if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[program.hotbarIndex]))
+					auto kv = program.hotbar.find(program.hotbarIndex);
+					if(kv != program.hotbar.end())
 					{
-						if (LogicTile* existingLogic = world.GetLogicTile(program.mouseHovering))
+						if (world.PlaceElement(program.mouseHovering, kv->second.itemTile))
 						{
-							if (existingLogic->logictype == hotbarLogic->logictype)
+							CraftingClass::TryCrafting(kv->second.itemTile, program.mouseHovering);
+							kv->second.quantity--;
+							if (kv->second.quantity == 0)
 							{
-								existingLogic->quantity++;
-								hotbarLogic->quantity--;
-							}
-							if (hotbarLogic->quantity == 0)
-							{
-								delete hotbarLogic;
-								program.hotbar[program.hotbarIndex] = nullptr;
-							}
-						}
-						else
-						{
-							LogicTile* logicPlace = hotbarLogic->Copy();
-							logicPlace->signal = 0;
-							logicPlace->pos = program.mouseHovering;
-							if (Robot* robot = world.GetRobot(program.mouseHovering))
-							{
-								logicPlace->DoRobotLogic(robot->pos);
-							}
-							world.logictiles.insert({ logicPlace->pos.CoordToEncoded(), logicPlace });
-							world.updateQueueD.insert(logicPlace->pos.CoordToEncoded());
-							world.updateQueueC.insert({ logicPlace->pos.CoordToEncoded(),1 });										// Queue update for placed element
-							for (int i = 0; i < 4; i++)
-							{
-								world.updateQueueC.insert({ logicPlace->pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
-							}
-							program.selectedLogicTile = logicPlace;
-							hotbarLogic->quantity--;
-							if (hotbarLogic->quantity == 0)
-							{
-								delete hotbarLogic;
-								program.hotbar[program.hotbarIndex] = nullptr;
-							}
-						}
-					}
-					else if (Robot* hotbarRobot = dynamic_cast<Robot*> (program.hotbar[program.hotbarIndex]))
-					{
-						if (Robot* robot = world.GetRobot(program.mouseHovering))
-						{
-							// Don't do anything if a robot is already there
-						}
-						else
-						{
-							Robot* newRobot = hotbarRobot->Copy();
-							newRobot->pos = program.mouseHovering;
-							newRobot->stopped = true;
-							world.robots.insert({ newRobot->pos.CoordToEncoded(),*newRobot });
-							delete hotbarRobot;
-							program.hotbar[program.hotbarIndex] = nullptr;
-						}
-					}
-					else if (ItemTile* hotbarItem = dynamic_cast<ItemTile*> (program.hotbar[program.hotbarIndex]))
-					{
-						if (world.ChangeItem(program.mouseHovering, hotbarItem->itemTile, 1))
-						{
-							CraftingClass::TryCrafting(hotbarItem->itemTile, program.mouseHovering);
-							hotbarItem->quantity--;
-							if (hotbarItem->quantity == 0)
-							{
-								delete hotbarItem;
-								program.hotbar[program.hotbarIndex] = nullptr;
+								program.hotbar.erase(kv->first);
 							}
 						}
 					}
@@ -661,110 +607,19 @@ void WidgetCreator::CreateActionList()
 
 	// Remove Element
 	userActions.insert({ "Remove Element", [&] {
-		if (ItemTile* item = world.GetItemTile(program.mouseHovering))
-		{
-			// If you can take an item off then do so
-			if (world.ChangeItem(program.mouseHovering, item->itemTile, -1))
-			{
-				// Look through the hotbar if there's already a stack there
-				for (int i = 0; i < program.hotbar.size(); i++)
-				{
-					if (ItemTile* hotbarItem = dynamic_cast<ItemTile*> (program.hotbar[i]))
-					{
-						if (item->itemTile == hotbarItem->itemTile)
-						{
-							if (hotbarItem->quantity != UINT8_MAX)
-							{
-								hotbarItem->quantity++;
-								return;
-							}
-						}
-					}
-				}
-				for (int i = 0; i < program.hotbar.size(); i++)
-				{
-					if (program.hotbar[i] == nullptr)
-					{
-						ItemTile* newItem = new ItemTile();
-						newItem->itemTile = item->itemTile;
-						newItem->quantity = 1;
-						program.hotbar[i] = newItem;
-						return;
-					}
-				}
-				// If not go put it in an empty slot
-				if (program.hotbar.size() < program.hotbarSize)
-				{
-					ItemTile* newItem = new ItemTile();
-					newItem->itemTile = item->itemTile;
-					newItem->quantity = 1;
-					program.hotbar.emplace_back(newItem);
-				}
-				else
-				{
-					world.ChangeItem(program.mouseHovering, item->itemTile, 1);
-				}
-			}
-			return;
-		}
-		if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
-		{
-			// Look through the hotbar if there's already a stack there
-			for (int i = 0; i < program.hotbar.size(); i++)
-			{
-				if (LogicTile* hotbarLogic = dynamic_cast<LogicTile*> (program.hotbar[i]))
-				{
-					if (hotbarLogic->logictype == logic->logictype)
-					{
-						if (hotbarLogic->quantity != UINT8_MAX)
-						{
-							hotbarLogic->quantity++;
-							assert(world.ChangeLogic(program.mouseHovering, logic->logictype, -1));
-							return;
-						}
-					}
-				}
-			}
-			// If not go put it in an empty slot
-			for (int i = 0; i < program.hotbar.size(); i++)
-			{
-				if (program.hotbar[i] == nullptr)
-				{
-					LogicTile* hotbarLogic = logic->Copy();
-					program.hotbar[i] = hotbarLogic;
-					assert(world.ChangeLogic(program.mouseHovering, logic->logictype, -1));
-					return;
-				}
-			}
-			// If not go put it in an empty slot
-			if (program.hotbar.size() < program.hotbarSize)
-			{
-				LogicTile* hotbarLogic = logic->Copy();
-				program.hotbar.emplace_back(hotbarLogic);
-				assert(world.ChangeLogic(program.mouseHovering, logic->logictype, -1));
-			}
-			return;
-		}
-		if (Robot* robot = world.GetRobot(program.mouseHovering))
-		{
-			for (int i = 0; i < program.hotbar.size(); i++)
-			{
-				if (program.hotbar[i] == nullptr)
-				{
-					Robot* hotbarRobot = robot->Copy();
-					program.hotbar[i] = hotbarRobot;
-					world.ChangeRobot(program.mouseHovering, -1);
-					return;
-				}
-			}
-			if (program.hotbar.size() < program.hotbarSize)
-			{
-				Robot* hotbarRobot = robot->Copy();
-				program.hotbar.emplace_back(hotbarRobot);
-				world.ChangeRobot(program.mouseHovering, -1);
-			}
-			return;
-		}
+		bool elementFound = false;
+		uint16_t element = 0;
+		if(!elementFound)
+			if (element = world.ChangeItem(program.mouseHovering, -1, 0))
+				elementFound = true;
+		if (!elementFound)
+			if (element = world.ChangeRobot(program.mouseHovering, -1))
+				elementFound = true;
+		if (!elementFound)
+			if (element = world.ChangeLogic(program.mouseHovering, -1, 0))
+				elementFound = true;
+		if(element)
+			ChangeInventory(element, 1);
 	} });
 
 	// Every tick
@@ -975,6 +830,78 @@ void WidgetCreator::MapNewButton(sf::Event::KeyEvent newButton)
 	actionBindButtonIndex = -1;
 }
 
+int WidgetCreator::ChangeInventory(uint16_t item, int quantity)
+{
+	if (quantity > 0)
+	{
+		bool addedToInv = false;
+		for (auto kv : program.hotbar)
+		{
+			if (kv.second.itemTile == item)
+			{
+				int subQuantity = quantity;
+				if (kv.second.quantity + quantity > 255)
+					subQuantity = 255 - kv.second.quantity;
+				auto modify = program.hotbar.find(kv.first);
+				modify->second.quantity += subQuantity;
+				quantity -= subQuantity;
+				if (quantity == 0)
+				{
+					addedToInv = true;
+					break;
+				}
+			}
+		}
+		if (!addedToInv)
+		{
+			for (uint16_t i = 1; i < 21; i++)
+			{
+				auto kv = program.hotbar.find(i);
+				if (kv == program.hotbar.end())
+				{
+					ItemTile item = ItemTile(item);
+					int subQuantity = quantity;
+					if (subQuantity > 255)
+						subQuantity = 255;
+					item.quantity = subQuantity;
+					quantity -= subQuantity;
+					program.hotbar.insert({ i,item });
+					if (quantity == 0)
+						break;
+				}
+			}
+		}
+	}
+	else if(quantity < 0)
+	{
+		std::vector<uint16_t> removeList;
+		for (auto kv : program.hotbar)
+		{
+			if (kv.second.itemTile == item)
+			{
+				auto element = program.hotbar.find(kv.first);
+				if (element != program.hotbar.end())
+				{
+					int subQuantity = quantity;
+					if ((int)element->second.quantity + subQuantity < 0)
+						subQuantity = -(int)element->second.quantity;
+					element->second.quantity += subQuantity;
+					if (element->second.quantity == 0)
+						removeList.emplace_back(element->first);
+					quantity -= subQuantity;
+					if (quantity == 0)
+						break;
+				}
+			}
+		}
+		for (auto k : removeList)
+		{
+			program.hotbar.erase(k);
+		}
+	}
+	return quantity;
+}
+
 void WidgetCreator::MouseMoved()
 {
 	if (!program.gamePaused)
@@ -992,23 +919,23 @@ void WidgetCreator::MouseMoved()
 				program.selectedRobot->stopped = false;
 				if (LogicTile* logic = world.GetLogicTile(program.selectedRobot->pos))
 				{
-					logic->DoRobotLogic(program.selectedRobot->pos);
+					//logic->DoRobotLogic(program.selectedRobot->pos);
 				}
 			}
 		}
 		else
 		{
 			bool foundLogic = false;
-			program.hoveringHotbar = -1;
+			program.hoveringHotbar = 0;
 			program.selectedHotbar = nullptr;
-			for (uint8_t i = 0; i < program.hotbar.size(); ++i)
+			for (uint8_t i = 0; i < program.hotbarSlots.size(); ++i)
 			{
 				sf::RectangleShape rect = program.hotbarSlots[i];
 				sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
 				if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
 				{
-					program.selectedHotbar = program.hotbar[i];
-					program.hoveringHotbar = i;
+					program.selectedHotbar = &program.hotbar[i];
+					program.hoveringHotbar = i + 1;
 					foundLogic = true;
 				}
 			}
@@ -1041,7 +968,7 @@ void WidgetCreator::RightMousePressed()
 void WidgetCreator::FinishedSelection(Pos start, Pos end)
 {
 	// Empty the old list when creating a new one
-	program.copyList.clear();
+	program.copyMap.clear();
 	// Make sure start is the top left position of the rect
 	if (start.x > end.x)
 	{
@@ -1063,21 +990,19 @@ void WidgetCreator::FinishedSelection(Pos start, Pos end)
 		{
 			if (LogicTile* logic = world.GetLogicTile(Pos{ i,j }))
 			{
-				ParentTile* newElement = dynamic_cast<ParentTile*> (logic);
-				program.copyList.emplace_back(newElement);
+				LogicTile copyLogic = *logic;
+				copyLogic.quantity = 1;
+				program.copyMap.insert({(Pos{ i,j } -start).CoordToEncoded(), copyLogic});
 				if (program.cut)
-					world.logictiles.erase(Pos{ i,j }.CoordToEncoded());
-			}
-			if (ItemTile* item = world.GetItemTile(Pos{ i,j }))
-			{
-				ItemTileWPOS* copyItem = new ItemTileWPOS();
-				copyItem->pos = Pos{ i,j };
-				copyItem->itemTile = item->itemTile;
-				copyItem->quantity = item->quantity;
-				ParentTile* newElement = dynamic_cast<ParentTile*> (copyItem);
-				program.copyList.emplace_back(newElement);
-				if (program.cut)
-					world.items.erase(Pos{ i,j }.CoordToEncoded());
+				{
+					uint16_t element = 0;
+					if (program.cut)
+						element = world.ChangeLogic(Pos{ i,j }, -1, 0);
+					if (element)
+					{
+						ChangeInventory(element, 1);
+					}
+				}
 			}
 		}
 	}
@@ -1089,21 +1014,11 @@ void WidgetCreator::FinishedSelection(Pos start, Pos end)
 
 void WidgetCreator::PasteSelection()
 {
-	for (ParentTile* element : program.copyList)
+	for (auto kv : program.copyMap)
 	{
-		if (LogicTile* newElement = dynamic_cast<LogicTile*> (element))
-		{
-			LogicTile* copyElement = newElement->Copy();
-			copyElement->pos = copyElement->pos + program.mouseHovering - program.originSelection;
-			world.logictiles.insert({ copyElement->pos.CoordToEncoded(), copyElement});
-		}
-		else if(ItemTileWPOS* newElement = dynamic_cast<ItemTileWPOS*> (element))
-		{
-			ItemTile copy;
-			copy.itemTile = newElement->itemTile;
-			copy.quantity = newElement->quantity;
-			world.items.insert({ (newElement->pos + program.mouseHovering - program.originSelection).CoordToEncoded(), copy });
-		}
+		uint16_t element = world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, 1, kv.second.logicType);
+		if(element > 1)
+			ChangeInventory(element, -1);
 	}
 	program.paste = false;
 }
@@ -1153,7 +1068,7 @@ bool WidgetCreator::LoadProgramSettings()
 		i++;
 	}
 	myfile.close();
-	world.Deserialize(world.name);
+	//world.Deserialize(world.name);
 	return true;
 }
 
@@ -1235,4 +1150,44 @@ void WidgetCreator::PerformActions()
 			}
 		}
 	}
+}
+
+class SimpleTextFieldListener : public agui::ActionListener
+{
+private:
+	std::function<void()> enterAction;
+public:
+	SimpleTextFieldListener(std::function<void()> enterAction) {
+		this->enterAction = enterAction;
+	};
+	void actionPerformed(const agui::ActionEvent& evt)
+	{
+		enterAction();
+	}
+	~SimpleTextFieldListener(void) {};
+};
+
+void WidgetCreator::AddCraftingFrame()
+{
+	mGui->add(&craftingFrame);
+	craftingFrame.setSize(agui::Dimension(mainFrameWidth, mainFrameHeight));
+	searchTitle.setText("Find: ");
+	craftingFrame.add(&searchTitle);
+
+	searchBar.addActionListener(new SimpleTextFieldListener([&] {
+			FindRecipes(creator->searchBar.getText(),0);
+		}));
+	searchBar.setSize(agui::Dimension(50, 20));
+	searchBar.setLocation(agui::Point(50,0));
+	craftingFrame.add(&searchBar);
+
+	recipeResults.setLocation(agui::Point(0, 20));
+	craftingFrame.add(&recipeResults);
+}
+
+void WidgetCreator::FindRecipes(std::string name, int state)
+{
+	std::vector<int> foundNames = findSubstrings(&program.itemPrototypes, name);
+
+
 }

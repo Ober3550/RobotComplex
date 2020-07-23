@@ -15,7 +15,6 @@ void WorldSave::Serialize(std::string filename)
 	// Before saving the robots make sure to stop the one that the player's meant to be controlling
 	if (program.selectedRobot)
 		program.selectedRobot->stopped = true;
-	SerializeLogicStructure("saves/" + filename + "/logicStructure.txt");
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
 	//platforms.Serialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Serialize("saves/" + filename + "/platformsNext.bin");
@@ -23,9 +22,8 @@ void WorldSave::Serialize(std::string filename)
 	nextItemPos.Serialize("saves/" + filename + "/itemsNext.bin");
 	robots.Serialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Serialize("saves/" + filename + "/robotsNext.bin");
-	logictiles.Serialize("saves/" + filename + "/logic.bin");
-	//updateQueueB.Serialize("saves/" + filename + "/updateQueueB.bin");
-	updateQueueC.Serialize("saves/" + filename + "/updateQueueC.bin");
+	logicTiles.Serialize("saves/" + filename + "/logic.bin");
+	updateNext.Serialize("saves/" + filename + "/updateWire.bin");
 	updateQueueD.Serialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 	SerializeItemNames("saves/" + filename + "/itemNames.txt");
@@ -37,7 +35,6 @@ void WorldSave::Deserialize(std::string filename)
 {
 	this->clear();
 	world.name = filename;
-	DeserializeLogicStructure("saves/" + filename + "/logicStructure.txt");
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
 	//platforms.Deserialize("saves/" + filename + "/platforms.bin");
@@ -46,10 +43,9 @@ void WorldSave::Deserialize(std::string filename)
 	nextItemPos.Deserialize("saves/" + filename + "/itemsNext.bin");
 	robots.Deserialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Deserialize("saves/" + filename + "/robotsNext.bin");
-	logictiles.Deserialize("saves/" + filename + "/logic.bin", world.oldLogicNewLogic, world.oldLogicSize);
-	//updateQueueB.Deserialize("saves/" + filename + "/updateQueueB.bin");
-	updateQueueC.Deserialize("saves/" + filename + "/updateQueueC.bin");
-	updateQueueD.Deserialize("saves/" + filename + "/updateQueueD.bin");
+	logicTiles.Deserialize("saves/" + filename + "/logic.bin");
+	updateNext.Deserialize("saves/" + filename + "/updateWire.bin");
+	updateQueueD.Deserialize("saves/" + filename + "/updateItem.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
 	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin");
@@ -64,21 +60,13 @@ void WorldSave::clear()
 	itemPrevMoved.clear();
 	robots.clear();
 	nextRobotPos.clear();
-	for (std::pair<uint64_t, LogicTile*> logic : logictiles)
-	{
-		delete logic.second;
-	}
-	logictiles.clear();
+	logicTiles.clear();
 	worldChunks.clear();
 	craftingQueue.clear();
-	updateQueueA.clear();
-	updateQueueB.clear();
-	updateQueueC.clear();
+	updateCurr.clear();
+	updateProp.clear();
+	updateNext.clear();
 	updateQueueD.clear();
-	for (ParentTile* element: program.hotbar)
-	{
-		delete element;
-	}
 	program.hotbar.clear();
 	name = "New World";
 	tick = 0;
@@ -116,7 +104,7 @@ void WorldSave::DeserializeItemNames(std::string filename)
 		i++;
 	}
 }
-
+/*
 void WorldSave::SerializeLogicStructure(std::string filename)
 {
 	std::ofstream myfile;
@@ -157,7 +145,7 @@ void WorldSave::DeserializeLogicStructure(std::string filename)
 		}
 	}
 }
-
+*/
 void WorldSave::SerializeMisc(std::string filename)
 {
 	std::ofstream myfile;

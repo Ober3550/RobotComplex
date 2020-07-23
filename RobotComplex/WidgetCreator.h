@@ -82,6 +82,14 @@ public:
 	std::string actionBindWaiting = "";
 	int actionBindButtonIndex = 0;
 
+	// Crafting GUI
+	agui::Frame craftingFrame;
+	agui::Label searchTitle;
+	agui::TextField searchBar;
+	agui::Button previousRecipe;
+	agui::Button nextRecipe;
+	agui::Label recipeResults;
+
 	WidgetCreator(agui::Gui *guiInstance, sf::RenderWindow* window);
 	~WidgetCreator()
 	{
@@ -92,6 +100,7 @@ public:
 	void AddMainFrame();
 	void AddSaveFrame();
 	void AddNewWorldFrame();
+	void AddCraftingFrame();
 	void SetGuiVisibility();
 	bool LoadProgramSettings();
 	void SaveProgramSettings();
@@ -107,5 +116,7 @@ public:
 	void FinishedSelection(Pos start, Pos end);
 	void PasteSelection();
 	void PerformActions();
+	void FindRecipes(std::string name, int state);
+	int  ChangeInventory(uint16_t item, int quantity);
 };
 extern WidgetCreator* creator;

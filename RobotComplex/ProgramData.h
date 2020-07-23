@@ -23,9 +23,10 @@ public:
 	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
 	MyMap<std::string, RecipeProto> recipePrototypes;
 	
+
 	std::vector<std::string> itemPrototypes;
 	std::vector<std::string> itemTooltips;
-	int regItemsEnd;
+	int itemsEnd;
 	std::vector<std::vector<std::string>> logicTooltips;
 	MyMap<char, sf::IntRect> fontMap;	// Map that relates characters to sections of the font texture
 	sf::Font guiFont;
@@ -69,9 +70,9 @@ public:
 	Pos cameraPos = { 0, 0 };
 	int hotbarIndex = 0;
 	int hotbarSize = 20;
-	MyVector<ParentTile*> hotbar;
+	MyMap<uint16_t, ItemTile> hotbar;
 	int hoveringHotbar;
-	ParentTile* selectedHotbar;
+	ItemTile* selectedHotbar;
 	LogicTile* selectedLogicTile;
 	Robot* selectedRobot;
 	int rotateBot = 0;
@@ -87,7 +88,7 @@ public:
 	bool startedSelection = false;
 	Pos startSelection;
 	Pos originSelection;
-	std::vector<ParentTile*> copyList;
+	MyMap<uint64_t, LogicTile> copyMap;
 	
 	
 	std::string selectedSave = "";

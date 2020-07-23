@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string>
 template < typename T>
 std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T& element)
 {
@@ -21,3 +22,4 @@ std::pair<bool, int > findInVector(const std::vector<T>& vecOfElements, const T&
 
 	return result;
 }
+std::vector<int> findSubstrings(const std::vector<std::string>* nameList, std::string element);

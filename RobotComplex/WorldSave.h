@@ -28,13 +28,13 @@ public:
 	MyMap<uint64_t, Facing> nextRobotPos;
 	MySet<uint64_t> robotMovingTo;
 
-	MyMap<uint64_t, LogicTile*> logictiles;
+	MyMap<uint64_t, LogicTile> logicTiles;
 
 	MyMap<uint64_t, WorldChunk> worldChunks;
 	MyMap<uint64_t, CraftingProcess> craftingQueue;
-	MySet<uint64_t> updateQueueA;	// Processing queue for update from Queue B
-	MySet<uint64_t> updateQueueB;	// Queue for current updates
-	MyMap<uint64_t,int> updateQueueC;	// Queue for updates next ticks
+	MySet<uint64_t> updateCurr;	// Processing queue for update from Queue B
+	MySet<uint64_t> updateProp;	// Queue for current updates
+	MyMap<uint64_t,int> updateNext;	// Queue for updates next ticks
 	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
 	bool moving = false;
 	std::string name;
@@ -82,18 +82,19 @@ public:
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);
 	bool PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft); // bool is for whether the robot should move after a failed operation
-	bool ChangeItem(Pos pos, uint16_t item, int quantity);
-	bool ChangeRobot(Pos pos, int quantity);
-	bool ChangeLogic(Pos pos, uint8_t logicType, int quantity);
+	uint16_t ChangeItem(Pos pos, int quantity, uint16_t item);
+	uint16_t ChangeRobot(Pos pos, int quantity);
+	uint16_t ChangeLogic(Pos pos, int quantity, uint8_t logicType);
 	void GenerateChunk(Pos pos);
 	void GenerateOre(Pos pos);
 	void Serialize(std::string filename);
 	void SerializeItemNames(std::string filename);
 	void SerializeMisc(std::string filename);
-	void SerializeLogicStructure(std::string filename);
+	bool PlaceElement(Pos pos, uint16_t item);
+	//void SerializeLogicStructure(std::string filename);
 	void Deserialize(std::string filename);
 	void DeserializeItemNames(std::string filename);
-	void DeserializeLogicStructure(std::string filename);
+	//void DeserializeLogicStructure(std::string filename);
 	void DeserializeMisc(std::string filename);
 	void clear();
 };

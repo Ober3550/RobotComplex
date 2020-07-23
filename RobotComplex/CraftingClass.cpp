@@ -20,7 +20,7 @@ int CraftingClass::CheckCrafting(Pos pos)
 			{
 				// If there already exists a logic or robot component at the position to be populated 
 				// do not craft otherwise the players materials will be consumed
-				if (recipeComp.itemTile >= program.regItemsEnd)
+				if (recipeComp.itemTile > program.itemsEnd)
 				{
 					// If the item is the last item it's the robot
 					if (recipeComp.itemTile == program.itemPrototypes.size() - 1)
@@ -137,7 +137,7 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 				{
 					Pos alterPos = pos.RelativePosition(k, l);
 					// If item number isn't an item create a different item in the world
-					if (recipeComp.itemTile >= program.regItemsEnd)
+					if (recipeComp.itemTile > program.itemsEnd)
 					{
 						if (recipeComp.itemTile == program.itemPrototypes.size() - 1)
 						{
@@ -149,7 +149,7 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 						{
 							// If this fails the check function failed to return that 
 							// there was no empty position or logic tile in the position required
-							assert(world.ChangeLogic(alterPos, int(recipeComp.itemTile) - program.regItemsEnd, recipeComp.resultState));
+							assert(world.ChangeLogic(alterPos, int(recipeComp.itemTile) - program.itemsEnd, recipeComp.resultState));
 						}
 					}
 					else

@@ -10,6 +10,7 @@ ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 {
 	if (element == ElementTypes::logic)
 	{
+		/*
 		LogicTypes* logictype = new LogicTypes();
 		myfile->read((char*)logictype, sizeof(LogicTypes));
 		int elementSize = world.oldLogicSize[*logictype];
@@ -21,6 +22,8 @@ ParentTile* ParentTile::Factory(ElementTypes element, std::ifstream* myfile)
 		}
 		else
 			return nullptr;
+		*/
+		return nullptr;
 	}
 	else if (element == ElementTypes::robot)
 	{
@@ -43,7 +46,7 @@ void ParentTile::DrawTile(SpriteVector* appendTo, float x, float y, float s, uin
 {
 	if (LogicTile* logic = dynamic_cast<LogicTile*> (this))
 	{
-		logic->DrawTile(appendTo, x, y, s, flags, color);
+		//logic->DrawTile(appendTo, x, y, s, flags, color);
 	}
 	else if (Robot* robot = dynamic_cast<Robot*> (this))
 	{

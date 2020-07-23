@@ -10,8 +10,46 @@
 #include <bitset>
 #include "SpriteVector.h"
 #include "MySet.h"
-#include "ParentTile.h"
+#include "MyMap.h"
 
+// Currently just 4 bytes but may be packed to 3
+class LogicTile : public ParentTile {
+public:
+	LogicType logicType;
+	uint8_t signal : 5;
+	uint8_t color : 3;
+	Facing facing;
+	uint8_t quantity;
+	uint8_t signal2 : 5;
+	uint8_t color2 : 3;
+	LogicTile() {
+		logicType, signal, color, facing, quantity, signal2, color2 = 0;
+	}
+	LogicTile(uint8_t type)
+	{
+		logicType = (LogicType)type;
+		signal = 0;
+		color = 1;
+		facing = north;
+		quantity = 1;
+		signal2 = 0;
+		color2 = 1;
+	}
+	void DoWireLogic(Pos currentPosition);
+	uint8_t GetSignal(LogicTile querier);
+	void SignalEval(std::array<uint8_t, 4> neighbourSigs);
+	bool ShowAlign();
+	bool GetConnected(Pos currentPosition, Pos neighbourPosition, LogicTile neigbourElement);
+	void DrawLogic(Pos currentPos, SpriteVector* appendTo, void* localMap, float x, float y, float s, uint8_t flags);
+	void DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal, uint8_t flags);
+	void DrawQuantity(SpriteVector* appendTo, float x, float y, float s, int quantity, uint8_t flags);
+	void DoItemLogic() {};
+	void DoRobotLogic() {};
+};
+
+
+
+/*
 class LogicTile : public ParentTile {
 public:
 	Pos pos;								// 8 bytes
@@ -346,3 +384,4 @@ public:
 		return logicTile;
 	}
 };
+*/

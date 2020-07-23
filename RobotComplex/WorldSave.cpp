@@ -115,17 +115,11 @@ Robot* WorldSave::GetRobot(uint64_t encodedPos)
 }
 LogicTile* WorldSave::GetLogicTile(Pos pos)
 {
-	if (LogicTile * *temp = world.logictiles.GetValue(pos.CoordToEncoded()))
-		return *temp;
-	else
-		return nullptr;
+	return world.logicTiles.GetValue(pos.CoordToEncoded());
 }
 LogicTile* WorldSave::GetLogicTile(uint64_t encodedPos)
 {
-	if (LogicTile * *temp = world.logictiles.GetValue(encodedPos))
-		return *temp;
-	else
-		return nullptr;
+	return world.logicTiles.GetValue(encodedPos);
 }
 CraftingProcess* WorldSave::GetCrafting(Pos pos)
 {
@@ -135,7 +129,7 @@ CraftingProcess* WorldSave::GetCrafting(uint64_t encodedPos)
 {
 	return world.craftingQueue.GetValue(encodedPos);
 }
-bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
+uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
 {
 	uint64_t itemPos = pos.CoordToEncoded();
 	if (ItemTile* currentItem = world.GetItemTile(itemPos))
@@ -161,7 +155,7 @@ bool WorldSave::ChangeItem(Pos pos, uint16_t item, int quantity)
 				logicTile->DoItemLogic();
 			}
 		}
-		return true;
+		return currentItem->itemTile;
 	}
 	else
 	{
@@ -191,7 +185,7 @@ bool WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int push
 	{
 		if (LogicTile* logic = world.GetLogicTile(nextPos))
 		{
-			if (logic->logictype == gate)
+			if (logic->logicType == gate)
 			{
 				if (!logic->signal)
 				{
@@ -304,27 +298,56 @@ void WorldSave::MovePlatform(Pos pos, Facing toward)
 	}
 }
 
-bool WorldSave::ChangeLogic(Pos pos, uint8_t logicType, int quantity)
+uint16_t WorldSave::ChangeLogic(Pos pos, int quantity, uint8_t logicType)
 {
 	if (LogicTile* logic = world.GetLogicTile(pos))
 	{
+		if (logicType != 0 && logic->logicType != logicType)
+			return false;
 		if (logic->quantity + quantity < 0 || logic->quantity + quantity > UINT8_MAX)
 			return false;
 		else
 		{
+			if (logic->color != program.placeColor 
+			&& logic->logicType == wire)
+			{
+				logic->logicType = wirebridge;
+				logic->color2 = program.placeColor;
+				for (int i = 0; i < 4; i++)
+				{
+					Pos neighbourPosition = pos.FacingPosition((Facing)i);
+					if (LogicTile* neighbour = world.GetLogicTile(neighbourPosition))
+					{
+						if (neighbour->color == logic->color)
+						{
+							logic->facing = (Facing)i;
+							break;
+						}
+					}
+				}
+				world.updateNext.insert({ pos.CoordToEncoded(),1 });
+			}
+			
 			logic->quantity += quantity;
+			if (logic->quantity == 1 
+				&& logic->logicType == wirebridge)
+			{
+				logic->logicType = wire;
+				logic->color2 = logic->color;
+				world.updateNext.insert({ pos.CoordToEncoded(),1 });
+			}
 		}
 		if (logic->quantity == 0)
 		{
 			if (program.selectedLogicTile == logic)
 				program.selectedLogicTile = nullptr;
-			delete logic;
-			world.logictiles.erase(pos.CoordToEncoded());
+			world.logicTiles.erase(pos.CoordToEncoded());
 			for (int i = 0; i < 4; i++)
 			{
-				world.updateQueueC.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+				world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 			}
 		}
+		return logic->logicType + program.itemsEnd;
 	}
 	else
 	{
@@ -332,17 +355,24 @@ bool WorldSave::ChangeLogic(Pos pos, uint8_t logicType, int quantity)
 			return false;
 		if (quantity > 0)
 		{
-			LogicTypes logicType = LogicTypes();
-			LogicTile* logicPlace = LogicTile::Factory(uint16_t(logicType));
-			logicPlace->pos = pos;
-			logicPlace->quantity = quantity;
-			world.logictiles.insert({ pos.CoordToEncoded(),logicPlace });
+			LogicTile logicPlace = LogicTile(logicType);
+			logicPlace.color = program.placeColor;
+			logicPlace.color2 = program.placeColor;
+			logicPlace.facing = program.placeRotation;
+			logicPlace.quantity = quantity;
+			world.logicTiles.insert({ pos.CoordToEncoded(),logicPlace });
+			world.updateNext.insert({ pos.CoordToEncoded(),1 });
+			for (int i = 0; i < 4; i++)
+			{
+				world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+			}
+			return logicPlace.logicType + program.itemsEnd;
 		}
 	}
-	return true;
+	return false;
 }
 
-bool WorldSave::ChangeRobot(Pos pos, int quantity)
+uint16_t WorldSave::ChangeRobot(Pos pos, int quantity)
 {
 	if (Robot* robot = world.GetRobot(pos))
 	{
@@ -351,6 +381,7 @@ bool WorldSave::ChangeRobot(Pos pos, int quantity)
 		if(robot == program.selectedRobot)
 			program.selectedRobot = nullptr;
 		world.robots.erase(pos.CoordToEncoded());
+		return program.itemsEnd + 256;
 	}
 	else
 	{
@@ -365,4 +396,26 @@ bool WorldSave::ChangeRobot(Pos pos, int quantity)
 			return false;
 	}
 	return true;
+}
+
+bool WorldSave::PlaceElement(Pos pos, uint16_t item)
+{
+	if (item <= program.itemsEnd)
+	{
+		if(world.ChangeItem(pos, 1, item))
+			return true;
+		return false;
+	}
+	else if (item < program.itemsEnd + 255)
+	{
+		if (world.ChangeLogic(pos, 1, item - program.itemsEnd))
+			return true;
+		return false;
+	}
+	else if(item == program.itemsEnd + 255)
+	{
+		if (world.ChangeRobot(pos, 1))
+			return true;
+		return false;
+	}
 }

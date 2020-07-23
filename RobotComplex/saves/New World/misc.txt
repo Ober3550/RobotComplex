@@ -1,1 +1,1 @@
-Camera Pos,-45,-90
+Camera Pos,0,0

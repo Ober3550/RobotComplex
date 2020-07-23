@@ -3,10 +3,12 @@
 #include "Facing.h"
 #include <cassert>
 #include <math.h>
+#include "absl/hash/hash.h"
 struct Pos {
 public:
 	int32_t x = 0, y = 0;
 	uint64_t CoordToEncoded();
+	operator uint64_t() { return this->CoordToEncoded(); };
 	static Pos EncodedToCoord(uint64_t input);
 	static Facing BehindFacing(Facing);
 	static Facing RelativeFacing(Facing,int);
@@ -28,4 +30,8 @@ public:
 	Pos operator*(int other);
 	Pos operator/(int other);
 	Pos operator%(int other);
+	template <typename H>
+	friend H AbslHashValue(H h, const Pos& p) {
+		return H::combine(std::move(h), p.x, p.y);
+	}
 };
