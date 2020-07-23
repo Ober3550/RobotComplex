@@ -280,16 +280,18 @@ void LogicTile::DrawLogic(Pos currentPos, SpriteVector* appendTo, void* localMap
 	sprite_rotation = ((float)this->facing) * (float)90.f;
 	sprite.setRotation(sprite_rotation);
 	sprite.setColor(sf::Color(Red, Green, Blue, Alpha));
-	sprite.setTexture(*logicTextures[this->logicType]);
+	if (this->logicType == wirebridge)
+		sprite.setTexture(*logicTextures[1]);
+	else
+		sprite.setTexture(*logicTextures[this->logicType]);
 	sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
-	if (this->logicType == wire)
+	if (this->logicType == wire || this->logicType == wirebridge)
 	{
 		sprite.setTextureRect(sf::IntRect(14, 14, 4, 4));
 		sprite.setPosition(x + float(GC::tileSize) - 2, y + float(GC::tileSize) - 2);
 	}
 		
-	if (this->logicType != wirebridge)
-		appendTo->emplace_back(sprite);
+	appendTo->emplace_back(sprite);
 
 	// Signal value
 	this->DrawSignalStrength(appendTo, x - (5 * (this->logicType == wirebridge)), y, s, this->signal, flags);

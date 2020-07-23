@@ -309,7 +309,8 @@ uint16_t WorldSave::ChangeLogic(Pos pos, int quantity, uint8_t logicType)
 		else
 		{
 			if (logic->color != program.placeColor 
-			&& logic->logicType == wire)
+			&& logic->logicType == wire
+			&& quantity > 0)
 			{
 				logic->logicType = wirebridge;
 				logic->color2 = program.placeColor;
