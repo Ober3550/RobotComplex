@@ -134,11 +134,12 @@ uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
 	uint64_t itemPos = pos.CoordToEncoded();
 	if (ItemTile* currentItem = world.GetItemTile(itemPos))
 	{
-		if (currentItem->itemTile != item && currentItem->itemTile != 0)
+		if (item != 0 && currentItem->itemTile != item && currentItem->itemTile != 0)
 			return false;
 		else
 		{
-			currentItem->itemTile = item;
+			if(quantity > 0)
+				currentItem->itemTile = item;
 			if (currentItem->quantity < quantity && quantity < 0 || int(currentItem->quantity) + quantity > int(UINT8_MAX))
 				return false;
 			else

@@ -121,18 +121,19 @@ void LoadPrototypes()
 
 	// Populate the item tooltips according to the prototype names
 	std::regex addSpaces("_");
-	for (std::string text : program.itemPrototypes)
+	for (int i=0;i < program.itemPrototypes.size();i++)
 	{
+		std::string text = program.itemPrototypes[i];
 		std::string temp = "";
 		temp = std::regex_replace(text, addSpaces, " ");
-		uint16_t i = 0;
-		temp[i] = std::toupper(temp[i]);
-		for (i = 1; i < temp.length(); i++)
+		uint16_t j = 0;
+		temp[j] = std::toupper(temp[j]);
+		for (j = 1; j < temp.length(); j++)
 		{
-			if (temp[i - 1] == ' ')
-				temp[i] = std::toupper(temp[i]);
+			if (temp[j - 1] == ' ')
+				temp[j] = std::toupper(temp[j]);
 		}
-		program.itemTooltips.emplace_back(temp);
+		program.itemTooltips.insert({ i,temp });
 	}
 	itemTextures.emplace_back(&sf::Texture());
 	itemTextures.emplace_back(&sf::Texture());
@@ -142,28 +143,16 @@ void LoadPrototypes()
 		itemTextures.emplace_back(LoadTexture("items/" + program.itemPrototypes[i] + ".png"));
 	}
 
-	//Logic Tooltips
-	std::vector<std::string> logicTypeTooltips;
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Wire
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Redirector
-	program.logicTooltips.emplace_back(logicTypeTooltips);  // Pressureplate
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Inverter
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Booster
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Repeater
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Memory
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Holder
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Counter
-	program.logicTooltips.emplace_back(logicTypeTooltips);	// Comparer
-	program.logicTooltips[0].emplace_back("Wire transfers signals");
-	program.logicTooltips[1].emplace_back("Redirects the robot");
-	program.logicTooltips[2].emplace_back("Creates signal when robot or item ontop");
-	program.logicTooltips[3].emplace_back("Inverter: output = 16 - behind + side");
-	program.logicTooltips[4].emplace_back("Booster: output = 16 + behind if: behind > side");
-	program.logicTooltips[5].emplace_back("Gives out same signal as input");
-	program.logicTooltips[6].emplace_back("Stores 16 different values that cycle when input rises to high");
-	program.logicTooltips[7].emplace_back("Catches robots and releases when powered");
-	program.logicTooltips[8].emplace_back("Counts up to the max value then resets");
-	program.logicTooltips[9].emplace_back("Comparer: output = 16 + input if: behind = side");
+	// Logic Tooltips
+	program.itemTooltips.insert({ program.itemsEnd + wire, "Wire: transfers signals" });
+	program.itemTooltips.insert({ program.itemsEnd + redirector, "Redirector: Redirects the robot" });
+	program.itemTooltips.insert({ program.itemsEnd + pressureplate, "PressurePlate: Creates signal when robot or item ontop" });
+	program.itemTooltips.insert({ program.itemsEnd + inverter, "Inverter: output = 16 - behind + side" });
+	program.itemTooltips.insert({ program.itemsEnd + booster, "Booster: output = 16 + behind if: behind > side" });
+	program.itemTooltips.insert({ program.itemsEnd + repeater, "Repeater: Gives out same signal as input" });
+	program.itemTooltips.insert({ program.itemsEnd + gate, "Gate: Can stop robots movement" });
+	program.itemTooltips.insert({ program.itemsEnd + counter, "Counter: Counts up" });
+	program.itemTooltips.insert({ program.itemsEnd + comparer, "Comparer: output = 16 + input if: behind = side" });
 
 	// Animation prototypes
 	std::vector<std::string> animationPrototypes;

@@ -27,7 +27,6 @@ void WorldSave::Serialize(std::string filename)
 	updateQueueD.Serialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 	SerializeItemNames("saves/" + filename + "/itemNames.txt");
-	
 	SerializeMisc("saves/" + filename + "/misc.txt");
 	program.hotbar.Serialize("saves/" + filename + "/inventory.bin");
 }

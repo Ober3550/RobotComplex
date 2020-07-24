@@ -25,7 +25,7 @@ public:
 	
 
 	std::vector<std::string> itemPrototypes;
-	std::vector<std::string> itemTooltips;
+	MyMap<uint16_t, std::string> itemTooltips;
 	int itemsEnd;
 	std::vector<std::vector<std::string>> logicTooltips;
 	MyMap<char, sf::IntRect> fontMap;	// Map that relates characters to sections of the font texture

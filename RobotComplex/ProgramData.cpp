@@ -10,7 +10,6 @@
 #include "CraftingProcess.h"
 #include "RedirectorColors.h"
 #include "Textures.h"
-#include "ItemTileWPOS.h"
 #include <typeinfo>
 #include <cmath>
 
@@ -310,7 +309,7 @@ void ProgramData::DrawTooltips()
 	}
 	else if (program.selectedLogicTile)
 	{
-		//CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedLogicTile->GetTooltip(), Align::centre);
+		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.itemTooltips[program.selectedLogicTile->logicType + program.itemsEnd], Align::centre);
 	}
 }
 

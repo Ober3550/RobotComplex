@@ -1,7 +1,9 @@
-#include <cstdint>
-#include "ParentTile.h"
 #pragma once
-class ItemTile : public ParentTile
+#include <cstdint>
+#include <string>
+#include <iostream>
+#include "SpriteVector.h"
+class ItemTile
 {
 public:
 	uint16_t itemTile;

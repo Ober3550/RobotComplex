@@ -8,7 +8,6 @@
 #include "KeyNames.h"
 #include "GetFileNamesInFolder.h"
 #include "MyMod.h"
-#include "ItemTileWPOS.h"
 #include "SplitString.h"
 
 class SimpleButtonListener : public agui::ButtonListener
@@ -750,7 +749,6 @@ void WidgetCreator::UserInput(sf::Event input)
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 				heldTick["Place Element"] = world.tick;
 		}
-			
 	}
 	else if (input.type == sf::Event::MouseButtonPressed)
 	{
@@ -859,13 +857,13 @@ int WidgetCreator::ChangeInventory(uint16_t item, int quantity)
 				auto kv = program.hotbar.find(i);
 				if (kv == program.hotbar.end())
 				{
-					ItemTile item = ItemTile(item);
+					ItemTile newItem = ItemTile(item);
 					int subQuantity = quantity;
 					if (subQuantity > 255)
 						subQuantity = 255;
-					item.quantity = subQuantity;
+					newItem.quantity = subQuantity;
 					quantity -= subQuantity;
-					program.hotbar.insert({ i,item });
+					program.hotbar.insert({ i,newItem });
 					if (quantity == 0)
 						break;
 				}
@@ -934,9 +932,13 @@ void WidgetCreator::MouseMoved()
 				sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
 				if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
 				{
-					program.selectedHotbar = &program.hotbar[i];
-					program.hoveringHotbar = i + 1;
-					foundLogic = true;
+					auto kv = program.hotbar.find(i + 1);
+					if (kv != program.hotbar.end())
+					{
+						program.selectedHotbar = &kv->second;
+						program.hoveringHotbar = i + 1;
+						foundLogic = true;
+					}
 				}
 			}
 			if (!foundLogic)

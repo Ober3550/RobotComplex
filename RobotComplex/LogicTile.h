@@ -13,7 +13,7 @@
 #include "MyMap.h"
 
 // Currently just 4 bytes but may be packed to 3
-class LogicTile : public ParentTile {
+class LogicTile {
 public:
 	LogicType logicType;
 	uint8_t signal : 5;

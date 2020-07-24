@@ -214,13 +214,11 @@
     <ClCompile Include="FindInVector.cpp" />
     <ClCompile Include="GetFileNamesInFolder.cpp" />
     <ClCompile Include="ItemTile.cpp" />
-    <ClCompile Include="ItemTileWPOS.cpp" />
     <ClCompile Include="KeyNames.cpp" />
     <ClCompile Include="LogicTile.cpp" />
     <ClCompile Include="LogicTileDrawing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyMod.cpp" />
-    <ClCompile Include="ParentTile.cpp" />
     <ClCompile Include="Pos.cpp" />
     <ClCompile Include="ProgramData.cpp" />
     <ClCompile Include="PrototypeLoader.cpp" />
@@ -245,7 +243,6 @@
     <ClInclude Include="GetFileLength.h" />
     <ClInclude Include="GetFileNamesInFolder.h" />
     <ClInclude Include="ItemTile.h" />
-    <ClInclude Include="ItemTileWPOS.h" />
     <ClInclude Include="KeyNames.h" />
     <ClInclude Include="LogicTile.h" />
     <ClInclude Include="LogicTypes.h" />
@@ -254,7 +251,6 @@
     <ClInclude Include="MySet.h" />
     <ClInclude Include="MyVector.h" />
     <ClInclude Include="Oregen.h" />
-    <ClInclude Include="ParentTile.h" />
     <ClInclude Include="Pos.h" />
     <ClInclude Include="ProgramData.h" />
     <ClInclude Include="PrototypeLoader.h" />

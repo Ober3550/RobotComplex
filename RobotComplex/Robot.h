@@ -2,10 +2,9 @@
 #include "Facing.h"
 #include "Pos.h"
 #include "ReservedItems.h"
-#include "ParentTile.h"
 #include <vector>
 #include "SpriteVector.h"
-class Robot : public ParentTile {
+class Robot {
 public:
 	Pos pos;												// 8 bytes
 	Facing facing = north;									// 1 byte

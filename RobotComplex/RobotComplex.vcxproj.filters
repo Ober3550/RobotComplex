@@ -77,12 +77,6 @@
     <ClCompile Include="ItemTile.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
-    <ClCompile Include="ParentTile.cpp">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClCompile>
-    <ClCompile Include="ItemTileWPOS.cpp">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClCompile>
     <ClCompile Include="KeyNames.cpp">
       <Filter>Header Files\HelperElements</Filter>
     </ClCompile>
@@ -187,9 +181,6 @@
     <ClInclude Include="Align.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
-    <ClInclude Include="ParentTile.h">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClInclude>
     <ClInclude Include="MyVector.h">
       <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
@@ -201,9 +192,6 @@
     </ClInclude>
     <ClInclude Include="Oregen.h">
       <Filter>Header Files\Enums</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemTileWPOS.h">
-      <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
     <ClInclude Include="SplitString.h">
       <Filter>Header Files\HelperElements</Filter>
