@@ -211,7 +211,6 @@
     <ClCompile Include="CraftingClass.cpp" />
     <ClCompile Include="CraftingProcess.cpp" />
     <ClCompile Include="FileLength.cpp" />
-    <ClCompile Include="FindInVector.cpp" />
     <ClCompile Include="GetFileNamesInFolder.cpp" />
     <ClCompile Include="ItemTile.cpp" />
     <ClCompile Include="KeyNames.cpp" />
@@ -223,7 +222,7 @@
     <ClCompile Include="ProgramData.cpp" />
     <ClCompile Include="PrototypeLoader.cpp" />
     <ClCompile Include="Robot.cpp" />
-    <ClCompile Include="SplitString.cpp" />
+    <ClCompile Include="MyStrings.cpp" />
     <ClCompile Include="TestWorld.cpp" />
     <ClCompile Include="WidgetCreator.cpp" />
     <ClCompile Include="WorldSave.cpp" />
@@ -259,7 +258,7 @@
     <ClInclude Include="ReservedItems.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Robot.h" />
-    <ClInclude Include="SplitString.h" />
+    <ClInclude Include="MyStrings.h" />
     <ClInclude Include="SpriteVector.h" />
     <ClInclude Include="TestWorld.h" />
     <ClInclude Include="Textures.h" />

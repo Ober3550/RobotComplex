@@ -68,20 +68,6 @@ Pos Pos::InChunkPosition()
 	Pos result{ this->x & GC::chunkMask,this->y & GC::chunkMask };
 	return result;
 }
-bool Pos::operator==(Pos other)
-{
-	if (other.x == this->x && other.y == this->y)
-		return true;
-	else
-		return false;
-}
-bool Pos::operator!=(Pos other)
-{
-	if (other.x == this->x && other.y == this->y)
-		return false;
-	else
-		return true;
-}
 Pos Pos::operator>>(int shift)
 {
 	return Pos{ this->x >> shift, this->y >> shift };
@@ -125,4 +111,20 @@ Pos Pos::operator/(int other)
 Pos Pos::operator%(int other)
 {
 	return Pos{ int(MyMod(this->x,other)), int(MyMod(this->y,other)) };
+}
+bool operator==(const Pos& posA, const Pos& posB)
+{
+	return (posA.x == posB.x && posA.y == posB.y);
+}
+bool operator!=(const Pos& posA, const Pos& posB)
+{
+	return!(posA == posB);
+}
+bool operator==(const SmallPos& posA, const SmallPos& posB)
+{
+	return (posA.x == posB.x && posA.y == posB.y);
+}
+bool operator!=(const SmallPos& posA, const SmallPos& posB)
+{
+	return!(posA == posB);
 }

@@ -89,6 +89,8 @@ public:
 	agui::Button previousRecipe;
 	agui::Button nextRecipe;
 	agui::Label recipeResults;
+	agui::Button craftingNextButton;
+	agui::Button craftingPrevButton;
 
 	WidgetCreator(agui::Gui *guiInstance, sf::RenderWindow* window);
 	~WidgetCreator()

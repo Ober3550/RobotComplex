@@ -4,7 +4,7 @@
 #include "Windows.h"
 #include "ProgramData.h"
 #include "FindInVector.h"
-#include "SplitString.h"
+#include "MyStrings.h"
 
 void WorldSave::Serialize(std::string filename)
 {
@@ -47,7 +47,7 @@ void WorldSave::Deserialize(std::string filename)
 	updateQueueD.Deserialize("saves/" + filename + "/updateItem.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
-	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin");
+	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin", world.oldItemNewItem);
 }
 
 void WorldSave::clear()
@@ -78,9 +78,12 @@ void WorldSave::SerializeItemNames(std::string filename)
 	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())
 	{
-		for (std::string item : program.itemPrototypes)
+		for (auto item : program.itemPrototypes)
 		{
-			myfile << (item + "\r\n");
+			if (item.second.length() != 0)
+			{
+				myfile << std::to_string(item.first) << " " << item.second << "\r\n";
+			}
 		}
 		myfile.close();
 	}
@@ -93,9 +96,11 @@ void WorldSave::DeserializeItemNames(std::string filename)
 	int i = 0;
 	while (std::getline(file, str))
 	{
-		std::pair<bool,int> map = findInVector(program.itemPrototypes, str);
-		if(map.first)
-			oldItemNewItem.insert({ i, map.second });
+		std::vector<std::string> splitStr;
+		split(&splitStr, str, ' ');
+		auto item = program.itemLookups.find(splitStr[1]);
+		if(item != program.itemLookups.end())
+			oldItemNewItem.insert({ std::stoi(splitStr[0]), item->second });
 		else
 		{
 			//error item doesn't exist
@@ -103,48 +108,6 @@ void WorldSave::DeserializeItemNames(std::string filename)
 		i++;
 	}
 }
-/*
-void WorldSave::SerializeLogicStructure(std::string filename)
-{
-	std::ofstream myfile;
-	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
-	if (myfile.is_open())
-	{
-		for (int i=0; i<logicTypes.size();i++)
-		{
-			LogicTile* tempLogic = LogicTile::Factory(i);
-			if (tempLogic)
-			{
-				int logicSize = tempLogic->MemorySize();
-				myfile << (logicTypes[i] + ":" + std::to_string(logicSize) + "\r\n");
-			}
-		}
-		myfile.close();
-	}
-}
-
-void WorldSave::DeserializeLogicStructure(std::string filename)
-{
-	std::ifstream file(filename);
-	std::string str;
-	int i = 0;
-	while (std::getline(file, str))
-	{
-		std::vector<std::string> splitLine;
-		split(&splitLine, str, ':');
-		if (splitLine.size() != 0)
-		{
-			std::pair<bool, int> map = findInVector(logicTypes, splitLine[0]);
-			oldLogicSize.emplace_back(std::stoi(splitLine[1]));
-			if (map.first)
-			{
-				oldLogicNewLogic.insert({ i, map.second }); 
-			}
-			i++;
-		}
-	}
-}
-*/
 void WorldSave::SerializeMisc(std::string filename)
 {
 	std::ofstream myfile;

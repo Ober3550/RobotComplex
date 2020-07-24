@@ -50,9 +50,10 @@ void WorldSave::GenerateOre(Pos pos)
 		generate = (generate % (oreRarities[i] * GC::chunkSize)) + ((region + adjust) * oreRarities[i]) * GC::chunkSize;
 		if (generate.ChunkPosition() == pos)
 		{
-			int itemNumber = findInVector(program.itemPrototypes, ores[i]).second;
-			if (itemNumber != -1)
+			auto item = program.itemLookups.find(ores[i]);
+			if (item != program.itemLookups.end())
 			{
+				uint16_t itemNumber = item->second;
 				ItemTile newItem = ItemTile();
 				newItem.itemTile = itemNumber;
 				int size = rand() % 10 + 10;
@@ -153,7 +154,7 @@ uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
 		{
 			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
 			{
-				logicTile->DoItemLogic();
+				logicTile->DoItemLogic(Pos::EncodedToCoord(itemPos));
 			}
 		}
 		return currentItem->itemTile;
@@ -170,7 +171,7 @@ uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
 		{
 			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
 			{
-				logicTile->DoItemLogic();
+				logicTile->DoItemLogic(Pos::EncodedToCoord(itemPos));
 			}
 		}
 		return true;
@@ -383,14 +384,13 @@ uint16_t WorldSave::ChangeRobot(Pos pos, int quantity)
 		if(robot == program.selectedRobot)
 			program.selectedRobot = nullptr;
 		world.robots.erase(pos.CoordToEncoded());
-		return program.itemsEnd + 256;
+		return program.itemsEnd + GC::MAXLOGIC;
 	}
 	else
 	{
 		if (quantity > 0)
 		{
 			Robot newRobot;
-			newRobot.pos = pos;
 			newRobot.stopped = true;
 			world.robots.insert({ pos.CoordToEncoded(),newRobot });
 		}
@@ -408,16 +408,41 @@ bool WorldSave::PlaceElement(Pos pos, uint16_t item)
 			return true;
 		return false;
 	}
-	else if (item < program.itemsEnd + 255)
+	else if (item < program.itemsEnd + GC::MAXLOGIC)
 	{
 		if (world.ChangeLogic(pos, 1, item - program.itemsEnd))
 			return true;
 		return false;
 	}
-	else if(item == program.itemsEnd + 255)
+	else if(item == program.itemsEnd + GC::MAXLOGIC)
 	{
 		if (world.ChangeRobot(pos, 1))
 			return true;
 		return false;
 	}
+}
+
+uint16_t WorldSave::ChangeElement(Pos pos, int quantity, uint16_t item)
+{
+	if (quantity > 0)
+	{
+		return PlaceElement(pos, item);
+	}
+	else if (quantity < 0)
+	{
+		uint16_t element;
+		if (item <= program.itemsEnd)
+		{
+			return world.ChangeItem(pos, quantity, item);
+		}
+		else if (item < program.itemsEnd + GC::MAXLOGIC)
+		{
+			return world.ChangeLogic(pos, quantity, item);
+		}
+		else if(item == program.itemsEnd + GC::MAXLOGIC)
+		{
+			return world.ChangeRobot(pos, quantity);
+		}
+	}
+	return true;
 }

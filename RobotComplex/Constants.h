@@ -30,4 +30,5 @@ namespace GC
 	static constexpr uint8_t startSignalStrength = 16;
 	static constexpr uint8_t colorClassA = 1;
 	static constexpr uint8_t colorClassB = 4;
+	static constexpr uint8_t MAXLOGIC = 255;
 }

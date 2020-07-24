@@ -20,11 +20,12 @@
 class ProgramData {
 public:
 	MyMap<uint16_t, std::vector<uint16_t>> itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
+	MyMap<uint16_t, std::vector<uint16_t>> itemResultList;
 	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
 	MyMap<std::string, RecipeProto> recipePrototypes;
 	
-
-	std::vector<std::string> itemPrototypes;
+	MyMap<uint16_t, std::string> itemPrototypes;
+	MyMap<std::string, uint16_t> itemLookups;
 	MyMap<uint16_t, std::string> itemTooltips;
 	int itemsEnd;
 	std::vector<std::vector<std::string>> logicTooltips;
@@ -43,9 +44,26 @@ public:
 	std::vector<sf::RectangleShape> scaledPersistentBoxes;
 	SpriteVector robotSprites;
 	SpriteVector animationSprites;
+
+	// Gui Elements
 	SpriteVector hotbarSprites;
-	std::vector<sf::RectangleShape> hotbarSlots;
+	MyMap<SmallPos, sf::RectangleShape> hotbarSlots;
+	SmallPos hotbarIndex = { 255,255 };
+	SmallPos hoveringHotbar = { 255,255 };
+	MyMap<SmallPos, ItemTile> hotbar;
+	ItemTile* selectedHotbar;
+
+	SpriteVector unscaledSprites;
 	std::vector<sf::RectangleShape> unscaledBoxes;
+	
+	bool								craftingViewUpdate;
+	std::vector<uint16_t>				foundRecipeList;
+	uint16_t							craftingViewIndex;
+	SpriteVector						craftingViewSprites;
+	MyMap<SmallPos, sf::RectangleShape> craftingViewBacks;
+	MyMap<SmallPos, ItemTile>			craftingView;
+	SmallPos							craftingViewSize;
+
 	std::vector<sf::Text> textOverlay;
 	MySet<uint64_t> elementExists;
 
@@ -68,12 +86,8 @@ public:
 	Pos mouseHovering;
 	Pos prevCameraPos = {0, 0};
 	Pos cameraPos = { 0, 0 };
-	int hotbarIndex = 0;
-	int hotbarSize = 20;
-	MyMap<uint16_t, ItemTile> hotbar;
-	int hoveringHotbar;
-	ItemTile* selectedHotbar;
 	LogicTile* selectedLogicTile;
+	Pos selectedRobotPos;
 	Robot* selectedRobot;
 	int rotateBot = 0;
 	bool moveBot = false;
@@ -123,6 +137,7 @@ public:
 	void DrawUpdateCounter();
 	void DrawTooltips();
 	void DrawHotbar();
+	void DrawCraftingView();
 	void DrawSelectedRegion();
 	void DrawDebugHUD();
 	void DrawGameState(sf::RenderWindow& window);
@@ -137,5 +152,6 @@ public:
 	void MoveBots();
 	void UpdateMap();
 	void RecalculateMousePos();
+	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color);
 };
 extern ProgramData program;

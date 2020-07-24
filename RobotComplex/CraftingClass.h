@@ -17,7 +17,8 @@ public:
 	uint16_t animationReference;
 	int CheckCrafting(Pos pos);
 	void TryCraftingOther(uint16_t item, Pos itemPos); // Tries crafting a different recipe once the previous one has finished. For chaining processes
-	void DoCrafting(Pos pos);
+	bool DoCrafting(Pos pos);
 	void SuccessfulCraft(Pos pos);
+	void ShowRecipeAsGrid();
 	static void TryCrafting(uint16_t item, Pos itemPos);
 };

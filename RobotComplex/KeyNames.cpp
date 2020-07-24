@@ -1,5 +1,5 @@
 #include "KeyNames.h"
-#include "SplitString.h"
+#include "MyStrings.h"
 
 namespace KeyNames
 {

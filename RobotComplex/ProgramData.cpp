@@ -75,7 +75,7 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 	}
 	*/
 }
-void ProgramData::DrawItem(SpriteVector* appendTo,ItemTile item, float x, float y, uint8_t flags)
+void ProgramData::DrawItem(SpriteVector* appendTo, ItemTile item, float x, float y, uint8_t flags)
 {
 	if (item.itemTile < itemTextures.size())
 	{
@@ -154,8 +154,8 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 		{
 			if (auto nextPos = world.nextRobotPos.GetValue(encodedPos))
 			{
-				Pos newPos = robot->pos.FacingPosition(*nextPos);
-				Pos difference = newPos - robot->pos;
+				Pos newPos = Pos::EncodedToCoord(encodedPos).FacingPosition(*nextPos);
+				Pos difference = newPos - Pos::EncodedToCoord(encodedPos);
 				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 				if (step > 1.0f)
 					step = 1.0f;
@@ -164,8 +164,8 @@ void ProgramData::RecreateRobotSprites(uint64_t encodedPos, float x, float y)
 			}
 			if (auto nextPos = world.nextPlatforms.GetValue(encodedPos))
 			{
-				Pos newPos = robot->pos.FacingPosition(*nextPos);
-				Pos difference = newPos - robot->pos;
+				Pos newPos = Pos::EncodedToCoord(encodedPos).FacingPosition(*nextPos);
+				Pos difference = newPos - Pos::EncodedToCoord(encodedPos);
 				float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 				if (step > 1.0f)
 					step = 1.0f;
@@ -267,7 +267,7 @@ void ProgramData::RecreateSprites() {
 	{
 		for (int x = begX; x <= endX; x++)
 		{
-			Pos screenPos = Pos{ x, y } * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+			Pos screenPos = Pos{ x, y } * (int)GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
 			Pos tilePos = Pos{ x,y };
 			uint64_t encodedPos = tilePos.CoordToEncoded();
 			if (program.redrawGround)
@@ -358,51 +358,7 @@ void ProgramData::DrawCrosshair(sf::RenderWindow& window)
 	window.draw(verticalLine);
 	window.draw(horizontalLine);
 }
-void ProgramData::DrawHotbar()
-{
-	program.hotbarSprites.clear();
-	program.hotbarSlots.clear();
-	for (uint8_t i = 0; i < program.hotbarSize; ++i)
-	{
-		int temp = program.hotbarSize;
-		if (temp > 10)
-			temp = 10;
-		int x = int(MyMod(i, 10) - temp / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		sf::RectangleShape hotbarSlot;
-		if (i + 1 == program.hotbarIndex)
-			hotbarSlot.setFillColor(sf::Color(200, 200, 200, 100));
-		else
-			hotbarSlot.setFillColor(sf::Color(50, 50, 50, 100));
-		hotbarSlot.setSize(sf::Vector2f(GC::hotbarSlotSize, GC::hotbarSlotSize));
-		hotbarSlot.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
-		program.hotbarSlots.emplace_back(hotbarSlot);
-	}
-	for (auto kv : program.hotbar)
-	{
-		ItemTile item = kv.second;
-		uint16_t i = kv.first;
-		int x = int(MyMod(i - 1, 10) - 10 / 2.f) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		int y = int(program.windowHeight / 2.f) - (1 + i / 10) * (GC::hotbarSlotSize + GC::hotbarPadding);
-		if (item.itemTile <= program.itemsEnd)
-		{
-			DrawItem(&program.hotbarSprites, item, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 0);
-		}
-		else if (item.itemTile < program.itemsEnd + 255)
-		{
-			LogicTile logic = LogicTile(item.itemTile - program.itemsEnd);
-			logic.color = program.placeColor;
-			logic.signal = 1;
-			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, &program.hotbarSprites, &world.logicTiles, x - GC::halfTileSize, y - GC::halfTileSize, 1.0, 0);
-		}
-		else if (item.itemTile == program.itemsEnd + 255)
-		{
-			
-		}
-		if (item.quantity > 1)
-			CreateSmallText(&program.hotbarSprites, std::to_string(item.quantity), float(x), float(y), 2.f, Align::right);
-	}
-}
+
 void ProgramData::CreateText(float x, float y, std::string input, Align align)
 {
 	sf::Text text;
@@ -436,8 +392,6 @@ void ProgramData::CreateText(float x, float y, std::string input, Align align)
 	}break;
 	}
 	text.setPosition(x, y);
-
-	
 
 	program.unscaledBoxes.emplace_back(backPlane);
 	program.textOverlay.emplace_back(text);
@@ -478,17 +432,17 @@ void ProgramData::FindMovingRobot()
 {
 	if (program.selectedRobot)
 	{
-		if (Facing* movingTo = world.nextRobotPos.GetValue(program.selectedRobot->pos))
+		if (Facing* movingTo = world.nextRobotPos.GetValue(program.selectedRobotPos))
 		{
-			Pos difference = program.selectedRobot->pos.FacingPosition(*movingTo) - program.selectedRobot->pos;
+			Pos difference = program.selectedRobotPos.FacingPosition(*movingTo) - program.selectedRobotPos;
 			float step = program.framesSinceTick / float(GC::FRAMERATE / GC::UPDATERATE);
 			if (step > 1.0f)
 				step = 1.0f;
-			program.cameraPos = (program.selectedRobot->pos << GC::tileShift) + Pos{ int(float(difference.x) * float(GC::tileSize) * step) ,int(float(difference.y) * float(GC::tileSize) * step) };
+			program.cameraPos = (program.selectedRobotPos << (int)GC::tileShift) + Pos{ int(float(difference.x) * float(GC::tileSize) * step) ,int(float(difference.y) * float(GC::tileSize) * step) };
 		}
 		else
 		{
-			program.cameraPos = (program.selectedRobot->pos << GC::tileShift);
+			program.cameraPos = (program.selectedRobotPos << (int)GC::tileShift);
 		}
 	}
 }
@@ -590,7 +544,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		program.unscaledBoxes.clear();
 		program.scaledBoxes.clear();
 		RecreateSprites();
-		if (program.selectedLogicTile && program.hoveringHotbar == 0)
+		if (program.selectedLogicTile && program.hoveringHotbar == SmallPos{ 255,255 })
 			DrawSelectedBox(&program.scaledBoxes,program.mouseHovering);
 		DrawAlignment();
 		DrawSelectedRegion();
@@ -598,6 +552,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 			DrawDebugHUD();
 		DrawTooltips();
 		DrawHotbar();
+		DrawCraftingView();
 	//}
 	window.setView(program.worldView);
 	program.groundSprites.draw(window);
@@ -615,11 +570,17 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		window.draw(sprite);
 	}
 	window.setView(program.hudView);
-	for (sf::RectangleShape sprite : program.hotbarSlots)
+	//DrawCrosshair(window);
+	for (auto element : program.hotbarSlots)
 	{
-		window.draw(sprite);
+		window.draw(element.second);
 	}
 	program.hotbarSprites.draw(window);
+	for (auto element : program.craftingViewBacks)
+	{
+		window.draw(element.second);
+	}
+	program.craftingViewSprites.draw(window);
 	for (sf::RectangleShape sprite : program.unscaledBoxes)
 	{
 		window.draw(sprite);
@@ -667,7 +628,6 @@ void ProgramData::MovePlatform(Pos pos, Facing toward)
 		}
 		if (Robot* elem = world.GetRobot(pos.CoordToEncoded()))
 		{
-			elem->pos = newPos;
 			/*
 			if (auto moving = world.nextRobotPos.GetValue(pos.CoordToEncoded()))
 			{
@@ -707,29 +667,25 @@ void ProgramData::SwapBots()
 		Pos newPos = pos.FacingPosition(moving.second);
 		if (Robot* test = world.GetRobot(pos))
 		{
-			world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
-			world.robots[newPos.CoordToEncoded()].pos = newPos;
-			// Be sure to update which robot the players controlling before removing the old copy
+			// Be sure to update which robot the players controlling before changing the map incase of remap
 			if (&world.robots[pos.CoordToEncoded()] == program.selectedRobot)
 			{
 				program.selectedRobot = &world.robots[newPos.CoordToEncoded()];
+				program.selectedRobotPos = newPos;
 			}
+			world.robots[newPos.CoordToEncoded()] = world.robots[pos.CoordToEncoded()];
 			world.robots.erase(pos.CoordToEncoded());
 
 			// If the robot landed on a logic tile, apply its logic this tick
-			/*
-			if (auto temp = world.logictiles.GetValue(newPos.CoordToEncoded()))
+			if (LogicTile* logicTile = world.GetLogicTile(newPos))
 			{
-				LogicTile* logicTile = *temp;
-				logicTile->DoRobotLogic(newPos);
+				logicTile->DoRobotLogic(newPos, newPos);
 			}
-			*/
 
 			// If the robot left a logic tile, update its logic
-			if (auto temp = world.logicTiles.GetValue(pos.CoordToEncoded()))
+			if (LogicTile* logicTile = world.GetLogicTile(pos))
 			{
-				//LogicTile* logicTile = *temp;
-				//logicTile->DoRobotLogic(pos);
+				logicTile->DoRobotLogic(pos, pos);
 			}
 		}
 	}
@@ -738,22 +694,22 @@ void ProgramData::SwapBots()
 
 void ProgramData::MoveBots()
 {
-	for (MyMap<uint64_t,Robot>::iterator robotIter = world.robots.begin(); robotIter != world.robots.end(); robotIter++)
+	for (auto& robotIter : world.robots)
 	{
-		if (&robotIter->second != program.selectedRobot)
+		if (&robotIter.second != program.selectedRobot)
 		{
-			robotIter->second.Move();
+			robotIter.second.Move(Pos::EncodedToCoord(robotIter.first));
 		}
 		else
 		{
 			if (program.rotateBot != 0)
 			{
-				robotIter->second.Rotate(program.rotateBot);
+				robotIter.second.Rotate(program.rotateBot);
 				program.rotateBot = 0;
 			}
 			if (program.moveBot)
 			{
-				robotIter->second.Move();
+				robotIter.second.Move(Pos::EncodedToCoord(robotIter.first));
 				program.moveBot = false;
 			}
 		}
@@ -812,12 +768,11 @@ void ProgramData::UpdateMap()
 	world.platforms.clear();
 	world.updateCurr.clear();
 	// Update all the logic tiles that were queued to finish this tick
-	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
 	std::vector<uint64_t> removeList;
 	for (auto iter : world.updateNext)
 	{
 		iter.second--;
-		// Erase all 0 tick recipes from craftingQueue
+		// Add all 0 tick queued elements to be updated this tick
 		if (iter.second == 0)
 		{
 			world.updateCurr.insert({ iter.first });
@@ -842,7 +797,7 @@ void ProgramData::UpdateMap()
 	} while (world.updateCurr.size() != 0);
 	removeList.clear();
 	// Decrease the number of ticks for each active recipe and complete recipes that reach 0
-	for (auto iter : world.craftingQueue)
+	for (auto& iter : world.craftingQueue)
 	{
 		iter.second.ticks--;
 		// Erase all 0 tick recipes from craftingQueue
@@ -868,7 +823,7 @@ void ProgramData::UpdateMap()
 	{
 		if (LogicTile* logic = world.GetLogicTile(kv))
 		{
-			//logic->DoItemLogic();
+			logic->DoItemLogic(Pos::EncodedToCoord(kv));
 		}
 	}
 	world.updateQueueD.clear();
@@ -877,7 +832,7 @@ void ProgramData::UpdateMap()
 
 void ProgramData::DrawAlignment()
 {
-	if (program.selectedLogicTile || program.hotbarIndex != -1)
+	if (program.selectedLogicTile || program.hotbarIndex != SmallPos{ 255,255 })
 	{
 		bool drawLine = false;
 		Facing rotation = program.placeRotation;
@@ -917,3 +872,70 @@ void ProgramData::RecalculateMousePos()
 	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 }
 
+void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color)
+{
+	slots->clear();
+	slots->reserve(size.x * size.y);
+	sprites->clear();
+	for (uint8_t i = 0; i < size.x; i++)
+	{
+		for (uint8_t j = 0; j < size.y; j++)
+		{
+			int x = screenX + (i * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
+			int y = screenY + (j * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
+			sf::RectangleShape gridBack;
+			if(i == highlight.x && j == highlight.y)
+				gridBack.setFillColor(sf::Color(200, 200, 200, 100));
+			else
+				gridBack.setFillColor(sf::Color(50, 50, 50, 100));
+			gridBack.setSize(sf::Vector2f(GC::hotbarSlotSize, GC::hotbarSlotSize));
+			gridBack.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
+			slots->insert({ SmallPos{i,j},gridBack });
+		}
+	}
+	for (auto kv : *items)
+	{
+		ItemTile item = kv.second;
+		SmallPos pos = kv.first;
+		int x = screenX + (pos.x * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
+		int y = screenY + (pos.y * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
+		if (item.itemTile <= program.itemsEnd)
+		{
+			DrawItem(sprites, item, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 0);
+		}
+		else if (item.itemTile < program.itemsEnd + 255)
+		{
+			LogicTile logic = LogicTile(item.itemTile - program.itemsEnd);
+			logic.color = color;
+			logic.signal = 1;
+			logic.facing = rotation;
+			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize, y - GC::halfTileSize, 1.0, 0);
+		}
+		else if (item.itemTile == program.itemsEnd + 255)
+		{
+			Robot robot = Robot();
+			robot.facing = rotation;
+			robot.DrawTile(sprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.f, 0, sf::Color(250, 191, 38, 255));
+		}
+		if (item.quantity > 1)
+			CreateSmallText(sprites, std::to_string(item.quantity), float(x), float(y), 2.f, Align::right);
+	}
+}
+
+void ProgramData::DrawHotbar()
+{
+	DrawItemGrid((GC::hotbarSlotSize + GC::hotbarPadding) * -4.5, program.halfWindowHeight - (GC::hotbarSlotSize + GC::hotbarPadding) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarSlots, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor);
+}
+
+void ProgramData::DrawCraftingView()
+{
+	if (foundRecipeList.size() > 0)
+	{
+		if (program.craftingViewUpdate)
+		{
+			program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
+			program.craftingViewUpdate = false;
+		}
+		DrawItemGrid(0, 0, program.craftingViewSize, 1.f, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red);
+	}
+}

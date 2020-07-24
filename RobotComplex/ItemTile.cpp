@@ -3,7 +3,10 @@
 #include "Textures.h"
 std::string ItemTile::GetTooltip()
 {
-	return program.itemTooltips[this->itemTile];
+	auto tooltip = program.itemTooltips.find(this->itemTile);
+	if (tooltip != program.itemTooltips.end())
+		return tooltip->second;
+	return "";
 }
 
 void ItemTile::Serialize(std::ofstream* writer)

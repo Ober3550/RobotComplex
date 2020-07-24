@@ -16,6 +16,7 @@
 #include "FindInVector.h"
 #include "Animation.h"
 #include "GetFileNamesInFolder.h"
+#include "MyStrings.h"
 
 extern "C"
 {
@@ -98,43 +99,41 @@ void LoadPrototypes()
 	groundTexture = LoadTexture("groundTexture8greyscale.png");
 
 	lua_State* L = luaL_newstate();
+	std::vector<std::string> tempItems;
 	// Items
 	if (CheckLua(L, luaL_dofile(L, "data/items.lua")))
 	{
 		lua_getglobal(L, "items");
 		if (lua_istable(L, -1))
 		{
-			lua_append_linear_table(L, -1, &program.itemPrototypes);
+			lua_append_linear_table(L, -1, &tempItems);
 		}
 	}
-
+	for (int i = 0; i < tempItems.size(); i++)
+	{
+		program.itemPrototypes.insert({ i,tempItems[i] });
+	}
 	program.itemsEnd = program.itemPrototypes.size() - 1;
 	// Add logical elements to the end of the list to allow for crafting them
 	for (auto logic : logicTypes)
 	{
 		logicTextures.emplace(logic.first, LoadTexture("logic/"+logic.second+".png"));
-		program.itemPrototypes.emplace_back(logic.second);
+		program.itemPrototypes.insert({ logic.first + program.itemsEnd,logic.second });
 	}
 		
-	program.itemPrototypes.emplace_back("robot");
+	program.itemPrototypes.insert({program.itemsEnd + 255, "robot" });
 
+	for (auto element : program.itemPrototypes)
+	{
+		program.itemLookups.insert({ element.second,element.first });
+	}
 
 	// Populate the item tooltips according to the prototype names
-	std::regex addSpaces("_");
-	for (int i=0;i < program.itemPrototypes.size();i++)
+	for (auto element : program.itemPrototypes)
 	{
-		std::string text = program.itemPrototypes[i];
-		std::string temp = "";
-		temp = std::regex_replace(text, addSpaces, " ");
-		uint16_t j = 0;
-		temp[j] = std::toupper(temp[j]);
-		for (j = 1; j < temp.length(); j++)
-		{
-			if (temp[j - 1] == ' ')
-				temp[j] = std::toupper(temp[j]);
-		}
-		program.itemTooltips.insert({ i,temp });
+		program.itemTooltips.insert({ element.first,capitalize(swapChar(element.second,'_',' ')) });
 	}
+
 	itemTextures.emplace_back(&sf::Texture());
 	itemTextures.emplace_back(&sf::Texture());
 	itemTextures.emplace_back(&sf::Texture());
@@ -153,6 +152,7 @@ void LoadPrototypes()
 	program.itemTooltips.insert({ program.itemsEnd + gate, "Gate: Can stop robots movement" });
 	program.itemTooltips.insert({ program.itemsEnd + counter, "Counter: Counts up" });
 	program.itemTooltips.insert({ program.itemsEnd + comparer, "Comparer: output = 16 + input if: behind = side" });
+	program.itemTooltips.insert({ program.itemsEnd + 255, "Robot" });
 
 	// Animation prototypes
 	std::vector<std::string> animationPrototypes;
@@ -247,15 +247,12 @@ void LoadPrototypes()
 		}
 	}
 
-	// Recipe Prototypes: Recipe, Recipe Width, Craft Time, Animation, Animation Offset
-	/*
-	program.recipePrototypes.insert({"iron_ingot",RecipeProto({ { "iron_ingot"  ,1 }, { "iron_ore",  -1 }, { "coal_ore",-1 } }, 1, 5, "furnace_animation")});
-
-	*/
 	MySet<uint16_t> catalysts = MySet<uint16_t>();
+	MySet<uint16_t> results = MySet<uint16_t>();
 	for (std::pair<std::string, RecipeProto> recipeProto : program.recipePrototypes)
 	{
 		catalysts.clear();
+		results.clear();
 		CraftingClass newRecipe;
 		newRecipe.recipeIndex = uint16_t(program.craftingRecipes.size());
 
@@ -263,18 +260,21 @@ void LoadPrototypes()
 		std::vector<RecipeComponent> recipe;
 		for (RecipeCompProto recipeCompProto : recipeProto.second.recipe)
 		{
-			std::pair<bool,int> itemIndex = findInVector(program.itemPrototypes, recipeCompProto.itemName);
-			if (!itemIndex.first)
+			auto item = program.itemLookups.find(recipeCompProto.itemName);
+			if (recipeCompProto.itemName != "" && item == program.itemLookups.end())
 			{
 				OutputDebugStringA(("Recipe Load Fail. Item: " + recipeCompProto.itemName + " does not exist. ").c_str());
 				assert(false);
 			}
 			else
 			{
-				if (itemIndex.second)
+				if (item->second)
 				{
-					catalysts.insert(itemIndex.second);
-					recipe.emplace_back(RecipeComponent{ (uint16_t)itemIndex.second, recipeCompProto.requirement, recipeCompProto.resultState });
+					if (recipeCompProto.resultState < 1)
+						catalysts.insert(item->second);
+					else
+						results.insert(item->second);
+					recipe.emplace_back(RecipeComponent{ (uint16_t)item->second, recipeCompProto.requirement, recipeCompProto.resultState });
 				}
 				else
 				{
@@ -289,9 +289,13 @@ void LoadPrototypes()
 		newRecipe.animationReference = (findInVector(animationPrototypes, recipeProto.second.animation).second + 1);
 		program.craftingRecipes.emplace_back(newRecipe);
 
-		for (uint16_t catalystIndex : catalysts)
+		for (uint16_t index : catalysts)
 		{
-			program.itemRecipeList[catalystIndex].emplace_back(newRecipe.recipeIndex);
+			program.itemRecipeList[index].emplace_back(newRecipe.recipeIndex);
+		}
+		for (uint16_t index : results)
+		{
+			program.itemResultList[index].emplace_back(newRecipe.recipeIndex);
 		}
 	}
 }
@@ -317,22 +321,12 @@ void LoadPrototypes()
 */
 void LoadLogicToHotbar()
 {
-	uint8_t godQuantity = 200;
-	ItemTile wire				= ItemTile(program.itemsEnd + 1,	godQuantity);
-	ItemTile redirect			= ItemTile(program.itemsEnd + 2,	godQuantity);
-	ItemTile gate				= ItemTile(program.itemsEnd + 3,	godQuantity);
-	ItemTile belt				= ItemTile(program.itemsEnd + 4,	godQuantity);
-	ItemTile shover				= ItemTile(program.itemsEnd + 5,	godQuantity);
-	ItemTile wireBridge			= ItemTile(program.itemsEnd + 6,	godQuantity);
-	ItemTile inverter			= ItemTile(program.itemsEnd + 128,  godQuantity);
-	ItemTile pressureplate		= ItemTile(program.itemsEnd + 129,  godQuantity);
-	ItemTile booster			= ItemTile(program.itemsEnd + 130,  godQuantity);
-	ItemTile comparer			= ItemTile(program.itemsEnd + 133,  godQuantity);
-	ItemTile plusone			= ItemTile(program.itemsEnd + 134,  godQuantity);
-	ItemTile toggle				= ItemTile(program.itemsEnd + 135,  godQuantity);
-	ItemTile item				= ItemTile(4,	godQuantity);
-	ItemTile item2				= ItemTile(3,	godQuantity);
-
-	program.hotbar.insert({1, wire});
-	program.hotbar.insert({ 2, inverter });
+	uint8_t robot = 255;
+	uint8_t godQuantity = 255;
+	program.hotbar.insert({ SmallPos{0,1}, ItemTile(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{1,1}, ItemTile(program.itemsEnd + redirector,		godQuantity) });
+	program.hotbar.insert({ SmallPos{2,1}, ItemTile(program.itemsEnd + belt,			godQuantity) });
+	program.hotbar.insert({ SmallPos{3,1}, ItemTile(program.itemsEnd + shover,			godQuantity) });
+	program.hotbar.insert({ SmallPos{4,1}, ItemTile(program.itemsEnd + wire,			godQuantity) });
+	program.hotbar.insert({ SmallPos{5,1}, ItemTile(program.itemsEnd + inverter,		godQuantity) });
 }

@@ -80,10 +80,7 @@
     <ClCompile Include="KeyNames.cpp">
       <Filter>Header Files\HelperElements</Filter>
     </ClCompile>
-    <ClCompile Include="SplitString.cpp">
-      <Filter>Header Files\HelperElements</Filter>
-    </ClCompile>
-    <ClCompile Include="FindInVector.cpp">
+    <ClCompile Include="MyStrings.cpp">
       <Filter>Header Files\HelperElements</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,11 +190,11 @@
     <ClInclude Include="Oregen.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
-    <ClInclude Include="SplitString.h">
-      <Filter>Header Files\HelperElements</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyStrings.h">
+      <Filter>Header Files\HelperElements</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

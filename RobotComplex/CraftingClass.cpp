@@ -90,7 +90,7 @@ int CraftingClass::CheckCrafting(Pos pos)
 	}
 	return successReturn;
 }
-void CraftingClass::DoCrafting(Pos pos)
+bool CraftingClass::DoCrafting(Pos pos)
 {
 	auto tile = world.GetItemTile(pos);
 	for (int j = 0; j < (int)recipe.size() / width; j++)
@@ -105,10 +105,12 @@ void CraftingClass::DoCrafting(Pos pos)
 				{
 					CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks, craftTicks, this->animationReference };
 					world.craftingQueue.insert({ pos.RelativePosition(-i,-j).CoordToEncoded(),addProcess });
+					return true;
 				}
 			}
 		}
 	}
+	return false;
 }
 void CraftingClass::TryCraftingOther(uint16_t item, Pos itemPos)
 {
@@ -136,31 +138,11 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 				if (recipeComp.resultState != 0)
 				{
 					Pos alterPos = pos.RelativePosition(k, l);
-					// If item number isn't an item create a different item in the world
-					if (recipeComp.itemTile > program.itemsEnd)
+					world.ChangeElement(alterPos, recipeComp.resultState, recipeComp.itemTile);
+					if (recipeComp.resultState > 0)	// If an item is populated at a tile
 					{
-						if (recipeComp.itemTile == program.itemPrototypes.size() - 1)
-						{
-							// If this fails the check function failed to return that 
-							// there was no empty position or robot in the position required
-							assert(world.ChangeRobot(alterPos, recipeComp.resultState));
-						}
-						else
-						{
-							// If this fails the check function failed to return that 
-							// there was no empty position or logic tile in the position required
-							assert(world.ChangeLogic(alterPos, int(recipeComp.itemTile) - program.itemsEnd, recipeComp.resultState));
-						}
-					}
-					else
-					{
-						// This must be true otherwise the successful craft was false
-						assert(world.ChangeItem(alterPos, recipeComp.itemTile, recipeComp.resultState));
-						if (recipeComp.resultState > 0)	// If an item is populated at a tile
-						{
-							// Try to queue a different recipe according to that item type.
-							TryCraftingOther(recipeComp.itemTile, alterPos);
-						}
+						// Try to queue a different recipe according to that item type.
+						TryCraftingOther(recipeComp.itemTile, alterPos);
 					}
 				}
 			}
@@ -179,7 +161,28 @@ void CraftingClass::TryCrafting(uint16_t item, Pos itemPos)
 		// Try to craft item when placed
 		for (uint16_t recipe : *recipeList)
 		{
-			program.craftingRecipes[recipe].DoCrafting(itemPos);
+			if (program.craftingRecipes[recipe].DoCrafting(itemPos))
+				break;
+		}
+	}
+}
+
+void CraftingClass::ShowRecipeAsGrid()
+{
+	program.craftingView.clear();
+	program.craftingViewSize = SmallPos{ uint8_t(width * 2), uint8_t((int)recipe.size() / width) };
+	for (int j = 0; j < (int)recipe.size() / width; j++)
+	{
+		int row = j * width;
+		for (int i = 0; i < width; i++)
+		{
+			RecipeComponent recipeComp = recipe[i + row];
+			if (recipeComp.itemTile)
+			{
+				program.craftingView.insert({ SmallPos{uint8_t(i + (width * (recipeComp.resultState > 0))),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
+				if(recipeComp.requirement == 0)
+					program.craftingView.insert({ SmallPos{uint8_t(i + width),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
+			}
 		}
 	}
 }

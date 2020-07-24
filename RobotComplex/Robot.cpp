@@ -20,7 +20,7 @@ void Robot::Rotate(int r)
 	// Then converts back to enum
 	facing = Facing((int(facing) + r) & 3);
 }
-bool Robot::Move()
+bool Robot::Move(Pos pos)
 {
 	// For logic tile that stops robot untill it receives a signal
 	if (!stopped)
@@ -54,7 +54,7 @@ bool Robot::Move()
 					if (step)
 					{
 						world.robotMovingTo.insert(newPos.CoordToEncoded());
-						world.nextRobotPos.insert({ this->pos.CoordToEncoded(), this->facing });
+						world.nextRobotPos.insert({ pos.CoordToEncoded(), this->facing });
 						return true;
 					}
 					else
@@ -83,17 +83,4 @@ void Robot::DrawTile(SpriteVector* appendTo, int x, int y, float s, uint8_t flag
 	sprite.setColor(sf::Color(255, 255, 255, 255));
 	sprite.setTextureRect(sf::IntRect(64 * facing, 0, 32, 48));
 	appendTo->emplace_back(sprite);
-}
-
-void Robot::Serialize(std::ofstream* writer)
-{
-	writer->write((char*)&this->pos, sizeof(Pos));
-	writer->write((char*)&this->facing, sizeof(Facing));
-	writer->write((char*)&this->stopped, sizeof(bool));
-}
-void Robot::Deserialize(std::ifstream* reader)
-{
-	reader->read((char*)&this->pos, sizeof(Pos));
-	reader->read((char*)&this->facing, sizeof(Facing));
-	reader->read((char*)&this->stopped, sizeof(bool));
 }

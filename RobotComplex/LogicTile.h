@@ -43,8 +43,8 @@ public:
 	void DrawLogic(Pos currentPos, SpriteVector* appendTo, void* localMap, float x, float y, float s, uint8_t flags);
 	void DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal, uint8_t flags);
 	void DrawQuantity(SpriteVector* appendTo, float x, float y, float s, int quantity, uint8_t flags);
-	void DoItemLogic() {};
-	void DoRobotLogic() {};
+	void DoItemLogic(Pos currentPosition);
+	void DoRobotLogic(Pos currentPosition, Pos robotRef);
 };
 
 

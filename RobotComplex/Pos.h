@@ -4,6 +4,7 @@
 #include <cassert>
 #include <math.h>
 #include "absl/hash/hash.h"
+
 struct Pos {
 public:
 	int32_t x = 0, y = 0;
@@ -19,8 +20,6 @@ public:
 	Pos ChunkPosition();
 	uint64_t ChunkEncoded();
 	Pos InChunkPosition();
-	bool operator==(Pos other);
-	bool operator!=(Pos other);
 	Pos operator>>(int other);
 	Pos operator<<(int other);
 	Pos operator+(Pos other);
@@ -35,3 +34,17 @@ public:
 		return H::combine(std::move(h), p.x, p.y);
 	}
 };
+
+struct SmallPos {
+public:
+	uint8_t x, y = 0;
+	template <typename H>
+	friend H AbslHashValue(H h, const SmallPos& p) {
+		return H::combine(std::move(h), p.x, p.y);
+	}
+};
+
+bool operator==(const Pos& posA, const Pos& posB);
+bool operator!=(const Pos& posA, const Pos& posB);
+bool operator==(const SmallPos& posA, const SmallPos& posB);
+bool operator!=(const SmallPos& posA, const SmallPos& posB);
