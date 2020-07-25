@@ -1,37 +1,37 @@
 New World
-Hotbar 3:Num3
-Change ColorClass:C
+Hotbar 15:Shift + Num5
+Hotbar 12:Shift + Num2
 Hotbar 10:Num0
+Hotbar 6:Num6
+Show Debug Info:F3
 Hotbar 11:Shift + Num1
 Hotbar 2:Num2
-Remove Logic:Delete
-Rotate Clockwise:R
-Hotbar 13:Shift + Num3
-Move East:D
-Hotbar 5:Num5
-Empty Hand:Q
-Rotate Anti-Clockwise:Shift + R
-Hotbar 20:Shift + Num0
-Show Detailed Info:Alt + LAlt
-Move South:S
 Hotbar 19:Shift + Num9
-Hotbar 7:Num7
-Hotbar 1:Num1
-Hotbar 15:Shift + Num5
-Hotbar 6:Num6
-Hotbar 17:Shift + Num7
-Move North:W
-Hotbar 8:Num8
-Hotbar 4:Num4
-Hotbar 9:Num9
-Hotbar 18:Shift + Num8
-Paste:Control + V
-Show Debug Info:F3
+Empty Hand:Q
 Cut:Control + X
-Swap hotbar:Z
-Move West:A
-Hotbar 14:Shift + Num4
+Hotbar 18:Shift + Num8
+Move East:D
+Hotbar 3:Num3
 Copy:Control + C
-Hotbar 12:Shift + Num2
-Set Robot Auto:X
+Move West:A
+Show Detailed Info:Alt + LAlt
+Hotbar 17:Shift + Num7
+Paste:Control + V
+Change ColorClass:C
+Hotbar 1:Num1
+Hotbar 13:Shift + Num3
+Move North:W
+Swap hotbar:Z
+Hotbar 9:Num9
+Hotbar 8:Num8
+Hotbar 7:Num7
+Hotbar 20:Shift + Num0
+Hotbar 14:Shift + Num4
+Rotate Clockwise:R
 Hotbar 16:Shift + Num6
+Hotbar 4:Num4
+Set Robot Auto:X
+Move South:S
+Hotbar 5:Num5
+Remove Logic:Delete
+Rotate Anti-Clockwise:Shift + R

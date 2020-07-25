@@ -12,6 +12,7 @@
 #include "Textures.h"
 #include <typeinfo>
 #include <cmath>
+#include "WidgetCreator.h"
 
 sf::Color ProgramData::HSV2RGB(sf::Color input)
 {
@@ -75,20 +76,6 @@ void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 	}
 	*/
 }
-void ProgramData::DrawItem(SpriteVector* appendTo, ItemTile item, float x, float y, uint8_t flags)
-{
-	if (item.itemTile < itemTextures.size())
-	{
-		sf::Sprite sprite;
-		sprite.setTexture(*itemTextures[item.itemTile]);
-		sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
-		sprite.setPosition(x + 16.f, y + 16.f);
-		sprite.setScale(sf::Vector2f(1.5f, 1.5f));
-		if (flags >> 7 & 1)
-			sprite.setColor(sf::Color(255, 255, 255, 128));
-		appendTo->emplace_back(sprite);
-	}
-}
 void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 {
 	if (ItemTile * tile = world.GetItemTile(encodedPos))
@@ -120,7 +107,7 @@ void ProgramData::RecreateItemSprites(uint64_t encodedPos, float x, float y)
 					y += int(float(difference.y) * float(GC::tileSize) * step);
 				}
 			}
-			DrawItem(&program.itemSprites,*tile, x, y, 0);
+			tile->DrawItem(&program.itemSprites, x, y, 1.5f, 0, sf::Color(255,255,255,255));
 		}
 	}
 }
@@ -295,11 +282,15 @@ void ProgramData::DrawUpdateCounter()
 }
 void ProgramData::DrawTooltips()
 {
-	if (program.selectedHotbar)
+	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
 	{
-		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.selectedHotbar->GetTooltip(), Align::centre);
+		program.selectedLogicTile = logic;
 	}
-	else if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
+	else
+	{
+		program.selectedLogicTile = nullptr;
+	}
+	if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
 	{
 		if (tile->itemTile > 2)
 		{
@@ -320,7 +311,7 @@ void ProgramData::DrawSelectedBox(std::vector<sf::RectangleShape>* appendTo, Pos
 	selectionBox.setFillColor(sf::Color(0, 0, 0, 0));
 	selectionBox.setOutlineColor(sf::Color(255, 255, 0, 255));
 	selectionBox.setOutlineThickness(2);
-	Pos drawPos = pos * GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+	Pos drawPos = pos * int(GC::tileSize) - Pos{ GC::halfTileSize,GC::halfTileSize };
 	selectionBox.setPosition(float(drawPos.x), float(drawPos.y));
 	appendTo->emplace_back(selectionBox);
 }
@@ -576,16 +567,7 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 		window.draw(element.second);
 	}
 	program.hotbarSprites.draw(window);
-	for (auto element : program.craftingViewBacks)
-	{
-		window.draw(element.second);
-	}
-	program.craftingViewSprites.draw(window);
 	for (sf::RectangleShape sprite : program.unscaledBoxes)
-	{
-		window.draw(sprite);
-	}
-	for (sf::Text sprite : program.textOverlay)
 	{
 		window.draw(sprite);
 	}
@@ -872,7 +854,7 @@ void ProgramData::RecalculateMousePos()
 	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 }
 
-void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color)
+void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
 {
 	slots->clear();
 	slots->reserve(size.x * size.y);
@@ -881,27 +863,30 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float sc
 	{
 		for (uint8_t j = 0; j < size.y; j++)
 		{
-			int x = screenX + (i * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
-			int y = screenY + (j * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
-			sf::RectangleShape gridBack;
-			if(i == highlight.x && j == highlight.y)
-				gridBack.setFillColor(sf::Color(200, 200, 200, 100));
-			else
-				gridBack.setFillColor(sf::Color(50, 50, 50, 100));
-			gridBack.setSize(sf::Vector2f(GC::hotbarSlotSize, GC::hotbarSlotSize));
-			gridBack.setPosition(sf::Vector2f(x - GC::hotbarSlotSize / 2.f, y - GC::hotbarSlotSize / 2.f));
-			slots->insert({ SmallPos{i,j},gridBack });
+			if (drawMid || (i != (size.x / 2)))
+			{
+				int x = screenX + (i * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
+				int y = screenY + (j * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
+				sf::RectangleShape gridBack;
+				if(i == highlight.x && j == highlight.y)
+					gridBack.setFillColor(sf::Color(200, 200, 200, 100));
+				else
+					gridBack.setFillColor(sf::Color(50, 50, 50, 100));
+				gridBack.setSize(sf::Vector2f(float(GC::hotbarSlotSize) * s, float(GC::hotbarSlotSize) * s));
+				gridBack.setPosition(sf::Vector2f(x - (float(GC::hotbarSlotSize) * s) / 2.f, y - (float(GC::hotbarSlotSize) * s) / 2.f));
+				slots->insert({ SmallPos{i,j},gridBack });
+			}
 		}
 	}
 	for (auto kv : *items)
 	{
 		ItemTile item = kv.second;
 		SmallPos pos = kv.first;
-		int x = screenX + (pos.x * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
-		int y = screenY + (pos.y * (GC::hotbarSlotSize + GC::hotbarPadding) * scale);
+		int x = screenX + (pos.x * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
+		int y = screenY + (pos.y * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 		if (item.itemTile <= program.itemsEnd)
 		{
-			DrawItem(sprites, item, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 0);
+			item.DrawItem(sprites, x - GC::halfTileSize, y - GC::halfTileSize, s * 1.5f, 0, sf::Color(255, 255, 255, 255));
 		}
 		else if (item.itemTile < program.itemsEnd + 255)
 		{
@@ -909,26 +894,47 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float sc
 			logic.color = color;
 			logic.signal = 1;
 			logic.facing = rotation;
-			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize, y - GC::halfTileSize, 1.0, 0);
+			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize, y - GC::halfTileSize, s, 0);
 		}
 		else if (item.itemTile == program.itemsEnd + 255)
 		{
 			Robot robot = Robot();
 			robot.facing = rotation;
-			robot.DrawTile(sprites, float(x - GC::halfTileSize), float(y - GC::halfTileSize), 1.f, 0, sf::Color(250, 191, 38, 255));
+			robot.DrawTile(sprites, x - GC::halfTileSize, y - GC::halfTileSize, s, 0, sf::Color(250, 191, 38, 255));
 		}
 		if (item.quantity > 1)
-			CreateSmallText(sprites, std::to_string(item.quantity), float(x), float(y), 2.f, Align::right);
+			CreateSmallText(sprites, std::to_string(item.quantity), x, y, 2.f, Align::right);
 	}
+}
+
+SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items)
+{
+	for (auto element : *slots)
+	{
+		sf::RectangleShape rect = element.second;
+		sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
+		if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
+		{
+			auto kv = items->find(element.first);
+			if (kv != items->end())
+			{
+				CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), kv->second.GetTooltip(), Align::centre);
+				return element.first;
+			}
+		}
+	}
+	return SmallPos{ 255,255 };
 }
 
 void ProgramData::DrawHotbar()
 {
-	DrawItemGrid((GC::hotbarSlotSize + GC::hotbarPadding) * -4.5, program.halfWindowHeight - (GC::hotbarSlotSize + GC::hotbarPadding) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarSlots, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor);
+	program.hoveringHotbar = DrawGridTooltips(&program.hotbarSlots, &program.hotbar);
+	DrawItemGrid((GC::hotbarTotalSize) * -5, program.halfWindowHeight - (GC::hotbarTotalSize) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarSlots, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
 }
 
 void ProgramData::DrawCraftingView()
 {
+	DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
 	if (foundRecipeList.size() > 0)
 	{
 		if (program.craftingViewUpdate)
@@ -936,6 +942,14 @@ void ProgramData::DrawCraftingView()
 			program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
 			program.craftingViewUpdate = false;
 		}
-		DrawItemGrid(0, 0, program.craftingViewSize, 1.f, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red);
+		
+		float x = program.craftingViewPos.getX() - program.windowedWidth * 0.5f;
+		float y = program.craftingViewPos.getY() - program.windowHeight * 0.5f + creator->craftingViewEndHeight;
+		float border = 10;
+		float viewScaleA = (program.craftingViewWidth - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.x));
+		float viewScaleB = (program.craftingViewHeight - creator->craftingViewEndHeight - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
+		x += border / 2;
+		float viewScale = std::min(viewScaleA, viewScaleB);
+		DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red, false);
 	}
 }

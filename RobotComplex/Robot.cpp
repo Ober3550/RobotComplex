@@ -73,7 +73,7 @@ void Robot::DrawTile(SpriteVector* appendTo, int x, int y, float s, uint8_t flag
 	sf::Sprite sprite;
 	sprite.setTexture(*robotTexture);
 	sprite.setOrigin(16, 32);
-	sprite.setPosition(float(x + 16), float(y + 16));
+	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	sprite.setScale(sf::Vector2f(s, s));
 
 	sprite.setColor(color);

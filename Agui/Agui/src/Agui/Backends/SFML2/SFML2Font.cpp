@@ -104,7 +104,7 @@ namespace agui
 			sfStr.setString( StringToUnicode(text) );
 			sfStr.setFont( *sfFont );
 			sfStr.setCharacterSize( characterSize );
-			return (int)sfStr.getLocalBounds().width;
+			return (int)sfStr.getLocalBounds().width * 1.1f;
 		}
 
 		return 0;

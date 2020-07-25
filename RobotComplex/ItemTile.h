@@ -24,7 +24,5 @@ public:
 		this->quantity = quantity;
 	}
 	std::string GetTooltip();
-	void DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color);
-	virtual void Serialize(std::ofstream*);
-	virtual void Deserialize(std::ifstream*);
+	void DrawItem(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color);
 };

@@ -4,6 +4,7 @@
 #include <vector>
 #include <mutex>
 #include <SFML/Graphics.hpp>
+#include "Agui/Agui.hpp"
 
 #include "Robot.h"
 #include "CraftingClass.h"
@@ -48,21 +49,26 @@ public:
 	// Gui Elements
 	SpriteVector hotbarSprites;
 	MyMap<SmallPos, sf::RectangleShape> hotbarSlots;
-	SmallPos hotbarIndex = { 255,255 };
-	SmallPos hoveringHotbar = { 255,255 };
 	MyMap<SmallPos, ItemTile> hotbar;
 	ItemTile* selectedHotbar;
+	SmallPos  hoveringHotbar;
+	SmallPos  hotbarIndex;
 
 	SpriteVector unscaledSprites;
 	std::vector<sf::RectangleShape> unscaledBoxes;
+
+	bool showingTooltip;
 	
 	bool								craftingViewUpdate;
 	std::vector<uint16_t>				foundRecipeList;
 	uint16_t							craftingViewIndex;
 	SpriteVector						craftingViewSprites;
-	MyMap<SmallPos, sf::RectangleShape> craftingViewBacks;
+	MyMap<SmallPos,sf::RectangleShape>	craftingViewBacks;
 	MyMap<SmallPos, ItemTile>			craftingView;
 	SmallPos							craftingViewSize;
+	float								craftingViewWidth;
+	float								craftingViewHeight;
+	agui::Point							craftingViewPos;
 
 	std::vector<sf::Text> textOverlay;
 	MySet<uint64_t> elementExists;
@@ -118,7 +124,6 @@ public:
 	int framesSinceTick = 0;
 
 	void RecreateGroundSprites(Pos tilePos, float x, float y);
-	void DrawItem(SpriteVector* appendTo, ItemTile item, float x, float y, uint8_t flags);
 	void RecreatePlatformSprites(uint64_t encodedPos, float x, float y);
 	void RecreateItemSprites(uint64_t encodedPos, float x, float y);
 	void RecreateLogicSprites(uint64_t encodedPos, float x, float y);
@@ -152,6 +157,7 @@ public:
 	void MoveBots();
 	void UpdateMap();
 	void RecalculateMousePos();
-	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color);
+	SmallPos DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items);
+	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid);
 };
 extern ProgramData program;

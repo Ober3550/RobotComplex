@@ -20,9 +20,10 @@ namespace GC
 	static constexpr uint8_t halfItemSprite = 8;
 
 	// GUI constants
-	static constexpr uint8_t tooltipPadding = 6;
-	static constexpr uint8_t hotbarSlotSize = 50;
-	static constexpr uint8_t hotbarPadding = 4;
+	static constexpr float tooltipPadding = 6;
+	static constexpr float hotbarSlotSize = 50;
+	static constexpr float hotbarPadding = 4;
+	static constexpr float hotbarTotalSize = hotbarSlotSize + hotbarPadding;
 
 	// Game constants
 	static constexpr uint8_t robotStrength = 6;

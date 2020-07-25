@@ -92,6 +92,7 @@ public:
 	void SerializeMisc(std::string filename);
 	bool PlaceElement(Pos pos, uint16_t item);
 	uint16_t ChangeElement(Pos pos, int quantity, uint16_t item);
+	int ChangeInventory(uint16_t item, int quantity);
 	//void SerializeLogicStructure(std::string filename);
 	void Deserialize(std::string filename);
 	void DeserializeItemNames(std::string filename);

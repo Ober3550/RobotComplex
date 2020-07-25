@@ -8,24 +8,16 @@ std::string ItemTile::GetTooltip()
 		return tooltip->second;
 	return "";
 }
-
-void ItemTile::Serialize(std::ofstream* writer)
+void ItemTile::DrawItem(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color)
 {
-	writer->write((char*)&this->itemTile, sizeof(uint16_t));
-	writer->write((char*)&this->quantity, sizeof(uint8_t));
-}
-void ItemTile::Deserialize(std::ifstream* reader)
-{
-	reader->read((char*)&this->itemTile, sizeof(uint16_t));
-	reader->read((char*)&this->quantity, sizeof(uint8_t));
-}
-void ItemTile::DrawTile(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color)
-{
-	sf::Sprite sprite;
-	sprite.setTexture(*itemTextures[this->itemTile]);
-	sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
-	sprite.setPosition(x + 16.f, y + 16.f);
-	sprite.setScale(sf::Vector2f(1.5f, 1.5f));
-	sprite.setColor(color);
-	appendTo->emplace_back(sprite);
+	if (this->itemTile < itemTextures.size())
+	{
+		sf::Sprite sprite;
+		sprite.setTexture(*itemTextures[this->itemTile]);
+		sprite.setOrigin(GC::halfItemSprite, GC::halfItemSprite);
+		sprite.setPosition(x + GC::halfTileSize, y + GC::halfTileSize);
+		sprite.setScale(sf::Vector2f(s, s));
+		sprite.setColor(color);
+		appendTo->emplace_back(sprite);
+	}
 }

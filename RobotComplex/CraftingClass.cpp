@@ -170,7 +170,7 @@ void CraftingClass::TryCrafting(uint16_t item, Pos itemPos)
 void CraftingClass::ShowRecipeAsGrid()
 {
 	program.craftingView.clear();
-	program.craftingViewSize = SmallPos{ uint8_t(width * 2), uint8_t((int)recipe.size() / width) };
+	program.craftingViewSize = SmallPos{ uint8_t(width * 2 + 1) , uint8_t((int)recipe.size() / width) };
 	for (int j = 0; j < (int)recipe.size() / width; j++)
 	{
 		int row = j * width;
@@ -179,9 +179,9 @@ void CraftingClass::ShowRecipeAsGrid()
 			RecipeComponent recipeComp = recipe[i + row];
 			if (recipeComp.itemTile)
 			{
-				program.craftingView.insert({ SmallPos{uint8_t(i + (width * (recipeComp.resultState > 0))),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
+				program.craftingView.insert({ SmallPos{uint8_t(i + ((width+1) * (recipeComp.resultState > 0))),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
 				if(recipeComp.requirement == 0)
-					program.craftingView.insert({ SmallPos{uint8_t(i + width),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
+					program.craftingView.insert({ SmallPos{uint8_t(i + (width + 1)),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
 			}
 		}
 	}

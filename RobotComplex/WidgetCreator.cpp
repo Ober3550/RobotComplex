@@ -25,11 +25,23 @@ public:
 				buttonAction();
 		}
 	}
-	void toggleStateChanged(agui::Button *, bool) {}
-	void death(agui::Button *) {}
-	void isToggleButtonChanged(agui::Button *, bool) {}
-	void textAlignmentChanged(agui::Button *, agui::AreaAlignmentEnum) {}
 	~SimpleButtonListener(void) {};
+};
+
+class SimpleFrameListener : public agui::FrameListener 
+{
+private:
+	std::function<void()> Action;
+public:
+	SimpleFrameListener(std::function<void()> action)
+	{
+		this->Action = action;
+	}
+	void topMarginChanged(agui::Frame*, int) { Action(); }
+	void bottomMarginChanged(agui::Frame*, int) { Action(); }
+	void leftMarginChanged(agui::Frame*, int) { Action(); }
+	void rightMarginChanged(agui::Frame*, int) { Action(); }
+	~SimpleFrameListener(void) {};
 };
 
 class SaveSelect : public agui::SelectionListener
@@ -613,7 +625,7 @@ void WidgetCreator::CreateActionList()
 			if (element = world.ChangeLogic(program.mouseHovering, -1, 0))
 				elementFound = true;
 		if(element)
-			ChangeInventory(element, 1);
+			world.ChangeInventory(element, 1);
 	} });
 
 	// Every tick
@@ -736,6 +748,9 @@ void WidgetCreator::UserInput(sf::Event input)
 	else if (input.type == sf::Event::MouseMoved)
 	{
 		sf::Vector2i tempPos = sf::Mouse::getPosition(*window);
+		program.craftingViewPos = creator->craftingFrame.getAbsolutePosition();
+		program.craftingViewWidth = creator->craftingFrame.getWidth();
+		program.craftingViewHeight = creator->craftingFrame.getHeight();
 		//sf::Vector2f scaledPos = window->mapPixelToCoords(tempPos, program.worldView);
 		program.mousePos = Pos{ int(tempPos.x) - int(program.halfWindowWidth),int(tempPos.y) - int(program.halfWindowHeight) };
 		MouseMoved();
@@ -823,88 +838,14 @@ void WidgetCreator::MapNewButton(sf::Event::KeyEvent newButton)
 	actionBindButtonIndex = -1;
 }
 
-int WidgetCreator::ChangeInventory(uint16_t item, int quantity)
-{
-	if (quantity > 0)
-	{
-		bool addedToInv = false;
-		for (auto kv : program.hotbar)
-		{
-			if (kv.second.itemTile == item)
-			{
-				int subQuantity = quantity;
-				if (kv.second.quantity + quantity > 255)
-					subQuantity = 255 - kv.second.quantity;
-				auto modify = program.hotbar.find(kv.first);
-				modify->second.quantity += subQuantity;
-				quantity -= subQuantity;
-				if (quantity == 0)
-				{
-					addedToInv = true;
-					break;
-				}
-			}
-		}
-		if (!addedToInv)
-		{
-			for (int j = 1; j >= 0; j--)
-			{
-				for (int i = 0; i < 10; i++)
-				{
-					auto kv = program.hotbar.find(SmallPos{ (uint8_t)i,(uint8_t)j });
-					if (kv == program.hotbar.end())
-					{
-						ItemTile newItem = ItemTile(item);
-						int subQuantity = quantity;
-						if (subQuantity > 255)
-							subQuantity = 255;
-						newItem.quantity = subQuantity;
-						quantity -= subQuantity;
-						program.hotbar.insert({ SmallPos{(uint8_t)i,(uint8_t)j},newItem });
-						if (quantity == 0)
-							break;
-					}
-				}
-			}
-		}
-	}
-	else if(quantity < 0)
-	{
-		std::vector<SmallPos> removeList;
-		for (auto kv : program.hotbar)
-		{
-			if (kv.second.itemTile == item)
-			{
-				auto element = program.hotbar.find(kv.first);
-				if (element != program.hotbar.end())
-				{
-					int subQuantity = quantity;
-					if ((int)element->second.quantity + subQuantity < 0)
-						subQuantity = -(int)element->second.quantity;
-					element->second.quantity += subQuantity;
-					if (element->second.quantity == 0)
-						removeList.emplace_back(element->first);
-					quantity -= subQuantity;
-					if (quantity == 0)
-						break;
-				}
-			}
-		}
-		for (auto k : removeList)
-		{
-			program.hotbar.erase(k);
-		}
-	}
-	return quantity;
-}
-
 void WidgetCreator::MouseMoved()
 {
+	program.prevMouseHovering = program.mouseHovering;
+	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 	if (!program.gamePaused)
 	{
-		program.prevMouseHovering = program.mouseHovering;
-		program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
-		if (Robot * robot = world.GetRobot(program.mouseHovering.CoordToEncoded()))
+
+		if (Robot* robot = world.GetRobot(program.mouseHovering.CoordToEncoded()))
 		{
 			if (robot != program.selectedRobot)
 			{
@@ -917,39 +858,6 @@ void WidgetCreator::MouseMoved()
 				{
 					logic->DoRobotLogic(program.selectedRobotPos, program.selectedRobotPos);
 				}
-			}
-		}
-		else
-		{
-			bool foundLogic = false;
-			program.hoveringHotbar = { 255,255 };
-			program.selectedHotbar = nullptr;
-			for (auto element : program.hotbarSlots)
-			{
-				sf::RectangleShape rect = element.second;
-				sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
-				if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
-				{
-					auto kv = program.hotbar.find(element.first);
-					if (kv != program.hotbar.end())
-					{
-						program.selectedHotbar = &kv->second;
-						foundLogic = true;
-					}
-					program.hoveringHotbar = element.first;
-				}
-			}
-			if (!foundLogic)
-			{
-				if (LogicTile * logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
-				{
-					foundLogic = true;
-					program.selectedLogicTile = logic;
-				}
-			}
-			if (!foundLogic)
-			{
-				program.selectedLogicTile = nullptr;
 			}
 		}
 	}
@@ -1000,7 +908,7 @@ void WidgetCreator::FinishedSelection(Pos start, Pos end)
 						element = world.ChangeLogic(Pos{ i,j }, -1, 0);
 					if (element)
 					{
-						ChangeInventory(element, 1);
+						world.ChangeInventory(element, 1);
 					}
 				}
 			}
@@ -1018,7 +926,7 @@ void WidgetCreator::PasteSelection()
 	{
 		uint16_t element = world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, 1, kv.second.logicType);
 		if(element > 1)
-			ChangeInventory(element, -1);
+			world.ChangeInventory(element, -1);
 	}
 	program.paste = false;
 }
@@ -1169,41 +1077,54 @@ public:
 
 void WidgetCreator::AddCraftingFrame()
 {
+	int height = 0;
 	mGui->add(&craftingFrame);
-	craftingFrame.setSize(agui::Dimension(mainFrameWidth, 110));
+
 	searchTitle.setText("Find: ");
+	searchTitle.setSize(150, 25);
 	craftingFrame.add(&searchTitle);
 
 	searchBar.addActionListener(new SimpleTextFieldListener([&] {
 			FindRecipes(creator->searchBar.getText(),0);
 		}));
-	searchBar.setSize(agui::Dimension(150, 20));
-	searchBar.setLocation(agui::Point(50,0));
+	searchBar.setSize(150, 20);
+	searchBar.setLocation(150,height);
 	craftingFrame.add(&searchBar);
+	height += 25;
 
-	recipeResults.setLocation(agui::Point(0, 20));
-	craftingFrame.add(&recipeResults);
-
-	craftingNextButton.setText("Next");
-	craftingNextButton.addButtonListener(new SimpleButtonListener([&] {
-		if (program.craftingViewIndex < program.foundRecipeList.size() - 1)
-			program.craftingViewIndex++;
-			program.craftingViewUpdate = true;
-		}));
-	craftingFrame.add(&craftingNextButton);
-	craftingNextButton.setSize(150, 50);
-	craftingNextButton.setLocation(150, 30);
+	resultsTitle.setText("");
+	resultsTitle.setSize(150, 25);
+	resultsTitle.setLocation(0, height);
+	craftingFrame.add(&resultsTitle);
+	height += 25;
 
 	craftingPrevButton.setText("Prev");
 	craftingPrevButton.addButtonListener(new SimpleButtonListener([&] {
 		if (program.craftingViewIndex > 0)
 			program.craftingViewIndex--;
+			resultsTitle.setText("Results: " + std::to_string(program.craftingViewIndex + 1) +"/" + std::to_string(program.foundRecipeList.size()));
 			program.craftingViewUpdate = true;
 		}));
 	craftingFrame.add(&craftingPrevButton);
 	craftingPrevButton.setSize(150, 50);
-	craftingPrevButton.setLocation(0, 30);
+	craftingPrevButton.setLocation(0, height);
 
+	craftingNextButton.setText("Next");
+	craftingNextButton.addButtonListener(new SimpleButtonListener([&] {
+		if (program.craftingViewIndex < program.foundRecipeList.size() - 1)
+			program.craftingViewIndex++;
+			resultsTitle.setText("Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size()));
+			program.craftingViewUpdate = true;
+		}));
+	craftingFrame.add(&craftingNextButton);
+	craftingNextButton.setSize(150, 50);
+	craftingNextButton.setLocation(150, height);
+
+	height += 50;
+
+	craftingViewEndHeight = height + frameHeadPadding;
+	program.craftingViewWidth = mainFrameWidth;
+	craftingFrame.setSize(agui::Dimension(mainFrameWidth, height + frameHeadPadding + mainFrameWidth));
 }
 
 void WidgetCreator::FindRecipes(std::string name, int state)
@@ -1222,5 +1143,9 @@ void WidgetCreator::FindRecipes(std::string name, int state)
 		}
 	}
 	program.craftingViewIndex = 0;
+	if (program.foundRecipeList.size() > 0)
+	{
+		resultsTitle.setText("Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size()));
+	}
 	program.craftingViewUpdate = true;
 }

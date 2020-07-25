@@ -446,3 +446,75 @@ uint16_t WorldSave::ChangeElement(Pos pos, int quantity, uint16_t item)
 	}
 	return true;
 }
+
+int WorldSave::ChangeInventory(uint16_t item, int quantity)
+{
+	if (quantity > 0)
+	{
+		for (auto& kv : program.hotbar)
+		{
+			if (kv.second.itemTile == item)
+			{
+				int subQuantity = quantity;
+				if (kv.second.quantity + subQuantity > 255)
+					subQuantity = 255 - kv.second.quantity;
+				kv.second.quantity += subQuantity;
+				quantity -= subQuantity;
+			}
+			if (quantity <= 0)
+				break;
+		}
+		if (quantity > 0)
+		{
+			for (int j = 1; j >= 0; j--)
+			{
+				for (int i = 0; i < 10; i++)
+				{
+					auto kv = program.hotbar.find(SmallPos{ (uint8_t)i,(uint8_t)j });
+					if (kv == program.hotbar.end())
+					{
+						ItemTile newItem = ItemTile(item);
+						int subQuantity = quantity;
+						if (subQuantity > 255)
+							subQuantity = 255;
+						newItem.quantity = subQuantity;
+						quantity -= subQuantity;
+						program.hotbar.insert({ SmallPos{(uint8_t)i,(uint8_t)j},newItem });
+					}
+					if (quantity == 0)
+						break;
+				}
+				if (quantity == 0)
+					break;
+			}
+		}
+	}
+	else if (quantity < 0)
+	{
+		std::vector<SmallPos> removeList;
+		for (auto kv : program.hotbar)
+		{
+			if (kv.second.itemTile == item)
+			{
+				auto element = program.hotbar.find(kv.first);
+				if (element != program.hotbar.end())
+				{
+					int subQuantity = quantity;
+					if ((int)element->second.quantity + subQuantity < 0)
+						subQuantity = -(int)element->second.quantity;
+					element->second.quantity += subQuantity;
+					if (element->second.quantity == 0)
+						removeList.emplace_back(element->first);
+					quantity -= subQuantity;
+					if (quantity == 0)
+						break;
+				}
+			}
+		}
+		for (auto k : removeList)
+		{
+			program.hotbar.erase(k);
+		}
+	}
+	return quantity;
+}

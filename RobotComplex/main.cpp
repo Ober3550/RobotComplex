@@ -277,6 +277,18 @@ int main()
 		program.worldMutex.unlock();
 		gui->logic();
 		gui->render();
+
+		// These elements will be ontop of the gui
+		for (auto element : program.craftingViewBacks)
+		{
+			window.draw(element.second);
+		}
+		program.craftingViewSprites.draw(window);
+		for (sf::Text sprite : program.textOverlay)
+		{
+			window.draw(sprite);
+		}
+
 		window.display();
 		clock_t endUpdate = clock();
 		if (program.frameRate == INFINITE)
