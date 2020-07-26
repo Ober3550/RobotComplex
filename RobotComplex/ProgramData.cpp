@@ -8,11 +8,11 @@
 #include <string>
 #include "MyMod.h"
 #include "CraftingProcess.h"
-#include "RedirectorColors.h"
+#include "ByteColors.h"
 #include "Textures.h"
 #include <typeinfo>
 #include <cmath>
-#include "WidgetCreator.h"
+#include "GuiHandler.h"
 
 sf::Color ProgramData::HSV2RGB(sf::Color input)
 {
@@ -514,37 +514,32 @@ void ProgramData::DrawDebugHUD()
 	}
 }
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
-	//if (!program.gamePaused)
-	//{
-		FindMovingRobot();
-		if (program.prevZoom != program.zoom)
-		{
-			program.redrawGround = true;
-			program.worldView.zoom(program.zoom / program.prevZoom);
-			program.prevZoom = program.zoom;
-		}
-		if (program.prevCameraPos != program.cameraPos)
-		{
-			program.redrawGround = true;
-			program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
-			program.prevCameraPos = program.cameraPos;
-			// Recalculate the possition of the mouse and what the new selection is after moving
-			program.RecalculateMousePos();
-		}
-		program.textOverlay.clear();
-		program.unscaledBoxes.clear();
-		program.scaledBoxes.clear();
-		RecreateSprites();
-		if (program.selectedLogicTile && program.hoveringHotbar == SmallPos{ 255,255 })
-			DrawSelectedBox(&program.scaledBoxes,program.mouseHovering);
+	FindMovingRobot();
+	if (program.prevZoom != program.zoom)
+	{
+		program.redrawGround = true;
+		program.worldView.zoom(program.zoom / program.prevZoom);
+		program.prevZoom = program.zoom;
+	}
+	if (program.prevCameraPos != program.cameraPos)
+	{
+		program.redrawGround = true;
+		program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
+		program.prevCameraPos = program.cameraPos;
+		// Recalculate the possition of the mouse and what the new selection is after moving
+		program.RecalculateMousePos();
+	}
+	
+	RecreateSprites();
+	if (program.hoveringHotbar == SmallPos{ 255,255 })
+	{
+		if (program.selectedLogicTile)
+			DrawSelectedBox(&program.scaledBoxes, program.mouseHovering);
 		DrawAlignment();
-		DrawSelectedRegion();
-		if (program.showDebugInfo)
-			DrawDebugHUD();
 		DrawTooltips();
-		DrawHotbar();
-		DrawCraftingView();
-	//}
+	}
+	DrawSelectedRegion();
+	DrawHotbar();
 	window.setView(program.worldView);
 	program.groundSprites.draw(window);
 	program.platformSprites.draw(window);
@@ -560,22 +555,10 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 	{
 		window.draw(sprite);
 	}
-	window.setView(program.hudView);
-	//DrawCrosshair(window);
-	for (auto element : program.hotbarSlots)
-	{
-		window.draw(element.second);
-	}
-	program.hotbarSprites.draw(window);
-	for (sf::RectangleShape sprite : program.unscaledBoxes)
-	{
-		window.draw(sprite);
-	}
 }
 
 void ProgramData::MovePlatform(Pos pos, Facing toward)
 {
-	
 	Pos newPos = pos.FacingPosition(toward);
 	program.scaledPersistentBoxes.clear();
 	if (program.showDebugInfo)
@@ -715,8 +698,8 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 		{
 			assert(false);
 		}
-		world.ChangeItem(pos, item->itemTile, -1);
-		world.ChangeItem(newPos, item->itemTile, 1);
+		world.ChangeItem(pos, -1, item->itemTile);
+		world.ChangeItem(newPos, 1, item->itemTile);
 		world.itemPrevMoved.insert(newPos.CoordToEncoded());
 	}
 	world.nextItemPos.erase(pos.CoordToEncoded());
@@ -856,9 +839,6 @@ void ProgramData::RecalculateMousePos()
 
 void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
 {
-	slots->clear();
-	slots->reserve(size.x * size.y);
-	sprites->clear();
 	for (uint8_t i = 0; i < size.x; i++)
 	{
 		for (uint8_t j = 0; j < size.y; j++)
@@ -928,28 +908,36 @@ SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slot
 
 void ProgramData::DrawHotbar()
 {
-	program.hoveringHotbar = DrawGridTooltips(&program.hotbarSlots, &program.hotbar);
+	program.hotbarSlots.clear();
+	program.hotbarSprites.clear();
+	
 	DrawItemGrid((GC::hotbarTotalSize) * -5, program.halfWindowHeight - (GC::hotbarTotalSize) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarSlots, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
+	program.hoveringHotbar = DrawGridTooltips(&program.hotbarSlots, &program.hotbar);
 }
 
 void ProgramData::DrawCraftingView()
 {
-	DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
-	if (foundRecipeList.size() > 0)
+	program.craftingViewBacks.clear();
+	program.craftingViewSprites.clear();
+	if (program.craftingViewShow)
 	{
-		if (program.craftingViewUpdate)
+		if (foundRecipeList.size() > 0)
 		{
-			program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
-			program.craftingViewUpdate = false;
+			if (program.craftingViewUpdate)
+			{
+				program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
+				program.craftingViewUpdate = false;
+			}
+			float craftingViewEndHeight = 100;
+			float x = program.craftingViewPos.x - program.windowWidth * 0.5f;
+			float y = program.craftingViewPos.y - program.windowHeight * 0.5f + craftingViewEndHeight;
+			float border = 20;
+			float viewScaleA = (program.craftingViewDimensions.x - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.x));
+			float viewScaleB = (program.craftingViewDimensions.y - craftingViewEndHeight - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
+			x += border / 2;
+			float viewScale = std::min(viewScaleA, viewScaleB);
+			DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red, false);
 		}
-		
-		float x = program.craftingViewPos.getX() - program.windowedWidth * 0.5f;
-		float y = program.craftingViewPos.getY() - program.windowHeight * 0.5f + creator->craftingViewEndHeight;
-		float border = 10;
-		float viewScaleA = (program.craftingViewWidth - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.x));
-		float viewScaleB = (program.craftingViewHeight - creator->craftingViewEndHeight - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
-		x += border / 2;
-		float viewScale = std::min(viewScaleA, viewScaleB);
-		DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red, false);
+		DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
 	}
 }

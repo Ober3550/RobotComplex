@@ -24,6 +24,9 @@
     <Filter Include="Data">
       <UniqueIdentifier>{31f77f00-d0d4-4525-b7e4-74c72154978e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Interface">
+      <UniqueIdentifier>{84eb7147-1ab5-452b-a858-923e138faeee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -62,12 +65,6 @@
     <ClCompile Include="Robot.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
-    <ClCompile Include="TestWorld.cpp">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClCompile>
-    <ClCompile Include="WidgetCreator.cpp">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClCompile>
     <ClCompile Include="WorldSave.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
@@ -82,6 +79,12 @@
     </ClCompile>
     <ClCompile Include="MyStrings.cpp">
       <Filter>Header Files\HelperElements</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiHandler.cpp">
+      <Filter>Header Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>Header Files\Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,25 +145,16 @@
     <ClInclude Include="RecipePrototype.h">
       <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
-    <ClInclude Include="RedirectorColors.h">
-      <Filter>Header Files\Enums</Filter>
-    </ClInclude>
     <ClInclude Include="ReservedItems.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
     <ClInclude Include="Robot.h">
       <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
-    <ClInclude Include="TestWorld.h">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClInclude>
     <ClInclude Include="Textures.h">
       <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
     <ClInclude Include="Tile.h">
-      <Filter>Header Files\WorldElements</Filter>
-    </ClInclude>
-    <ClInclude Include="WidgetCreator.h">
       <Filter>Header Files\WorldElements</Filter>
     </ClInclude>
     <ClInclude Include="WorldSave.h">
@@ -195,6 +189,12 @@
     </ClInclude>
     <ClInclude Include="MyStrings.h">
       <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteColors.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiHandler.h">
+      <Filter>Header Files\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

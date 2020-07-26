@@ -518,3 +518,19 @@ int WorldSave::ChangeInventory(uint16_t item, int quantity)
 	}
 	return quantity;
 }
+
+void WorldSave::PasteSelection()
+{
+	for (auto kv : program.copyMap)
+	{
+		uint16_t element = world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, 1, kv.second.logicType);
+		if (element > 1)
+			if (world.ChangeInventory(element, -1) != 0)
+			{
+				// Remove the just placed element if there are no more items of that sort in the inventory
+				world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, -1, kv.second.logicType);
+				break;
+			}
+	}
+	program.paste = false;
+}

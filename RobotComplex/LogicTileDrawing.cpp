@@ -9,7 +9,7 @@
 #include "Constants.h"
 #include <string>
 #include <SFML/Graphics.hpp>
-#include "RedirectorColors.h"
+#include "ByteColors.h"
 #include "Textures.h"
 void LogicTile::DrawSignalStrength(SpriteVector* appendTo, float x, float y, float s, int signal, uint8_t flags)
 {

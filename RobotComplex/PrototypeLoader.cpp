@@ -8,8 +8,7 @@
 #include <string>
 #include "MyMod.h"
 #include "CraftingProcess.h"
-#include "RedirectorColors.h"
-#include "TestWorld.h"
+#include "ByteColors.h"
 #include "PrototypeLoader.h"
 #include "RecipePrototype.h"
 #include "Textures.h"
@@ -32,7 +31,6 @@ extern "C"
 sf::Texture* LoadTexture(std::string filename)
 {
 	sf::Texture* texture = new sf::Texture();
-	//sf::Texture* texture = nullptr;
 	if (!texture->loadFromFile("assets/" + filename))
 	{
 		OutputDebugStringA((filename + " failed to load\r\n").c_str());

@@ -63,12 +63,12 @@ public:
 		noiseRef->SetFractalGain(0.5f);
 		noiseRef->SetAxisScales(0.4f,0.4f,0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
-		this->name = "New World";
+		this->name = "";
 		this->tick = 0;
 	}
-	WorldSave(int seed)
+	WorldSave(std::string name)
 	{
-		this->seed = seed;
+		this->seed = int(std::hash<std::string>{}(name));
 		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
 		noiseRef->SetFractalOctaves(6);
 		noiseRef->SetFractalLacunarity(2);
@@ -76,7 +76,7 @@ public:
 		noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
 		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
 		noiseRef->SetSeed(seed);
-		this->name = "New World";
+		this->name = name;
 		this->tick = 0;
 	}
 	bool CheckMovePlatform(Pos pos, Facing toward);
@@ -88,16 +88,16 @@ public:
 	void GenerateChunk(Pos pos);
 	void GenerateOre(Pos pos);
 	void Serialize(std::string filename);
+	void Serialize() { if(name != "") Serialize(name); }
 	void SerializeItemNames(std::string filename);
 	void SerializeMisc(std::string filename);
 	bool PlaceElement(Pos pos, uint16_t item);
 	uint16_t ChangeElement(Pos pos, int quantity, uint16_t item);
 	int ChangeInventory(uint16_t item, int quantity);
-	//void SerializeLogicStructure(std::string filename);
 	void Deserialize(std::string filename);
 	void DeserializeItemNames(std::string filename);
-	//void DeserializeLogicStructure(std::string filename);
 	void DeserializeMisc(std::string filename);
 	void clear();
+	void PasteSelection();
 };
 extern WorldSave world;

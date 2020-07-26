@@ -17,6 +17,8 @@
 #include "Align.h"
 #include "MyVector.h"
 #include "RecipePrototype.h"
+#include "imgui.h"
+#include "imgui-sfml.h"
 
 class ProgramData {
 public:
@@ -59,6 +61,7 @@ public:
 
 	bool showingTooltip;
 	
+	bool								craftingViewShow;
 	bool								craftingViewUpdate;
 	std::vector<uint16_t>				foundRecipeList;
 	uint16_t							craftingViewIndex;
@@ -66,18 +69,17 @@ public:
 	MyMap<SmallPos,sf::RectangleShape>	craftingViewBacks;
 	MyMap<SmallPos, ItemTile>			craftingView;
 	SmallPos							craftingViewSize;
-	float								craftingViewWidth;
-	float								craftingViewHeight;
-	agui::Point							craftingViewPos;
+	ImVec2								craftingViewDimensions;
+	ImVec2								craftingViewPos;
 
 	std::vector<sf::Text> textOverlay;
 	MySet<uint64_t> elementExists;
 
-	float windowedWidth;
-	float windowedHeight;
+	float maxWindowWidth;
+	float maxWindowHeight;
 	float windowWidth;
-	float halfWindowWidth;
 	float windowHeight;
+	float halfWindowWidth;
 	float halfWindowHeight;
 	float scale = 5.0f;
 	float zoom = 1.0f;
@@ -110,12 +112,10 @@ public:
 	Pos originSelection;
 	MyMap<uint64_t, LogicTile> copyMap;
 	
-	
 	std::string selectedSave = "";
 	bool running = true;
 	bool gamePaused = true;
-	bool showMain = true;
-	bool showSave = false;
+	bool acceptGameInput = true;
 	std::mutex worldMutex;
 
 	// Clock timing variables
