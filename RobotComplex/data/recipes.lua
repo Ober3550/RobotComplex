@@ -58,6 +58,34 @@ recipes =
 		craft_time = 1, 
 		animation = ""
 	},
+	bronze_ingot = {
+		components = 
+		{{ "iron_ore",  -1 },	{ "coal_ore",  -1 }, { "iron_ore", -1 }, 
+		{{"copper_ore", -1 },	{ "coal_ore",	-1}, { "copper_ore", -1},
+		{ "bronze_ingot", 1  },	{ "iron_ore", -1 }, { "bronze_ingot", 1}},
+		width = 3,
+		craft_time = 2,
+		animation = "",
+	},
+	iron_rod = 
+	{
+		components = 
+		{{ ""},	{ "iron_rod",  1 },
+		{{"iron_ingot", -1 },	{ "iron_ingot",	-1},
+		width = 2,
+		craft_time = 2,
+		animation = "",
+	},
+	motor =
+	{
+		components = 
+		{{ "" },	{ "iron_plate",  -1 }, { "motor", 1},
+		{{"iron_rod", -1 },	{ "copper_wire", -1}, { "iron_plate", -1 },
+		{{ "" },	{ "iron_plate",  -1 }, { "",
+		width = 3,
+		craft_time = 2,
+		animation = "",
+	},
 	robot = {
 		components ={{ "steel_ingot",-1},	{ "robot",1 },		{ "steel_ingot",-1},
 					{ "steel_ingot",-1 },	{ "iron_gear",-1 },	{ "steel_ingot",-1 }},
