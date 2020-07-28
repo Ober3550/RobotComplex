@@ -13,6 +13,7 @@
 #include <typeinfo>
 #include <cmath>
 #include "GuiHandler.h"
+#include "GroundTypes.h"
 
 sf::Color ProgramData::HSV2RGB(sf::Color input)
 {
@@ -36,14 +37,29 @@ void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
 	GroundTile * tile = world.GetGroundTile(tilePos);
 	sf::Sprite sprite;
 	uint8_t textureIndex = tile->groundTile;
-	if (textureIndex > program.maxGround)
-		program.maxGround = textureIndex;
-	if (textureIndex < program.minGround)
-		program.minGround = textureIndex;
-	sprite.setTexture(*groundTexture);
-	sprite.setTextureRect(sf::IntRect((textureIndex / 32)*32, 0, 32, 32));
-	sf::Color color = HSV2RGB(sf::Color(MyMod(textureIndex+16,256), 100 + MyMod(textureIndex,32), 220, 255 ));
-	sprite.setColor(color);
+	if (tile->groundTile > 64)
+	{
+		int index = int(textureIndex * 1.3f);
+		sprite.setTexture(*groundTexture);
+		sprite.setTextureRect(sf::IntRect((index / 32) * 32, 0, 32, 32));
+		sf::Color color = HSV2RGB(sf::Color(MyMod(64-index, 256), 100 + MyMod(index, 32), 220, 255));
+		sprite.setColor(color);
+	}
+	else
+	{
+		switch (tile->groundTile)
+		{
+		case water:
+		{
+			sprite.setTexture(*groundTextures[0]);
+		}break;
+		case sand:
+		{
+			sprite.setTexture(*groundTextures[1]);
+		}break;
+		default: return;// Return if the tile isn't a recognised element
+		}
+	}
 	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
 	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
 	program.groundSprites.emplace_back(sprite);
@@ -235,8 +251,6 @@ void ProgramData::UpdateElementExists()
 void ProgramData::RecreateSprites() {
 	if (program.redrawGround)
 	{
-		program.minGround = 255;
-		program.maxGround = 0;
 		program.groundSprites.clear();
 	}
 	program.platformSprites.clear();
@@ -837,7 +851,7 @@ void ProgramData::RecalculateMousePos()
 	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 }
 
-void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
+void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
 {
 	for (uint8_t i = 0; i < size.x; i++)
 	{
@@ -860,7 +874,7 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 	}
 	for (auto kv : *items)
 	{
-		ItemTile item = kv.second;
+		BigItem item = kv.second;
 		SmallPos pos = kv.first;
 		int x = screenX + (pos.x * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 		int y = screenY + (pos.y * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
@@ -887,7 +901,7 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 	}
 }
 
-SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items)
+SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items)
 {
 	for (auto element : *slots)
 	{
@@ -925,10 +939,11 @@ void ProgramData::DrawCraftingView()
 		{
 			if (program.craftingViewUpdate)
 			{
+				program.craftingViewUnlocked = program.craftingRecipes[program.foundRecipeList[program.craftingViewIndex]].unlocked;
 				program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
 				program.craftingViewUpdate = false;
 			}
-			float craftingViewEndHeight = 100;
+			float craftingViewEndHeight = 120;
 			float x = program.craftingViewPos.x - program.windowWidth * 0.5f;
 			float y = program.craftingViewPos.y - program.windowHeight * 0.5f + craftingViewEndHeight;
 			float border = 20;
@@ -937,7 +952,34 @@ void ProgramData::DrawCraftingView()
 			x += border / 2;
 			float viewScale = std::min(viewScaleA, viewScaleB);
 			DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red, false);
+			DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
 		}
-		DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
+	}
+}
+
+void ProgramData::DrawTechnologyView()
+{
+	if (world.currentTechnology != "")
+	{
+		program.technologyViewBacks.clear();
+		program.technologyViewSprites.clear();
+		if (program.technologyViewShow)
+		{
+			if (program.technologyViewUpdate)
+			{
+				program.technologyPrototypes[world.currentTechnology].ShowRequirementsAsGrid();
+				program.technologyViewUpdate = false;
+			}
+			float windowEndHeight = 40;
+			float x = program.technologyViewPos.x - program.windowWidth * 0.5f;
+			float y = program.technologyViewPos.y - program.windowHeight * 0.5f + windowEndHeight;
+			float border = 20;
+			float viewScaleA = (program.technologyViewDimensions.x - border) / (GC::hotbarTotalSize * float(program.technologyViewSize.x));
+			float viewScaleB = (program.technologyViewDimensions.y - windowEndHeight - border) / (GC::hotbarTotalSize * float(program.technologyViewSize.y));
+			x += border / 2;
+			float viewScale = std::min(viewScaleA, viewScaleB);
+			DrawItemGrid(x, y, program.technologyViewSize, viewScale, SmallPos{ 255,255 }, &program.technologyViewBacks, &program.technologyView, &program.technologyViewSprites, south, red, false);
+			DrawGridTooltips(&program.technologyViewBacks, &program.technologyView);
+		}
 	}
 }

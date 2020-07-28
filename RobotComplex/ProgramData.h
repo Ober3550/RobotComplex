@@ -16,16 +16,19 @@
 #include "MySet.h"
 #include "Align.h"
 #include "MyVector.h"
-#include "RecipePrototype.h"
+#include "Prototypes.h"
 #include "imgui.h"
 #include "imgui-sfml.h"
 
 class ProgramData {
 public:
-	MyMap<uint16_t, std::vector<uint16_t>> itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
-	MyMap<uint16_t, std::vector<uint16_t>> itemResultList;
-	std::vector<CraftingClass> craftingRecipes;				// Vector of crafting recipes
-	MyMap<std::string, RecipeProto> recipePrototypes;
+	MyMap<uint16_t, std::vector<uint16_t>>	itemRecipeList;	// Mapping from item type to recipe. Ie what items catalyse particular crafting recipes
+	MyMap<uint16_t, std::vector<uint16_t>>	itemResultList;
+	std::vector<CraftingClass>				craftingRecipes;	// Vector of crafting recipes
+	MyMap<std::string, uint16_t>			recipeNameToIndex;
+	MyMap<std::string, RecipeProto>			recipePrototypes;
+	MyMap<std::string, TechProto>			technologyPrototypes;
+	std::vector<std::string>				technologyOrder;
 	
 	MyMap<uint16_t, std::string> itemPrototypes;
 	MyMap<std::string, uint16_t> itemLookups;
@@ -36,8 +39,6 @@ public:
 	sf::Font guiFont;
 	std::vector<Animation> animationTemplates;
 
-	int minGround = 255;
-	int maxGround = 0;
 	//Stores sprite layers
 	SpriteVector groundSprites;
 	SpriteVector platformSprites;
@@ -51,7 +52,7 @@ public:
 	// Gui Elements
 	SpriteVector hotbarSprites;
 	MyMap<SmallPos, sf::RectangleShape> hotbarSlots;
-	MyMap<SmallPos, ItemTile> hotbar;
+	MyMap<SmallPos, BigItem> hotbar;
 	ItemTile* selectedHotbar;
 	SmallPos  hoveringHotbar;
 	SmallPos  hotbarIndex;
@@ -64,13 +65,23 @@ public:
 	bool								craftingViewShow;
 	bool								craftingViewUpdate;
 	std::vector<uint16_t>				foundRecipeList;
+	bool								craftingViewUnlocked;
 	uint16_t							craftingViewIndex;
 	SpriteVector						craftingViewSprites;
 	MyMap<SmallPos,sf::RectangleShape>	craftingViewBacks;
-	MyMap<SmallPos, ItemTile>			craftingView;
+	MyMap<SmallPos, BigItem>			craftingView;
 	SmallPos							craftingViewSize;
 	ImVec2								craftingViewDimensions;
 	ImVec2								craftingViewPos;
+
+	bool								technologyViewShow;
+	bool								technologyViewUpdate = true;
+	SpriteVector						technologyViewSprites;
+	MyMap<SmallPos, sf::RectangleShape>	technologyViewBacks;
+	MyMap<SmallPos, BigItem>			technologyView;
+	SmallPos							technologyViewSize;
+	ImVec2								technologyViewDimensions;
+	ImVec2								technologyViewPos;
 
 	std::vector<sf::Text> textOverlay;
 	MySet<uint64_t> elementExists;
@@ -143,6 +154,7 @@ public:
 	void DrawTooltips();
 	void DrawHotbar();
 	void DrawCraftingView();
+	void DrawTechnologyView();
 	void DrawSelectedRegion();
 	void DrawDebugHUD();
 	void DrawGameState(sf::RenderWindow& window);
@@ -157,7 +169,7 @@ public:
 	void MoveBots();
 	void UpdateMap();
 	void RecalculateMousePos();
-	SmallPos DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items);
-	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, ItemTile>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid);
+	SmallPos DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items);
+	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid);
 };
 extern ProgramData program;

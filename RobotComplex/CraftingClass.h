@@ -15,6 +15,7 @@ public:
 	uint8_t height;
 	uint32_t craftTicks;
 	uint16_t animationReference;
+	bool unlocked = true;
 	int CheckCrafting(Pos pos);
 	void TryCraftingOther(uint16_t item, Pos itemPos); // Tries crafting a different recipe once the previous one has finished. For chaining processes
 	bool DoCrafting(Pos pos);

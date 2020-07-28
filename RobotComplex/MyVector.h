@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 
 #include "GetFileLength.h"
-#include "ElementTypes.h"
 
 template <typename valueType>
 class MyVector : public std::vector<valueType>
@@ -55,3 +54,5 @@ public:
 		}
 	}
 };
+
+

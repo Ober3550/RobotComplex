@@ -161,8 +161,9 @@ void CraftingClass::TryCrafting(uint16_t item, Pos itemPos)
 		// Try to craft item when placed
 		for (uint16_t recipe : *recipeList)
 		{
-			if (program.craftingRecipes[recipe].DoCrafting(itemPos))
-				break;
+			if(program.craftingRecipes[recipe].unlocked)
+				if (program.craftingRecipes[recipe].DoCrafting(itemPos))
+					break;
 		}
 	}
 }
@@ -179,9 +180,13 @@ void CraftingClass::ShowRecipeAsGrid()
 			RecipeComponent recipeComp = recipe[i + row];
 			if (recipeComp.itemTile)
 			{
-				program.craftingView.insert({ SmallPos{uint8_t(i + ((width+1) * (recipeComp.resultState > 0))),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
+				ItemTile item = ItemTile(recipeComp.itemTile);
+				item.quantity = std::abs(recipeComp.resultState);
+				if (item.quantity == 0)
+					item.quantity = recipeComp.requirement;
+				program.craftingView.insert({ SmallPos{uint8_t(i + ((width+1) * (recipeComp.resultState > 0))),uint8_t(j)},  BigItem(item)});
 				if(recipeComp.requirement == 0)
-					program.craftingView.insert({ SmallPos{uint8_t(i + (width + 1)),uint8_t(j)}, ItemTile(recipeComp.itemTile) });
+					program.craftingView.insert({ SmallPos{uint8_t(i + (width + 1)),uint8_t(j)}, BigItem(recipeComp.itemTile) });
 			}
 		}
 	}

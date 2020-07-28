@@ -231,12 +231,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_AB5826A45BBB4CD08A2137CB13B97CDE"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_AD3403C34682469698305F92DE417ECB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1068,26 +1062,6 @@
             "TargetName" = "8:counter.png"
             "Tag" = "8:"
             "Folder" = "8:_B027385371F74F0784F5131C6DA77837"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AB5826A45BBB4CD08A2137CB13B97CDE"
-            {
-            "SourcePath" = "8:..\\RobotComplex\\Assets\\groundTexture8greyscale.png"
-            "TargetName" = "8:groundTexture8greyscale.png"
-            "Tag" = "8:"
-            "Folder" = "8:_634245BD6DF6467D8D9B8241CCBBCB78"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"

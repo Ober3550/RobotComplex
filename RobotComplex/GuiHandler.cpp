@@ -70,8 +70,6 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 			world.Serialize();
 			world.clear();
 			world.Deserialize(names[currIndex]);
-			program.selectedSave = names[currIndex];
-			program.gamePaused = false;
 			currentMenu = noMenu;
 		}
 		if (ImGui::Button("Back"))
@@ -126,6 +124,10 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 			FindRecipes(std::string(input));
 		}
 		ImGui::Text(resultsTitle.c_str());
+		if (program.craftingViewUnlocked)
+			ImGui::Text("Recipe: Unlocked");
+		else
+			ImGui::Text("Recipe: Locked");
 		if (ImGui::Button("Previous") && program.craftingViewIndex > 0)
 		{
 			program.craftingViewIndex--;
@@ -144,6 +146,18 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	}
 	program.DrawCraftingView();
 	
+	ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_::ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_::ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Technology Viewer"))
+		program.technologyViewShow = true;
+	else
+		program.technologyViewShow = false;
+	program.technologyViewDimensions = ImGui::GetWindowSize();
+	program.technologyViewPos = ImGui::GetWindowPos();
+	ImGui::Text("Next Objective:");
+	ImGui::End();
+	program.DrawTechnologyView();
+
 	if (program.showDebugInfo)
 		program.DrawDebugHUD();
 
@@ -156,6 +170,13 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 		window.draw(element.second);
 	}
 	program.craftingViewSprites.draw(window);
+
+	for (auto element : program.technologyViewBacks)
+	{
+		window.draw(element.second);
+	}
+	program.technologyViewSprites.draw(window);
+
 	for (sf::Text sprite : program.textOverlay)
 	{
 		window.draw(sprite);

@@ -84,3 +84,22 @@ std::string lowercase(std::string string)
 	}
 	return string;
 }
+namespace strings {
+	void Serialize(std::vector<std::string>* vec, std::string filename)
+	{
+		std::ofstream myfile;
+		for (auto& value : *vec)
+		{
+			myfile << value << '\n';
+		}
+	}
+
+	void Deserialize(std::vector<std::string>* vec, std::string filename)
+	{
+		std::ifstream myfile(filename);
+		std::string str;
+		while (std::getline(myfile, str)) {
+			vec->emplace_back(str);
+		}
+	}
+}

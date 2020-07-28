@@ -12,6 +12,9 @@ namespace GC
 	static constexpr uint8_t  chunkSize = 32;
 	static constexpr uint16_t chunkTileNum = 1024;
 
+	static constexpr uint8_t reservedGround = 63;
+	static constexpr uint8_t collideGround = 31;
+
 	static constexpr uint8_t tileSize = 32;
 	static constexpr uint8_t halfTileSize = 16;
 	static constexpr uint8_t tileShift = 5;

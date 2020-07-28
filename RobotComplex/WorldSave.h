@@ -45,6 +45,10 @@ public:
 	MyMap<uint8_t, uint8_t> oldLogicNewLogic;
 	std::vector<uint16_t> oldLogicSize;
 
+	std::vector<std::string> unlockedTechnologies;
+	std::string currentTechnology;
+	MyMap<uint16_t, int> resourcesDelivered;
+
 	FastNoiseSIMD* noiseRef;
 	GroundTile*		 GetGroundTile(Pos pos);
 	ItemTile*		 GetItemTile(Pos pos);
@@ -55,30 +59,8 @@ public:
 	LogicTile*		 GetLogicTile(uint64_t encodedPos);
 	CraftingProcess* GetCrafting(Pos pos);
 	CraftingProcess* GetCrafting(uint64_t encodedPos);
-	WorldSave()
-	{
-		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
-		noiseRef->SetFractalOctaves(6);
-		noiseRef->SetFractalLacunarity(2);
-		noiseRef->SetFractalGain(0.5f);
-		noiseRef->SetAxisScales(0.4f,0.4f,0.4f);
-		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
-		this->name = "";
-		this->tick = 0;
-	}
-	WorldSave(std::string name)
-	{
-		this->seed = int(std::hash<std::string>{}(name));
-		noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
-		noiseRef->SetFractalOctaves(6);
-		noiseRef->SetFractalLacunarity(2);
-		noiseRef->SetFractalGain(0.5f);
-		noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
-		noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
-		noiseRef->SetSeed(seed);
-		this->name = name;
-		this->tick = 0;
-	}
+	WorldSave();
+	WorldSave(std::string name);
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);
 	bool PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft); // bool is for whether the robot should move after a failed operation
@@ -99,5 +81,6 @@ public:
 	void DeserializeMisc(std::string filename);
 	void clear();
 	void PasteSelection();
+	void FindNextTechnology();
 };
 extern WorldSave world;

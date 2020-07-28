@@ -6,6 +6,40 @@
 #include "FindInVector.h"
 #include "MyStrings.h"
 
+WorldSave::WorldSave()
+{
+	noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
+	noiseRef->SetFractalOctaves(6);
+	noiseRef->SetFractalLacunarity(2);
+	noiseRef->SetFractalGain(0.5f);
+	noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
+	noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
+	this->name = "";
+	this->tick = 0;
+}
+
+WorldSave::WorldSave(std::string name)
+{
+	noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
+	noiseRef->SetFractalOctaves(6);
+	noiseRef->SetFractalLacunarity(2);
+	noiseRef->SetFractalGain(0.5f);
+	noiseRef->SetAxisScales(0.4f, 0.4f, 0.4f);
+	noiseRef->SetNoiseType(FastNoiseSIMD::NoiseType::ValueFractal);
+	this->seed = int(std::hash<std::string>{}(name));
+	noiseRef->SetSeed(seed);
+	this->name = name;
+	this->tick = 0;
+	for (auto tech : program.technologyPrototypes)
+	{
+		tech.second.Lock();
+	}
+	if (program.technologyOrder.size() > 0)
+	{
+		currentTechnology = program.technologyOrder[0];
+	}
+}
+
 void WorldSave::Serialize(std::string filename)
 {
 	if (!CreateDirectory("saves", NULL) && ERROR_ALREADY_EXISTS != GetLastError())
@@ -28,11 +62,20 @@ void WorldSave::Serialize(std::string filename)
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 	SerializeItemNames("saves/" + filename + "/itemNames.txt");
 	SerializeMisc("saves/" + filename + "/misc.txt");
+	resourcesDelivered.Serialize("saves/" + filename + "/resourcesDelivered.bin");
 	program.hotbar.Serialize("saves/" + filename + "/inventory.bin");
+	strings::Serialize(&unlockedTechnologies, "saves/" + filename + "/unlockedTechnologies.txt");
 }
+
+
+
 void WorldSave::Deserialize(std::string filename)
 {
 	this->clear();
+	for (auto tech : program.technologyPrototypes)
+	{
+		tech.second.Lock();
+	}
 	world.name = filename;
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
@@ -48,6 +91,28 @@ void WorldSave::Deserialize(std::string filename)
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
 	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin", world.oldItemNewItem);
+	resourcesDelivered.Deserialize("saves/" + filename + "/resourcesDelivered.bin");
+	strings::Deserialize(&unlockedTechnologies, "saves/" + filename + "/unlockedTechnologies.txt");
+
+	for (std::string tech : unlockedTechnologies)
+	{
+		auto techProto = program.technologyPrototypes.find(tech);
+		if(techProto != program.technologyPrototypes.end())
+		{
+			techProto->second.Unlock();
+		}
+	}
+	currentTechnology = "";
+	FindNextTechnology();
+
+	// Don't forget to set the seeds so world gen stays consistent
+	srand(std::hash<std::string>{}(filename));
+
+	this->seed = int(std::hash<std::string>{}(name));
+	noiseRef->SetSeed(seed);
+
+	program.selectedSave = filename;
+	program.gamePaused = false;
 }
 
 void WorldSave::clear()

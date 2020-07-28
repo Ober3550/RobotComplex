@@ -291,7 +291,9 @@ void GuiHandler::CreateActions()
 					{
 						if (world.PlaceElement(program.mouseHovering, kv->second.itemTile))
 						{
-							CraftingClass::TryCrafting(kv->second.itemTile, program.mouseHovering);
+							// Item may be removed because of hub
+							if(world.items.find(program.mouseHovering) != world.items.end())
+								CraftingClass::TryCrafting(kv->second.itemTile, program.mouseHovering);
 							kv->second.quantity--;
 							if (kv->second.quantity == 0)
 							{

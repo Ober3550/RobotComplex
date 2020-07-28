@@ -10,6 +10,8 @@
 #include "Oregen.h"
 #include "FindInVector.h"
 #include <math.h>
+#include "MyMod.h"
+#include "GroundTypes.h"
 
 void WorldSave::GenerateChunk(Pos pos)
 {
@@ -27,8 +29,20 @@ void WorldSave::GenerateChunk(Pos pos)
 		{
 			Pos currentPos = { (pos.x << GC::chunkShift) + (i & GC::chunkMask), (pos.y << GC::chunkShift) + (i / (GC::chunkMask + 1)) };
 			// For some reason mapping x to y fixes the perlin sampling
-			float normalized = ((chunkNoise[(currentPos.x & GC::chunkMask) * 32 + (currentPos.y & GC::chunkMask)] + 1.0f) / 2.0f);
-			newChunk->tiles[i] = GroundTile{(uint8_t)(normalized * 512)};
+			float normalized = (chunkNoise[(currentPos.x & GC::chunkMask) * 32 + (currentPos.y & GC::chunkMask)] + 1.0f) / 2.0f;
+			int tile = normalized * 256;
+			if (tile < 128)
+			{
+				newChunk->tiles[i] = GroundTile{ water };
+			}
+			else if (tile < 140)
+			{
+				newChunk->tiles[i] = GroundTile{ sand };
+			}
+			else
+			{
+				newChunk->tiles[i] = GroundTile{ uint8_t(normalized * 192 + 64)};
+			}
 		}
 		GenerateOre(pos);
 	}
@@ -45,8 +59,7 @@ void WorldSave::GenerateOre(Pos pos)
 			adjust.y = -1;
 		region = region / oreRarities[i];
 		// Some jank to get the random seed to work properly
-		srand(((uint32_t(region.y + adjust.y) << 16) | uint16_t(region.x + adjust.x)) ^ (i * 41 % 17));
-		Pos generate = Pos{ rand(),rand() };
+		Pos generate = Pos{ rand(), rand() };
 		generate = (generate % (oreRarities[i] * GC::chunkSize)) + ((region + adjust) * oreRarities[i]) * GC::chunkSize;
 		if (generate.ChunkPosition() == pos)
 		{
@@ -61,15 +74,21 @@ void WorldSave::GenerateOre(Pos pos)
 				{
 					for (int y = generate.y - size; y < generate.y + size; y++)
 					{
-						int distance = pow(generate.x - x, 2) + pow(generate.y - y, 2);
-						int quantity = size - sqrt(distance);
-						if (quantity < 0)
-							quantity = 0;
-						if (quantity > 0)
+						if (auto ground = world.GetGroundTile({ x,y }))
 						{
-							newItem.quantity = quantity * 7;
-							Pos newPos = Pos{ x, y };
-							world.items.insert({ newPos.CoordToEncoded(), newItem });
+							if (ground->groundTile > GC::collideGround)
+							{
+								int distance = pow(generate.x - x, 2) + pow(generate.y - y, 2);
+								int quantity = size - sqrt(distance);
+								if (quantity < 0)
+									quantity = 0;
+								if (quantity > 0)
+								{
+									newItem.quantity = quantity * 7;
+									Pos newPos = Pos{ x, y };
+									world.items.insert({ newPos.CoordToEncoded(), newItem });
+								}
+							}
 						}
 					}
 				}
@@ -533,4 +552,20 @@ void WorldSave::PasteSelection()
 			}
 	}
 	program.paste = false;
+}
+
+void WorldSave::FindNextTechnology()
+{
+	for (std::string tech : program.technologyOrder)
+	{
+		auto techProto = program.technologyPrototypes.find(tech);
+		if (techProto != program.technologyPrototypes.end())
+		{
+			if (techProto->second.unlocked == false)
+			{
+				currentTechnology = techProto->first;
+				break;
+			}
+		}
+	}
 }

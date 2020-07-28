@@ -17,13 +17,10 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
-//agui::Gui *gui = NULL;
-//agui::SFML2Input* inputHandler = NULL;
-//agui::SFML2Graphics* graphicsHandler = NULL;
-agui::Font *defaultFont = NULL;
 std::thread worldUpdate;
 
 sf::Texture* groundTexture;
+std::vector<sf::Texture*> groundTextures;
 std::vector<sf::Texture*> itemTextures;
 std::unordered_map<uint8_t, sf::Texture*> logicTextures;
 std::vector<sf::Texture*> animationTextures;
@@ -39,33 +36,6 @@ GuiHandler handler;
 bool maximize = true;
 constexpr uint8_t FRAMERATE = 60;
 constexpr uint8_t UPDATERATE = 20;
-
-//void initializeAgui(sf::RenderTarget& target)
-//{
-//	//Set the image loader
-//	agui::Image::setImageLoader(new agui::SFML2ImageLoader());
-//	//Set the font loader
-//	agui::Font::setFontLoader(new agui::SFML2FontLoader());
-//	//Instance the input handler
-//	inputHandler = new agui::SFML2Input();
-//	//Instance the graphics handler
-//	graphicsHandler = new agui::SFML2Graphics(target);
-//	agui::Color::setPremultiplyAlpha(false);
-//	//Instance the gui
-//	gui = new agui::Gui();
-//	//Set the input handler
-//	gui->setInput(inputHandler);
-//	//Set the graphics handler
-//	gui->setGraphics(graphicsHandler);
-//	//Set the font
-//	std::string font = "assets/DejaVuSans.ttf";
-//	defaultFont = agui::Font::load(font, 16);
-//	program.guiFont.loadFromFile(font);
-//	//Setting a global font is required and failure to do so will crash.
-//	agui::Widget::setGlobalFont(defaultFont);
-//	//Set icon image
-//	assert(icon.loadFromFile("assets/robotIcon.png"));
-//}
 
 void UpdateWorld()
 {
@@ -145,8 +115,6 @@ int main()
 
 	handler.FindRecipes("");
 
-	// The time it takes for the computer to startup the app will be used to seed the rng
-	srand(deltaClock.getElapsedTime().asMicroseconds());
 	while (window.isOpen() && program.running)
 	{
 		sf::Event event;

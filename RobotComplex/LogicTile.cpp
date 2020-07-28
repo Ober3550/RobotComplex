@@ -265,6 +265,15 @@ void LogicTile::DoItemLogic(Pos currentPos)
 			}
 		}
 	}break;
+	case hub:
+	{
+		if (ItemTile* item = world.GetItemTile(currentPos))
+		{
+			world.resourcesDelivered[item->itemTile] += item->quantity;
+			program.technologyViewUpdate = true;
+			world.items.erase(currentPos);
+		}
+	}break;
 	default:
 		break;
 	}

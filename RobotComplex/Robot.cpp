@@ -8,6 +8,7 @@
 #include "Facing.h"
 #include "ReservedItems.h"
 #include "Textures.h"
+#include "GroundTypes.h"
 
 void Robot::SetFacing(Facing direction)
 {
@@ -33,33 +34,37 @@ bool Robot::Move(Pos pos)
 			if (!world.robotMovingTo.contains(newPos.CoordToEncoded()))
 			{
 				// Robot cannot move into void.
-				if (GroundTile * groundTile = world.GetGroundTile(newPos))
+				if (GroundTile* groundTile = world.GetGroundTile(newPos))
 				{
-					// If next tile has an item on it and robot is not carying an item
-					// reduce the quantity of the tile and assign the item id to the robot
-					bool step = true;
-					if (ItemTile* nextTile = world.GetItemTile(newPos))
+					// Robots can't step onto water
+					if (groundTile->groundTile > GC::collideGround)
 					{
-						std::vector<Pos> pushStack = { newPos };
-						step = world.PushItems(&pushStack, this->facing, GC::robotStrength);
-						if (!pushStack.empty())
+						// If next tile has an item on it and robot is not carying an item
+						// reduce the quantity of the tile and assign the item id to the robot
+						bool step = true;
+						if (ItemTile* nextTile = world.GetItemTile(newPos))
 						{
-							for (uint16_t i = 1; i < pushStack.size(); i++)
+							std::vector<Pos> pushStack = { newPos };
+							step = world.PushItems(&pushStack, this->facing, GC::robotStrength);
+							if (!pushStack.empty())
 							{
-								world.itemMovingTo.insert(pushStack[i].CoordToEncoded());
-								world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
+								for (uint16_t i = 1; i < pushStack.size(); i++)
+								{
+									world.itemMovingTo.insert(pushStack[i].CoordToEncoded());
+									world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
+								}
 							}
 						}
-					}
-					if (step)
-					{
-						world.robotMovingTo.insert(newPos.CoordToEncoded());
-						world.nextRobotPos.insert({ pos.CoordToEncoded(), this->facing });
-						return true;
-					}
-					else
-					{
-						bool pushFailed = true;
+						if (step)
+						{
+							world.robotMovingTo.insert(newPos.CoordToEncoded());
+							world.nextRobotPos.insert({ pos.CoordToEncoded(), this->facing });
+							return true;
+						}
+						else
+						{
+							bool pushFailed = true;
+						}
 					}
 				}
 			}

@@ -10,7 +10,7 @@
 #include "CraftingProcess.h"
 #include "ByteColors.h"
 #include "PrototypeLoader.h"
-#include "RecipePrototype.h"
+#include "Prototypes.h"
 #include "Textures.h"
 #include "FindInVector.h"
 #include "Animation.h"
@@ -94,7 +94,9 @@ void LoadPrototypes()
 	LoadAllTextures();
 
 	// Ground Tiles
-	groundTexture = LoadTexture("groundTexture8greyscale.png");
+	groundTexture = LoadTexture("ground/groundTexture8greyscale.png");
+	groundTextures.emplace_back(LoadTexture("ground/water.png"));
+	groundTextures.emplace_back(LoadTexture("ground/sand.png"));
 
 	lua_State* L = luaL_newstate();
 	std::vector<std::string> tempItems;
@@ -253,6 +255,7 @@ void LoadPrototypes()
 		results.clear();
 		CraftingClass newRecipe;
 		newRecipe.recipeIndex = uint16_t(program.craftingRecipes.size());
+		program.recipeNameToIndex.insert({ recipeProto.first,uint16_t(program.craftingRecipes.size()) });
 
 		// Recipe Population
 		std::vector<RecipeComponent> recipe;
@@ -296,6 +299,85 @@ void LoadPrototypes()
 			program.itemResultList[index].emplace_back(newRecipe.recipeIndex);
 		}
 	}
+
+	// Loading technologies
+
+	// Recipes loaded from lua
+	if (CheckLua(L, luaL_dofile(L, "data/technology.lua")))
+	{
+		lua_getglobal(L, "technology");
+		if (lua_istable(L, -1))
+		{
+			lua_pushnil(L);
+			// stack now contains: -1 => nil; -2 => table
+			while (lua_next(L, -2))
+			{
+				std::string techName = "";
+				TechProto newTech;
+				lua_pushvalue(L, -2);
+				if (lua_isstring(L, -1))
+				{
+					techName = lua_tostring(L, -1);
+				}
+				if (lua_istable(L, -2))
+				{
+					lua_pushstring(L, "requirement");
+					lua_gettable(L, -3);
+					if (lua_istable(L, -1))
+					{
+						lua_pushnil(L);
+						while (lua_next(L, -2))
+						{
+							BigItemProto newComponent;
+							// For Components
+							lua_pushvalue(L, -2);
+							int index;
+							if (lua_isnumber(L, -1))
+								index = lua_tonumber(L, -1);
+							if (lua_istable(L, -2))
+							{
+								lua_rawgeti(L, -2, 1);
+								if (lua_isstring(L, -1))
+									newComponent.itemName = lua_tostring(L, -1);
+								lua_pop(L, 1);
+
+								lua_rawgeti(L, -2, 2);
+								if (lua_isnumber(L, -1))
+									newComponent.quantity = lua_tonumber(L, -1);
+								lua_pop(L, 1);
+							}
+							lua_pop(L, 2);
+							newTech.requirements.emplace_back(newComponent);
+						}
+					}
+					lua_pop(L, 1);
+
+					lua_pushstring(L, "unlocks");
+					lua_gettable(L, -3);
+					if (lua_istable(L, -1))
+					{
+						lua_pushnil(L);
+						while (lua_next(L, -2))
+						{
+							std::string newUnlock;
+							// For Components
+							lua_pushvalue(L, -2);
+							if (lua_isstring(L, -2))
+								newUnlock = lua_tostring(L, -2);
+							lua_pop(L, 2);
+
+							newTech.unlocks.emplace_back(newUnlock);
+						}
+					}
+					lua_pop(L, 1);
+				}
+				lua_pop(L, 2);
+				program.technologyPrototypes.insert({ techName, newTech });
+				program.technologyOrder.emplace_back(techName);
+			}
+			lua_pop(L, 1);
+		}
+	}
 }
 
 /*
@@ -321,10 +403,15 @@ void LoadLogicToHotbar()
 {
 	uint8_t robot = 255;
 	uint8_t godQuantity = 255;
-	program.hotbar.insert({ SmallPos{0,1}, ItemTile(program.itemsEnd + robot,			godQuantity) });
-	program.hotbar.insert({ SmallPos{1,1}, ItemTile(program.itemsEnd + redirector,		godQuantity) });
-	program.hotbar.insert({ SmallPos{2,1}, ItemTile(program.itemsEnd + belt,			godQuantity) });
-	program.hotbar.insert({ SmallPos{3,1}, ItemTile(program.itemsEnd + shover,			godQuantity) });
-	program.hotbar.insert({ SmallPos{4,1}, ItemTile(program.itemsEnd + wire,			godQuantity) });
-	program.hotbar.insert({ SmallPos{5,1}, ItemTile(program.itemsEnd + inverter,		godQuantity) });
+	program.hotbar.insert({ SmallPos{0,1}, BigItem(program.itemsEnd + robot,			1) });
+	program.hotbar.insert({ SmallPos{1,1}, BigItem(program.itemsEnd + redirector,		8) });
+	program.hotbar.insert({ SmallPos{2,1}, BigItem(program.itemsEnd + belt,				4) });
+	program.hotbar.insert({ SmallPos{3,1}, BigItem(program.itemsEnd + hub,				1) });
+	//program.hotbar.insert({ SmallPos{0,1}, ItemTile(program.itemsEnd + robot,			godQuantity) });
+	//program.hotbar.insert({ SmallPos{1,1}, ItemTile(program.itemsEnd + redirector,		godQuantity) });
+	//program.hotbar.insert({ SmallPos{2,1}, ItemTile(program.itemsEnd + belt,			godQuantity) });
+	//program.hotbar.insert({ SmallPos{3,1}, ItemTile(program.itemsEnd + shover,			godQuantity) });
+	//program.hotbar.insert({ SmallPos{4,1}, ItemTile(program.itemsEnd + wire,			godQuantity) });
+	//program.hotbar.insert({ SmallPos{5,1}, ItemTile(program.itemsEnd + inverter,		godQuantity) });
+	//program.hotbar.insert({ SmallPos{6,1}, ItemTile(program.itemsEnd + hub,				godQuantity) });
 }

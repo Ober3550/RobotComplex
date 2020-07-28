@@ -14,6 +14,7 @@
 #include "Pos.h"
 #include "ItemTile.h"
 #include "GetFileLength.h"
+#include "Prototypes.h"
 
 #ifndef __MYMAP_H__
 #define __MYMAP_H__
@@ -105,6 +106,61 @@ public:
 			while (!myfile.eof()) {
 				myfile.read((char*)key, sizeof(keyType));
 				myfile.read((char*)value, sizeof(ItemTile));
+				if (uint16_t* newItemNum = newMap.GetValue(value->itemTile))
+				{
+					value->itemTile = *newItemNum;
+					this->insert({ *key, *value });
+				}
+			}
+			myfile.close();
+		}
+	}
+};
+
+template <typename keyType>
+class MyMap<keyType, BigItem> : public absl::flat_hash_map<keyType, BigItem>
+{
+public:
+	BigItem* GetValue(keyType key)
+	{
+		auto find = this->find(key);
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	BigItem* GetValue(Pos key)
+	{
+		auto find = this->find(key.CoordToEncoded());
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	void Serialize(std::string filename)
+	{
+		std::ofstream myfile;
+		myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
+		if (myfile.is_open())
+		{
+			for (auto& kv : *this)
+			{
+				myfile.write((char*)&(kv.first), sizeof(keyType));
+				myfile.write((char*)&(kv.second.itemTile), sizeof(uint16_t));
+				myfile.write((char*)&(kv.second.quantity), sizeof(int));
+			}
+			myfile.close();
+		}
+	}
+	void Deserialize(std::string filename, MyMap<uint16_t, uint16_t> newMap)
+	{
+		std::ifstream myfile;
+		myfile.open(filename, std::ios::in | std::ios::binary);
+		int fileLength = GetFileLength(filename);
+		if (myfile.is_open() && fileLength > 0)
+		{
+			myfile.seekg(0, std::ios::beg);
+			keyType* key = new keyType();
+			BigItem* value = new BigItem();
+			while (!myfile.eof()) {
+				
+				myfile.read((char*)key, sizeof(keyType));
+				myfile.read((char*)&value->itemTile, sizeof(uint16_t));
+				myfile.read((char*)&value->quantity, sizeof(int));
 				if (uint16_t* newItemNum = newMap.GetValue(value->itemTile))
 				{
 					value->itemTile = *newItemNum;

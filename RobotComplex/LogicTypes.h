@@ -9,6 +9,7 @@ static const std::unordered_map<uint8_t, std::string> logicTypes = {
 	{4,"belt"},
 	{5,"shover"},
 	{6,"wirebridge"},
+	{7,"hub"},
 	{128,"inverter"},
 	{129,"pressureplate"},
 	{130,"booster"},
@@ -28,6 +29,7 @@ enum LogicType : uint8_t {
 	belt,
 	shover,
 	wirebridge,
+	hub,
 
 	// Unidirectional Output
 	inverter = 128,
