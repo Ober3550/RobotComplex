@@ -24,6 +24,7 @@ public:
 	MenuStack currentMenu = mainMenu;
 	bool craftingViewShow = true;
 	std::string resultsTitle = "";
+	bool populateResults = true;
 
 	// Window context
 	//sf::RenderWindow* window;

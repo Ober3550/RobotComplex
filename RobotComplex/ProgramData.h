@@ -27,8 +27,7 @@ public:
 	std::vector<CraftingClass>				craftingRecipes;	// Vector of crafting recipes
 	MyMap<std::string, uint16_t>			recipeNameToIndex;
 	MyMap<std::string, RecipeProto>			recipePrototypes;
-	MyMap<std::string, TechProto>			technologyPrototypes;
-	std::vector<std::string>				technologyOrder;
+	std::vector<TechProto>					technologyPrototypes;
 	
 	MyMap<uint16_t, std::string> itemPrototypes;
 	MyMap<std::string, uint16_t> itemLookups;
@@ -127,6 +126,7 @@ public:
 	bool running = true;
 	bool gamePaused = true;
 	bool acceptGameInput = true;
+	bool anyGuiHovered = false;
 	std::mutex worldMutex;
 
 	// Clock timing variables

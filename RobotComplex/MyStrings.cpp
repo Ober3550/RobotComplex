@@ -87,7 +87,7 @@ std::string lowercase(std::string string)
 namespace strings {
 	void Serialize(std::vector<std::string>* vec, std::string filename)
 	{
-		std::ofstream myfile;
+		std::ofstream myfile(filename);
 		for (auto& value : *vec)
 		{
 			myfile << value << '\n';

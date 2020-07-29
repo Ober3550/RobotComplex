@@ -115,6 +115,7 @@ int main()
 
 	handler.FindRecipes("");
 
+	srand(deltaClock.getElapsedTime().asMicroseconds());
 	while (window.isOpen() && program.running)
 	{
 		sf::Event event;

@@ -358,6 +358,7 @@ uint16_t WorldSave::ChangeLogic(Pos pos, int quantity, uint8_t logicType)
 				logic->color2 = logic->color;
 				world.updateNext.insert({ pos.CoordToEncoded(),1 });
 			}
+			world.updateQueueD.insert({ pos.CoordToEncoded() });
 		}
 		if (logic->quantity == 0)
 		{
@@ -388,6 +389,7 @@ uint16_t WorldSave::ChangeLogic(Pos pos, int quantity, uint8_t logicType)
 			{
 				world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
 			}
+			world.updateQueueD.insert({ pos.CoordToEncoded() });
 			return logicPlace.logicType + program.itemsEnd;
 		}
 	}
@@ -556,16 +558,12 @@ void WorldSave::PasteSelection()
 
 void WorldSave::FindNextTechnology()
 {
-	for (std::string tech : program.technologyOrder)
+	for (TechProto tech : program.technologyPrototypes)
 	{
-		auto techProto = program.technologyPrototypes.find(tech);
-		if (techProto != program.technologyPrototypes.end())
+		if (tech.unlocked == false)
 		{
-			if (techProto->second.unlocked == false)
-			{
-				currentTechnology = techProto->first;
-				break;
-			}
+			currentTechnology = tech;
+			break;
 		}
 	}
 }

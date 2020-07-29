@@ -57,6 +57,8 @@ public:
 
 class TechProto {
 public:
+	std::string name;
+	std::string tips;
 	std::vector<BigItemProto> requirements;
 	std::vector<std::string>	 unlocks;
 	bool unlocked = false;

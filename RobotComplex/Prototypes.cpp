@@ -75,7 +75,8 @@ void TechProto::ShowRequirementsAsGrid()
 {
 	program.technologyView.clear();
 	int width = std::max(requirements.size(), unlocks.size());
-	program.technologyViewSize = {uint8_t(width * 2 + 1), 1 };
+	width = int(std::ceil(sqrt(float(width))));
+	program.technologyViewSize = {uint8_t(width * 2 + 1), uint8_t(width) };
 	bool completedTech = true;
 	for (int i = 0; i < requirements.size(); i++)
 	{
@@ -90,19 +91,17 @@ void TechProto::ShowRequirementsAsGrid()
 			recipe.quantity = 0;
 		}
 		if(recipe.itemTile)
-			program.technologyView.insert({ SmallPos{uint8_t(i), 0}, recipe });
+			program.technologyView.insert({ SmallPos{uint8_t(i%width), uint8_t(i/width)}, recipe });
 	}
 	if (completedTech)
 	{
-		Unlock();
-		program.technologyView.clear();
-		world.FindNextTechnology();
+		world.techCompleted = true;
 		return;
 	}
 	for (int i=0;i<unlocks.size();i++)
 	{
 		std::string unlock = unlocks[i];
 		ItemTile item = ItemTile(program.itemLookups[unlock]);
-		program.technologyView.insert({ SmallPos{uint8_t(width + 1 + i), 0}, item });
+		program.technologyView.insert({ SmallPos{uint8_t(width + 1 + i % width), uint8_t(i / width)}, item });
 	}
 }

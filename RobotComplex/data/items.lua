@@ -13,5 +13,9 @@ items = {
 	"copper_plate",
 	"copper_wire",
 	"iron_plate",
-	"iron_gear"
+	"iron_gear",
+    "steel_plate",
+    "motor",
+    "bronze_ingot",
+    "iron_rod"
 }

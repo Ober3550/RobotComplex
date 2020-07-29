@@ -46,7 +46,8 @@ public:
 	std::vector<uint16_t> oldLogicSize;
 
 	std::vector<std::string> unlockedTechnologies;
-	std::string currentTechnology;
+	TechProto   currentTechnology;
+	bool		techCompleted = false;
 	MyMap<uint16_t, int> resourcesDelivered;
 
 	FastNoiseSIMD* noiseRef;

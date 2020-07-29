@@ -28,8 +28,8 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	{
 		window.draw(sprite);
 	}
-
-	program.acceptGameInput = !ImGui::IsAnyWindowHovered();
+	program.anyGuiHovered = ImGui::IsAnyWindowHovered();
+	program.acceptGameInput = !ImGui::IsAnyWindowFocused();
 	const int windowWidth = 300;
 	const int windowHeight = 250;
 	ImGui::SetNextWindowPos(ImVec2((program.windowWidth - windowWidth) * 0.5f, (program.windowHeight - windowHeight) * 0.5f), ImGuiCond_::ImGuiCond_FirstUseEver);
@@ -52,9 +52,17 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	case saveMenu:
 	{
 		ImGui::Begin("Save Menu");
+		static char input[40];
+		ImGui::InputText("", input, 40);
+		if (std::string(input) == "" && populateResults)
+		{
+			size_t length = std::string(verbs[rand() % verbs.size()] + nouns[rand() % nouns.size()]).copy(input, 40);
+			input[length] = '\0';
+			populateResults = false;
+		}
 		if (ImGui::Button("New World"))
 		{
-			program.selectedSave = verbs[rand() % verbs.size()] + nouns[rand() % nouns.size()];
+			program.selectedSave = input;
 			world = WorldSave(program.selectedSave);
 			program.gamePaused = false;
 			world.Serialize();
@@ -73,7 +81,10 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 			currentMenu = noMenu;
 		}
 		if (ImGui::Button("Back"))
+		{
+			populateResults = true;
 			currentMenu = mainMenu;
+		}
 		ImGui::End();
 	}break;
 	case controlMenu:
@@ -147,14 +158,15 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	program.DrawCraftingView();
 	
 	ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_::ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_::ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_::ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Technology Viewer"))
 		program.technologyViewShow = true;
 	else
 		program.technologyViewShow = false;
 	program.technologyViewDimensions = ImGui::GetWindowSize();
 	program.technologyViewPos = ImGui::GetWindowPos();
-	ImGui::Text("Next Objective:");
+	ImGui::Text(std::string("Next Objective: "+world.currentTechnology.name).c_str());
+	ImGui::Text(std::string("Tips: " + world.currentTechnology.tips).c_str());
 	ImGui::End();
 	program.DrawTechnologyView();
 

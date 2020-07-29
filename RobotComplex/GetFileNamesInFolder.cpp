@@ -1,6 +1,8 @@
 #include "GetFileNamesInFolder.h"
 #include <cassert>
 std::vector<std::string> getNamesInFolder(std::string folder){
+	if (!CreateDirectory(folder.c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError())
+		return std::vector<std::string>();
 	std::vector<std::string> names;
 	std::string pattern(folder);
 	pattern.append("\\*");
@@ -18,6 +20,8 @@ std::vector<std::string> getNamesInFolder(std::string folder){
 }
 std::vector<std::string> getFileNamesInFolder(std::string folder)
 {
+	if (!CreateDirectory(folder.c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError())
+		return std::vector<std::string>();
 	std::vector<std::string> names = getNamesInFolder(folder);
 	for (std::vector<std::string>::iterator iter = names.begin(); iter < names.end(); iter++)
 	{
@@ -34,6 +38,8 @@ std::vector<std::string> getFileNamesInFolder(std::string folder)
 }
 std::vector<std::string> getFolderNamesInFolder(std::string folder)
 {
+	if (!CreateDirectory(folder.c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError())
+		return std::vector<std::string>();
 	std::vector<std::string> names = getNamesInFolder(folder);
 	for (std::vector<std::string>::iterator iter = names.begin(); iter < names.end();iter++)
 	{

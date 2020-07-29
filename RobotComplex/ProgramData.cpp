@@ -296,25 +296,28 @@ void ProgramData::DrawUpdateCounter()
 }
 void ProgramData::DrawTooltips()
 {
-	if (LogicTile* logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
+	if (!program.anyGuiHovered)
 	{
-		program.selectedLogicTile = logic;
-	}
-	else
-	{
-		program.selectedLogicTile = nullptr;
-	}
-	if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
-	{
-		if (tile->itemTile > 2)
+		if (LogicTile* logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
 		{
-			std::string quantity = std::to_string(tile->quantity);
-			CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), tile->GetTooltip() + " " + quantity, Align::centre);
+			program.selectedLogicTile = logic;
 		}
-	}
-	else if (program.selectedLogicTile)
-	{
-		CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.itemTooltips[program.selectedLogicTile->logicType + program.itemsEnd], Align::centre);
+		else
+		{
+			program.selectedLogicTile = nullptr;
+		}
+		if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
+		{
+			if (tile->itemTile > 2)
+			{
+				std::string quantity = std::to_string(tile->quantity);
+				CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), tile->GetTooltip() + " " + quantity, Align::centre);
+			}
+		}
+		else if (program.selectedLogicTile)
+		{
+			CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.itemTooltips[program.selectedLogicTile->logicType + program.itemsEnd], Align::centre);
+		}
 	}
 }
 
@@ -951,7 +954,7 @@ void ProgramData::DrawCraftingView()
 			float viewScaleB = (program.craftingViewDimensions.y - craftingViewEndHeight - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
 			x += border / 2;
 			float viewScale = std::min(viewScaleA, viewScaleB);
-			DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, north, red, false);
+			DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, south, red, false);
 			DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
 		}
 	}
@@ -959,7 +962,7 @@ void ProgramData::DrawCraftingView()
 
 void ProgramData::DrawTechnologyView()
 {
-	if (world.currentTechnology != "")
+	if (world.currentTechnology.name != "")
 	{
 		program.technologyViewBacks.clear();
 		program.technologyViewSprites.clear();
@@ -967,10 +970,26 @@ void ProgramData::DrawTechnologyView()
 		{
 			if (program.technologyViewUpdate)
 			{
-				program.technologyPrototypes[world.currentTechnology].ShowRequirementsAsGrid();
+				for (auto& tech : program.technologyPrototypes)
+				{
+					if (tech.name == world.currentTechnology.name)
+					{
+						tech.ShowRequirementsAsGrid();
+						if (world.techCompleted)
+						{
+							world.techCompleted = false;
+							tech.Unlock();
+							program.technologyView.clear();
+							world.unlockedTechnologies.emplace_back(tech.name);
+							world.FindNextTechnology();
+						}
+						else
+							break;
+					}
+				}
 				program.technologyViewUpdate = false;
 			}
-			float windowEndHeight = 40;
+			float windowEndHeight = 60;
 			float x = program.technologyViewPos.x - program.windowWidth * 0.5f;
 			float y = program.technologyViewPos.y - program.windowHeight * 0.5f + windowEndHeight;
 			float border = 20;

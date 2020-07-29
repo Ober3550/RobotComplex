@@ -32,18 +32,16 @@ WorldSave::WorldSave(std::string name)
 	this->tick = 0;
 	for (auto tech : program.technologyPrototypes)
 	{
-		tech.second.Lock();
+		tech.Lock();
 	}
-	if (program.technologyOrder.size() > 0)
+	if (program.technologyPrototypes.size() > 0)
 	{
-		currentTechnology = program.technologyOrder[0];
+		currentTechnology = program.technologyPrototypes[0];
 	}
 }
 
 void WorldSave::Serialize(std::string filename)
 {
-	if (!CreateDirectory("saves", NULL) && ERROR_ALREADY_EXISTS != GetLastError())
-		return;
 	if (!CreateDirectory(("saves/" + filename).c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError())
 		return;
 	// Before saving the robots make sure to stop the one that the player's meant to be controlling
@@ -74,7 +72,7 @@ void WorldSave::Deserialize(std::string filename)
 	this->clear();
 	for (auto tech : program.technologyPrototypes)
 	{
-		tech.second.Lock();
+		tech.Lock();
 	}
 	world.name = filename;
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
@@ -94,15 +92,18 @@ void WorldSave::Deserialize(std::string filename)
 	resourcesDelivered.Deserialize("saves/" + filename + "/resourcesDelivered.bin");
 	strings::Deserialize(&unlockedTechnologies, "saves/" + filename + "/unlockedTechnologies.txt");
 
-	for (std::string tech : unlockedTechnologies)
+	for (auto tech : program.technologyPrototypes)
 	{
-		auto techProto = program.technologyPrototypes.find(tech);
-		if(techProto != program.technologyPrototypes.end())
+		for (std::string unlockTech : unlockedTechnologies)
 		{
-			techProto->second.Unlock();
+			if (tech.name == unlockTech)
+			{
+				tech.Unlock();
+				break;
+			}
 		}
 	}
-	currentTechnology = "";
+	currentTechnology = TechProto();
 	FindNextTechnology();
 
 	// Don't forget to set the seeds so world gen stays consistent

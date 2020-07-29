@@ -117,8 +117,11 @@ void LoadPrototypes()
 	// Add logical elements to the end of the list to allow for crafting them
 	for (auto logic : logicTypes)
 	{
-		logicTextures.emplace(logic.first, LoadTexture("logic/"+logic.second+".png"));
-		program.itemPrototypes.insert({ logic.first + program.itemsEnd,logic.second });
+		if (logic.first != wirebridge)
+		{
+			logicTextures.emplace(logic.first, LoadTexture("logic/" + logic.second + ".png"));
+			program.itemPrototypes.insert({ logic.first + program.itemsEnd,logic.second });
+		}
 	}
 		
 	program.itemPrototypes.insert({program.itemsEnd + 255, "robot" });
@@ -143,15 +146,15 @@ void LoadPrototypes()
 	}
 
 	// Logic Tooltips
-	program.itemTooltips.insert({ program.itemsEnd + wire, "Wire: transfers signals" });
-	program.itemTooltips.insert({ program.itemsEnd + redirector, "Redirector: Redirects the robot" });
-	program.itemTooltips.insert({ program.itemsEnd + pressureplate, "PressurePlate: Creates signal when robot or item ontop" });
-	program.itemTooltips.insert({ program.itemsEnd + inverter, "Inverter: output = 16 - behind + side" });
-	program.itemTooltips.insert({ program.itemsEnd + booster, "Booster: output = 16 + behind if: behind > side" });
-	program.itemTooltips.insert({ program.itemsEnd + repeater, "Repeater: Gives out same signal as input" });
-	program.itemTooltips.insert({ program.itemsEnd + gate, "Gate: Can stop robots movement" });
-	program.itemTooltips.insert({ program.itemsEnd + counter, "Counter: Counts up" });
-	program.itemTooltips.insert({ program.itemsEnd + comparer, "Comparer: output = 16 + input if: behind = side" });
+	program.itemTooltips[program.itemsEnd + wire] = "Wire: transfers signals";
+	program.itemTooltips[program.itemsEnd + redirector] = "Redirector: Redirects the robot";
+	program.itemTooltips[program.itemsEnd + pressureplate] = "PressurePlate: Creates signal when robot or item ontop";
+	program.itemTooltips[program.itemsEnd + inverter] = "Inverter: output = 16 - behind + side";
+	program.itemTooltips[program.itemsEnd + booster] = "Booster: output = 16 + behind if: behind > side";
+	program.itemTooltips[program.itemsEnd + repeater] = "Repeater: Gives out same signal as input";
+	program.itemTooltips[program.itemsEnd + gate] = "Gate: Can stop robots movement";
+	program.itemTooltips[program.itemsEnd + counter] = "Counter: Counts up";
+	program.itemTooltips[program.itemsEnd + comparer] = "Comparer: output = 16 + input if: behind = side";
 	program.itemTooltips.insert({ program.itemsEnd + 255, "Robot" });
 
 	// Animation prototypes
@@ -265,7 +268,6 @@ void LoadPrototypes()
 			if (recipeCompProto.itemName != "" && item == program.itemLookups.end())
 			{
 				OutputDebugStringA(("Recipe Load Fail. Item: " + recipeCompProto.itemName + " does not exist. ").c_str());
-				assert(false);
 			}
 			else
 			{
@@ -321,6 +323,18 @@ void LoadPrototypes()
 				}
 				if (lua_istable(L, -2))
 				{
+					lua_pushstring(L, "name");
+					lua_gettable(L, -3);
+					if (lua_isstring(L, -1))
+						newTech.name = lua_tostring(L, -1);
+					lua_pop(L, 1);
+
+					lua_pushstring(L, "tips");
+					lua_gettable(L, -3);
+					if (lua_isstring(L, -1))
+						newTech.tips = lua_tostring(L, -1);
+					lua_pop(L, 1);
+
 					lua_pushstring(L, "requirement");
 					lua_gettable(L, -3);
 					if (lua_istable(L, -1))
@@ -372,8 +386,7 @@ void LoadPrototypes()
 					lua_pop(L, 1);
 				}
 				lua_pop(L, 2);
-				program.technologyPrototypes.insert({ techName, newTech });
-				program.technologyOrder.emplace_back(techName);
+				program.technologyPrototypes.emplace_back(newTech);
 			}
 			lua_pop(L, 1);
 		}

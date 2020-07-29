@@ -41,7 +41,8 @@ public:
 		{
 			for (auto &kv : *this)
 			{
-				myfile.write((char*)&kv, sizeof(keyType) + sizeof(valueType));
+				myfile.write((char*)&(kv.first), sizeof(keyType));
+				myfile.write((char*)&(kv.second), sizeof(valueType));
 			}
 			myfile.close();
 		}
