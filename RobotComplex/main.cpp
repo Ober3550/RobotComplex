@@ -132,6 +132,7 @@ int main()
 				if (event.key.code == sf::Keyboard::F3)
 				{
 					program.showDebugInfo = !program.showDebugInfo;
+					handler.showDebug = !handler.showDebug;
 				}
 				// Stepping back should always be considered as input
 				else if (event.key.code == sf::Keyboard::Escape)
@@ -146,6 +147,7 @@ int main()
 		}
 		window.clear();
 		clock_t beginUpdate = clock();
+		program.startUpdate = clock();
 		program.textOverlay.clear();
 		if (program.selectedSave != "")
 		{
@@ -158,6 +160,10 @@ int main()
 		ImGui::SFML::Update(window, deltaClock.restart());
 		handler.HandleGui(window);
 		window.display();
+		clock_t midUpdate = clock();
+		int padTime = int(CLOCKS_PER_SEC / float(GC::FRAMERATE)) + beginUpdate - midUpdate;
+		if (padTime > 0)
+			Sleep(padTime);
 		clock_t endUpdate = clock();
 		if (program.frameRate == INFINITE)
 			program.frameRate = GC::FRAMERATE;

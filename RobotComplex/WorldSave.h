@@ -69,6 +69,7 @@ public:
 	uint16_t ChangeRobot(Pos pos, int quantity);
 	uint16_t ChangeLogic(Pos pos, int quantity, uint8_t logicType);
 	void GenerateChunk(Pos pos);
+	void DrawChunk(Pos pos, sf::Vector2f startPos);
 	void GenerateOre(Pos pos);
 	void Serialize(std::string filename);
 	void Serialize() { if(name != "") Serialize(name); }

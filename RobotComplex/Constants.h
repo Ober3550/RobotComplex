@@ -5,6 +5,9 @@ namespace GC
 	static constexpr int32_t  FRAMERATE = 60;
 	static constexpr int32_t  UPDATERATE = 20;
 	static constexpr uint8_t cameraSpeed = 10;
+	static constexpr float MIN_ZOOM = 0.5;
+	static constexpr float MAX_ZOOM = 5.0;
+	static constexpr float ZOOM_VELOCITY = 0.5;
 
 	// World Constants
 	static constexpr uint8_t  chunkShift = 5;

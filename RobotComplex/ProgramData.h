@@ -43,6 +43,8 @@ public:
 	SpriteVector platformSprites;
 	SpriteVector itemSprites;
 	SpriteVector logicSprites;
+	std::vector<sf::RectangleShape> mapGround;
+	std::vector<sf::RectangleShape> mapShapes;
 	std::vector<sf::RectangleShape> scaledBoxes;
 	std::vector<sf::RectangleShape> scaledPersistentBoxes;
 	SpriteVector robotSprites;
@@ -129,7 +131,11 @@ public:
 	bool anyGuiHovered = false;
 	std::mutex worldMutex;
 
+	clock_t startUpdate;
+	clock_t existsUpdate;
+
 	// Clock timing variables
+	double frameRefresh = 0;
 	double frameRate = 30;
 	double updateRate = 30;
 	int framesSinceTick = 0;
@@ -156,7 +162,6 @@ public:
 	void DrawCraftingView();
 	void DrawTechnologyView();
 	void DrawSelectedRegion();
-	void DrawDebugHUD();
 	void DrawGameState(sf::RenderWindow& window);
 	void DrawCrosshair(sf::RenderWindow& window);
 	void FindMovingRobot();

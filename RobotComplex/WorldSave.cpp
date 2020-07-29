@@ -12,6 +12,7 @@
 #include <math.h>
 #include "MyMod.h"
 #include "GroundTypes.h"
+#include "Textures.h"
 
 void WorldSave::GenerateChunk(Pos pos)
 {
@@ -86,7 +87,7 @@ void WorldSave::GenerateOre(Pos pos)
 								{
 									newItem.quantity = quantity * 7;
 									Pos newPos = Pos{ x, y };
-									world.items.insert({ newPos.CoordToEncoded(), newItem });
+									world.ChangeItem(newPos, newItem.quantity, newItem.itemTile);
 								}
 							}
 						}
@@ -119,7 +120,7 @@ GroundTile* WorldSave::GetGroundTile(Pos pos)
 }
 ItemTile* WorldSave::GetItemTile(Pos pos)
 {
-	return world.items.GetValue(pos.CoordToEncoded());
+	return world.GetItemTile(pos.CoordToEncoded());
 }
 ItemTile* WorldSave::GetItemTile(uint64_t encodedPos)
 {
@@ -167,7 +168,18 @@ uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
 		}
 		if (currentItem->quantity == 0)
 		{
-			world.items.erase(itemPos);
+			world.items.erase(pos.CoordToEncoded());
+			/*if (WorldChunk* chunk = world.worldChunks.GetValue(pos.ChunkPosition()))
+			{
+				for (auto item = chunk->items.begin(); item < chunk->items.end(); item++)
+				{
+					if (item->pos == pos)
+					{
+						chunk->items.erase(item);
+						break;
+					}
+				}
+			}*/
 		}
 		if (!world.updateQueueD.contains(pos.CoordToEncoded()))
 		{
@@ -185,7 +197,11 @@ uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
 		ItemTile* newItem = new ItemTile();
 		newItem->itemTile = item;
 		newItem->quantity = quantity;
-		world.items[pos.CoordToEncoded()] = *newItem;
+		world.items.insert({ pos,*newItem });
+		/*if (WorldChunk* chunk = world.worldChunks.GetValue(pos.ChunkPosition()))
+		{
+			chunk->items.emplace_back(PosItem{ pos,*newItem });
+		}*/
 		if (!world.updateQueueD.contains(pos.CoordToEncoded()))
 		{
 			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
@@ -378,19 +394,24 @@ uint16_t WorldSave::ChangeLogic(Pos pos, int quantity, uint8_t logicType)
 			return false;
 		if (quantity > 0)
 		{
-			LogicTile logicPlace = LogicTile(logicType);
-			logicPlace.color = program.placeColor;
-			logicPlace.color2 = program.placeColor;
-			logicPlace.facing = program.placeRotation;
-			logicPlace.quantity = quantity;
-			world.logicTiles.insert({ pos.CoordToEncoded(),logicPlace });
-			world.updateNext.insert({ pos.CoordToEncoded(),1 });
-			for (int i = 0; i < 4; i++)
+			auto ground = world.GetGroundTile(pos);
+			if (ground->groundTile > GC::collideGround)
 			{
-				world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+				LogicTile logicPlace = LogicTile(logicType);
+				logicPlace.color = program.placeColor;
+				logicPlace.color2 = program.placeColor;
+				logicPlace.facing = program.placeRotation;
+				logicPlace.quantity = quantity;
+				world.logicTiles.insert({ pos.CoordToEncoded(),logicPlace });
+				world.updateNext.insert({ pos.CoordToEncoded(),1 });
+				for (int i = 0; i < 4; i++)
+				{
+					world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+				}
+				world.updateQueueD.insert({ pos.CoordToEncoded() });
+				return logicPlace.logicType + program.itemsEnd;
 			}
-			world.updateQueueD.insert({ pos.CoordToEncoded() });
-			return logicPlace.logicType + program.itemsEnd;
+			else return false;
 		}
 	}
 	return false;
@@ -409,16 +430,20 @@ uint16_t WorldSave::ChangeRobot(Pos pos, int quantity)
 	}
 	else
 	{
-		if (quantity > 0)
+		auto ground = world.GetGroundTile(pos);
+		if (ground->groundTile > GC::collideGround)
 		{
-			Robot newRobot;
-			newRobot.stopped = true;
-			world.robots.insert({ pos.CoordToEncoded(),newRobot });
+			if (quantity > 0)
+			{
+				Robot newRobot;
+				newRobot.stopped = true;
+				world.robots.insert({ pos.CoordToEncoded(),newRobot });
+				return program.itemsEnd + GC::MAXLOGIC;
+			}
 		}
-		else if (quantity < 0)
-			return false;
+		else return false;
 	}
-	return true;
+	return false;
 }
 
 bool WorldSave::PlaceElement(Pos pos, uint16_t item)
@@ -566,4 +591,9 @@ void WorldSave::FindNextTechnology()
 			break;
 		}
 	}
+}
+
+void WorldSave::DrawChunk(Pos pos, sf::Vector2f startPos)
+{
+	
 }

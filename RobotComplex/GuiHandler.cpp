@@ -6,6 +6,7 @@
 #include "KeyNames.h"
 #include "GetFileNamesInFolder.h"
 #include <functional>
+#include <experimental/filesystem>
 
 static std::vector<std::string> verbs = {"Steampunk ","Dystopian ","Utopian ","Hellscape ","Peaceful ","Killer ","Chaotic "};
 static std::vector<std::string> nouns = {"City", "Meadows","Mountains","Valley","Desert","Skies","Space"};
@@ -28,6 +29,10 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	{
 		window.draw(sprite);
 	}
+
+	std::vector<std::string> names = getFolderNamesInFolder("saves");
+	static int currIndex = 0;
+
 	program.anyGuiHovered = ImGui::IsAnyWindowHovered();
 	program.acceptGameInput = !ImGui::IsAnyWindowFocused();
 	const int windowWidth = 300;
@@ -68,8 +73,6 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 			world.Serialize();
 			currentMenu = noMenu;
 		}
-		std::vector<std::string> names = getFolderNamesInFolder("saves");
-		static int currIndex = 0;
 		ImGui::ListBox("", &currIndex, names);
 		if (ImGui::Button("Save Game"))
 			world.Serialize(names[currIndex]);
@@ -79,6 +82,27 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 			world.clear();
 			world.Deserialize(names[currIndex]);
 			currentMenu = noMenu;
+		}
+		static bool openDeletePopup = false;
+		openDeletePopup |= ImGui::Button("Delete Save");
+		if (openDeletePopup)
+		{
+			ImGui::OpenPopup("Delete Popup");
+		}
+		if (ImGui::BeginPopup("Delete Popup"))
+		{
+			ImGui::Text("Are you sure?");
+			if (ImGui::Button("Yes")) {
+				if(names[currIndex] != "")
+					std::experimental::filesystem::remove_all("saves/" + names[currIndex]);
+				openDeletePopup = false;
+				ImGui::CloseCurrentPopup();
+			} ImGui::SameLine();
+			if (ImGui::Button("No")) {
+				openDeletePopup = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 		if (ImGui::Button("Back"))
 		{
@@ -169,9 +193,23 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 		ImGui::End();
 		program.DrawTechnologyView();
 	}
-
-	if (program.showDebugInfo)
-		program.DrawDebugHUD();
+	if (showDebug)
+	{
+		ImGui::Begin("Debug Information");
+		ImGui::Text(std::string("FPS/UPS: " + std::to_string(program.frameRate) + "/" + std::to_string(program.updateRate)).c_str());
+		ImGui::Text(std::string("Camera x/y: " + std::to_string(program.cameraPos.x) + "/" + std::to_string(program.cameraPos.y)).c_str());
+		ImGui::Text(std::string("Map    x/y: " + std::to_string(program.mouseHovering.x) + "/" + std::to_string(program.mouseHovering.y)).c_str());
+		ImGui::Text(std::string("Screen x/y: " + std::to_string(program.mousePos.x) + "/" + std::to_string(program.mousePos.y)).c_str());
+		ImGui::Text(std::string("Zoom: " + std::to_string(program.zoom)).c_str());
+		ImGui::Text(std::string("Tiles  Rendered: " + std::to_string(program.groundSprites.size())).c_str());
+		ImGui::Text(std::string("Items  Rendered: " + std::to_string(program.itemSprites.size())).c_str());
+		ImGui::Text(std::string("Logic  Rendered: " + std::to_string(program.logicSprites.size())).c_str());
+		ImGui::Text(std::string("Robots Rendered: " + std::to_string(program.robotSprites.size())).c_str());
+		ImGui::Text(std::string("Update Exists Size: " + std::to_string(program.elementExists.size())).c_str());
+		ImGui::Text(std::string("Update Exists Max Size: " + std::to_string(program.elementExists.max_size())).c_str());
+		ImGui::Text(std::string("Update Exists Delay: " + std::to_string(program.existsUpdate - program.startUpdate)).c_str());
+		ImGui::End();
+	}
 
 	//ImGui::ShowDemoWindow();
 

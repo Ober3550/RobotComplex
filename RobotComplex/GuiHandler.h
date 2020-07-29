@@ -15,6 +15,7 @@ public:
 	bool craftingViewShow = true;
 	std::string resultsTitle = "";
 	bool populateResults = true;
+	bool showDebug = false;
 
 	// Window context
 	//sf::RenderWindow* window;

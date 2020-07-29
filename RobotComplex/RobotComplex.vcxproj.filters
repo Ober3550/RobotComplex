@@ -89,6 +89,9 @@
     <ClCompile Include="Prototypes.cpp">
       <Filter>Header Files\WorldElements</Filter>
     </ClCompile>
+    <ClCompile Include="WorldChunk.cpp">
+      <Filter>Header Files\WorldElements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FindInVector.h">

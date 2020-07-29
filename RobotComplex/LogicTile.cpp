@@ -271,7 +271,7 @@ void LogicTile::DoItemLogic(Pos currentPos)
 		{
 			world.resourcesDelivered[item->itemTile] += item->quantity;
 			program.technologyViewUpdate = true;
-			world.items.erase(currentPos);
+			world.ChangeItem(currentPos, -255, item->itemTile);
 		}
 	}break;
 	default:

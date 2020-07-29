@@ -33,9 +33,6 @@ void GuiHandler::LoadDefaultKeyMapping()
 	keyPress = { sf::Keyboard::Q, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	eventToAction.insert({ keyPress, "Empty Hand" });
 
-	keyPress = { sf::Keyboard::Delete, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-	eventToAction.insert({ keyPress, "Remove Logic" });
-
 	keyPress = { sf::Keyboard::X, /*alt*/ false, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
 	eventToAction.insert({ keyPress, "Set Robot Auto" });
 
@@ -176,20 +173,6 @@ void GuiHandler::CreateActions()
 		program.cut = false;
 	} });
 
-	//Delete
-	userActionOrder.push_back("Remove Logic");
-	userActions.insert({ "Remove Logic",[&] {
-		if (program.selectedLogicTile)
-		{
-			world.logicTiles.erase(program.mouseHovering.CoordToEncoded());
-			for (int i = 0; i < 4; i++)
-			{
-				world.updateNext.insert({ program.mouseHovering.FacingPosition(Facing(i)).CoordToEncoded(),1 });
-			}
-			program.selectedLogicTile = nullptr;
-		}
-	} });
-
 	//X
 	userActionOrder.push_back("Set Robot Auto");
 	userActions.insert({ "Set Robot Auto",[&] {
@@ -288,8 +271,8 @@ void GuiHandler::CreateActions()
 						if (world.PlaceElement(program.mouseHovering, kv->second.itemTile))
 						{
 							// Item may be removed because of hub
-							if(world.items.find(program.mouseHovering) != world.items.end())
-								CraftingClass::TryCrafting(kv->second.itemTile, program.mouseHovering);
+							if(ItemTile* item = world.GetItemTile(program.mouseHovering))
+								CraftingClass::TryCrafting(item->itemTile, program.mouseHovering);
 							kv->second.quantity--;
 							if (kv->second.quantity == 0)
 							{
@@ -588,12 +571,11 @@ void GuiHandler::HandleInput(sf::Event input, sf::RenderWindow& window)
 		{
 			if (input.mouseWheelScroll.delta != 0)
 			{
-				program.scale -= input.mouseWheelScroll.delta;
-				if (program.scale < 0.0f)
-					program.scale = 0.0f;
-				if (program.scale > 35.0f)
-					program.scale = 35.0f;
-				program.zoom = 0.5f + program.scale / 10.0f;
+				program.zoom -= input.mouseWheelScroll.delta * GC::ZOOM_VELOCITY;
+				if (program.zoom < GC::MIN_ZOOM)
+					program.zoom = GC::MIN_ZOOM;
+				if (program.zoom > GC::MAX_ZOOM)
+					program.zoom = GC::MAX_ZOOM;
 				program.RecalculateMousePos();
 			}
 		}

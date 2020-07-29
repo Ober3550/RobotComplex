@@ -50,7 +50,7 @@ void WorldSave::Serialize(std::string filename)
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
 	//platforms.Serialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Serialize("saves/" + filename + "/platformsNext.bin");
-	items.Serialize("saves/" + filename + "/items.bin");
+	//items.Serialize("saves/" + filename + "/items.bin");
 	nextItemPos.Serialize("saves/" + filename + "/itemsNext.bin");
 	robots.Serialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Serialize("saves/" + filename + "/robotsNext.bin");
@@ -79,7 +79,7 @@ void WorldSave::Deserialize(std::string filename)
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
 	//platforms.Deserialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Deserialize("saves/" + filename + "/platformsNext.bin");
-	items.Deserialize("saves/" + filename + "/items.bin", world.oldItemNewItem);
+	//items.Deserialize("saves/" + filename + "/items.bin", world.oldItemNewItem);
 	nextItemPos.Deserialize("saves/" + filename + "/itemsNext.bin");
 	robots.Deserialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Deserialize("saves/" + filename + "/robotsNext.bin");
@@ -120,7 +120,7 @@ void WorldSave::clear()
 {
 	platforms.clear();
 	nextPlatforms.clear();
-	items.clear();
+	//items.clear();
 	nextItemPos.clear();
 	itemPrevMoved.clear();
 	robots.clear();

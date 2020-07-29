@@ -2,9 +2,10 @@
 #include <unordered_set>
 #include <fstream>
 #include <iostream>
+#include "absl/container/flat_hash_set.h"
 
 template <typename keyType>
-class MySet : public std::unordered_set<keyType>
+class MySet : public absl::flat_hash_set<keyType>
 {
 public:
 	bool contains(keyType key)
