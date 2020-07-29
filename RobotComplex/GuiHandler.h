@@ -2,16 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include "MyMap.h"
 
-// Create a hash function for key events to allow for key modifiers to be considered
-template<>
-struct std::hash<sf::Event::KeyEvent> {
-	std::size_t operator()(const sf::Event::KeyEvent& k) const
-	{
-		//{ sf::Keyboard::Escape, /*alt*/ true, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
-		return (int)k.system << 7 & (int)k.shift << 6 & (int)k.control << 5 & (int)k.alt << 4 & (int)k.code;
-	}
-};
-
 enum MenuStack {
 	noMenu,
 	mainMenu,
@@ -50,7 +40,13 @@ public:
 	void HandleInput(sf::Event event, sf::RenderWindow& window);
 	void HandleGui(sf::RenderWindow& window);
 	GuiHandler() {
-		LoadDefaultKeyMapping();
+		eventToAction.Deserialize("saves/config.txt");
+		if(eventToAction.size() == 0)
+			LoadDefaultKeyMapping();
+		for (auto kv : eventToAction)
+		{
+			actionToEvent.insert({ kv.second,kv.first });
+		}
 		CreateActions();
 	}
 };

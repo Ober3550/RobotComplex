@@ -199,6 +199,9 @@
     <ClInclude Include="GroundTypes.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
+    <ClInclude Include="Substrings.h">
+      <Filter>Header Files\HelperElements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\items.lua">

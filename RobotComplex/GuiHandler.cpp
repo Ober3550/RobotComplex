@@ -117,9 +117,9 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 		ImGui::End();
 	}break;
 	}
-	if (craftingViewShow)
+	if (program.selectedSave != "")
 	{
-		ImGui::SetNextWindowPos(ImVec2(20,20), ImGuiCond_::ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_::ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_::ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("Crafting Viewer"))
 			program.craftingViewShow = true;
@@ -152,23 +152,23 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 			program.craftingViewUpdate = true;
 			resultsTitle = "Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size());
 		}
-		
+
 		ImGui::End();
+		program.DrawCraftingView();
+
+		ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_::ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_::ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("Technology Viewer"))
+			program.technologyViewShow = true;
+		else
+			program.technologyViewShow = false;
+		program.technologyViewDimensions = ImGui::GetWindowSize();
+		program.technologyViewPos = ImGui::GetWindowPos();
+		ImGui::Text(std::string("Next Objective: " + world.currentTechnology.name).c_str());
+		ImGui::Text(std::string("Tips: " + world.currentTechnology.tips).c_str());
+		ImGui::End();
+		program.DrawTechnologyView();
 	}
-	program.DrawCraftingView();
-	
-	ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_::ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_::ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Technology Viewer"))
-		program.technologyViewShow = true;
-	else
-		program.technologyViewShow = false;
-	program.technologyViewDimensions = ImGui::GetWindowSize();
-	program.technologyViewPos = ImGui::GetWindowPos();
-	ImGui::Text(std::string("Next Objective: "+world.currentTechnology.name).c_str());
-	ImGui::Text(std::string("Tips: " + world.currentTechnology.tips).c_str());
-	ImGui::End();
-	program.DrawTechnologyView();
 
 	if (program.showDebugInfo)
 		program.DrawDebugHUD();

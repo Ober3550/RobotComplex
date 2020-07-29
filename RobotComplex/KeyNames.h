@@ -109,3 +109,13 @@ namespace KeyNames {
 	std::string toString(sf::Event::KeyEvent input);
 	sf::Event::KeyEvent* toEvent(std::string input);
 };
+
+// Create a hash function for key events to allow for key modifiers to be considered
+template<>
+struct std::hash<sf::Event::KeyEvent> {
+	std::size_t operator()(const sf::Event::KeyEvent& k) const
+	{
+		//{ sf::Keyboard::Escape, /*alt*/ true, /*ctrl*/ false, /*shift*/ false, /*system*/ false };
+		return (int)k.system << 7 & (int)k.shift << 6 & (int)k.control << 5 & (int)k.alt << 4 & (int)k.code;
+	}
+};

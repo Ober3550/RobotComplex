@@ -15,6 +15,8 @@
 #include "ItemTile.h"
 #include "GetFileLength.h"
 #include "Prototypes.h"
+#include "KeyNames.h"
+#include "MyStrings.h"
 
 #ifndef __MYMAP_H__
 #define __MYMAP_H__
@@ -169,6 +171,36 @@ public:
 				}
 			}
 			myfile.close();
+		}
+	}
+};
+
+template <>
+class MyMap<sf::Event::KeyEvent, std::string> : public absl::flat_hash_map<sf::Event::KeyEvent, std::string>
+{
+public:
+	std::string* GetValue(sf::Event::KeyEvent key)
+	{
+		auto find = this->find(key);
+		return find != this->end() ? &(find->second) : nullptr;
+	}
+	void Serialize(std::string filename)
+	{
+		std::ofstream myfile(filename);
+		for (auto& kv : *this)
+		{
+			myfile << KeyNames::toString(kv.first) << ':' << kv.second << '\n';
+		}
+	}
+	void Deserialize(std::string filename)
+	{
+		std::ifstream myfile(filename);
+		std::string str;
+		while (std::getline(myfile, str)) {
+			std::vector<std::string> splitStr;
+			split(&splitStr, str, ':');
+			if(splitStr.size() > 1)
+				this->insert({ *KeyNames::toEvent(splitStr[0]),splitStr[1] });
 		}
 	}
 };

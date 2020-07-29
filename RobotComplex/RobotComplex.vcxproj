@@ -262,6 +262,7 @@
     <ClInclude Include="Robot.h" />
     <ClInclude Include="MyStrings.h" />
     <ClInclude Include="SpriteVector.h" />
+    <ClInclude Include="Substrings.h" />
     <ClInclude Include="Textures.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="WorldChunk.h" />

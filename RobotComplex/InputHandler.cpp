@@ -7,6 +7,7 @@
 #include "KeyNames.h"
 #include "windows.h"
 #include "MyStrings.h"
+#include "Substrings.h"
 
 void GuiHandler::LoadDefaultKeyMapping()
 {
@@ -60,11 +61,6 @@ void GuiHandler::LoadDefaultKeyMapping()
 	{
 		keyPress = { sf::Keyboard::Key(int(sf::Keyboard::Num0) + MyMod(i + 1,10)), /*alt*/ false, /*ctrl*/ false, /*shift*/ i > 9, /*system*/ false };
 		eventToAction.insert({ keyPress, "Hotbar " + std::to_string(i + 1) });
-	}
-
-	for (auto kv : eventToAction)
-	{
-		actionToEvent.insert({ kv.second,kv.first });
 	}
 }
 

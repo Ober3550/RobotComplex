@@ -166,5 +166,6 @@ int main()
 	//creator->SaveProgramSettings();
 	ImGui::SFML::Shutdown();
 	MapUpdate.wait();
+	handler.eventToAction.Serialize("saves/config.txt");
 	return 0;
 }

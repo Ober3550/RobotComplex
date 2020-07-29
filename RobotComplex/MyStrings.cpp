@@ -1,4 +1,5 @@
 #include "MyStrings.h"
+#include "Substrings.h"
 void split(std::vector<std::string>* splitStr, std::string str, char delimeter)
 {
 	std::string word = "";
