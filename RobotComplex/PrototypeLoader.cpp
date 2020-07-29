@@ -98,22 +98,21 @@ void LoadPrototypes()
 	groundTextures.emplace_back(LoadTexture("ground/water.png"));
 	groundTextures.emplace_back(LoadTexture("ground/sand.png"));
 
+	
 	lua_State* L = luaL_newstate();
-	std::vector<std::string> tempItems;
+
 	// Items
-	if (CheckLua(L, luaL_dofile(L, "data/items.lua")))
-	{
-		lua_getglobal(L, "items");
-		if (lua_istable(L, -1))
-		{
-			lua_append_linear_table(L, -1, &tempItems);
-		}
-	}
+	program.itemPrototypes.insert({ 0,"" });
+	program.itemPrototypes.insert({ 1,"anything" });
+	program.itemPrototypes.insert({ 2, "energy" });
+	std::vector<std::string> tempItems = getFileNamesInFolder("assets/items");
 	for (int i = 0; i < tempItems.size(); i++)
 	{
-		program.itemPrototypes.insert({ i,tempItems[i] });
+		std::string substring = tempItems[i].substr(0, tempItems[i].length() - 4);
+		program.itemPrototypes.insert({ i, substring });
 	}
 	program.itemsEnd = program.itemPrototypes.size() - 1;
+
 	// Add logical elements to the end of the list to allow for crafting them
 	for (auto logic : logicTypes)
 	{
@@ -265,11 +264,7 @@ void LoadPrototypes()
 		for (RecipeCompProto recipeCompProto : recipeProto.second.recipe)
 		{
 			auto item = program.itemLookups.find(recipeCompProto.itemName);
-			if (recipeCompProto.itemName != "" && item == program.itemLookups.end())
-			{
-				OutputDebugStringA(("Recipe Load Fail. Item: " + recipeCompProto.itemName + " does not exist. ").c_str());
-			}
-			else
+			if (item != program.itemLookups.end())
 			{
 				if (item->second)
 				{
@@ -277,12 +272,12 @@ void LoadPrototypes()
 						catalysts.insert(item->second);
 					else
 						results.insert(item->second);
-					recipe.emplace_back(RecipeComponent{ (uint16_t)item->second, recipeCompProto.requirement, recipeCompProto.resultState });
 				}
-				else
-				{
-					recipe.emplace_back(RecipeComponent{ 0,0,0 });
-				}
+				recipe.emplace_back(RecipeComponent{ (uint16_t)item->second, recipeCompProto.requirement, recipeCompProto.resultState });
+			}
+			else
+			{
+				OutputDebugStringA(("Recipe Load Fail. Item: " + recipeCompProto.itemName + " does not exist. ").c_str());
 			}
 		}
 		newRecipe.recipe = recipe;
