@@ -68,7 +68,15 @@ void GuiHandler::CreateActions()
 	userActions.insert({ "Move North",[&] {
 		if (program.selectedRobot)
 		{
-			program.moveBot = true;
+			if (handler.useNormalMovement)
+			{
+				program.selectedRobot->SetFacing(north);
+				program.moveBot = true;
+			}
+			else
+			{
+				program.moveBot = true;
+			}
 		}
 		else
 		{
@@ -82,8 +90,16 @@ void GuiHandler::CreateActions()
 	userActions.insert({ "Move West",[&] {
 		if (program.selectedRobot)
 		{
-			if (handler.heldTick["Move West"] == world.tick)
-				program.rotateBot = -1;
+			if (handler.useNormalMovement)
+			{
+				program.selectedRobot->SetFacing(west);
+				program.moveBot = true;
+			}
+			else
+			{
+				if (handler.heldTick["Move West"] == world.tick)
+					program.rotateBot = -1;
+			}
 		}
 		else
 		{
@@ -97,8 +113,16 @@ void GuiHandler::CreateActions()
 	userActions.insert({ "Move South",[&] {
 		if (program.selectedRobot)
 		{
-			if (handler.heldTick["Move South"] == world.tick)
-				program.rotateBot = 2;
+			if (handler.useNormalMovement)
+			{
+				program.selectedRobot->SetFacing(south);
+				program.moveBot = true;
+			}
+			else
+			{
+				if (handler.heldTick["Move South"] == world.tick)
+					program.rotateBot = 2;
+			}
 		}
 		else
 		{
@@ -112,8 +136,16 @@ void GuiHandler::CreateActions()
 	userActions.insert({ "Move East",[&] {
 		if (program.selectedRobot)
 		{
-			if (handler.heldTick["Move East"] == world.tick)
-				program.rotateBot = 1;
+			if (handler.useNormalMovement)
+			{
+				program.selectedRobot->SetFacing(east);
+				program.moveBot = true;
+			}
+			else
+			{
+				if (handler.heldTick["Move East"] == world.tick)
+					program.rotateBot = 1;
+			}
 		}
 		else
 		{
@@ -126,7 +158,7 @@ void GuiHandler::CreateActions()
 	userActionOrder.push_back("Rotate Clockwise");
 	userActions.insert({ "Rotate Clockwise",[&] {
 
-		if (program.selectedLogicTile)
+		if (!program.hotbarSelectedLogicTile && program.selectedLogicTile)
 		{
 			program.placeRotation = program.selectedLogicTile->facing;
 			program.placeRotation = Pos::RelativeFacing(program.placeRotation,1);
@@ -145,7 +177,7 @@ void GuiHandler::CreateActions()
 	//R
 	userActionOrder.push_back("Rotate Anti-Clockwise");
 	userActions.insert({ "Rotate Anti-Clockwise",[&] {
-		if (program.selectedLogicTile)
+		if (!program.hotbarSelectedLogicTile && program.selectedLogicTile)
 		{
 			program.placeRotation = program.selectedLogicTile->facing;
 			program.placeRotation = Pos::RelativeFacing(program.placeRotation, -1);
@@ -158,7 +190,7 @@ void GuiHandler::CreateActions()
 		else
 		{
 			program.placeRotation = Pos::RelativeFacing(program.placeRotation, -1);
- }
+		}
 	} });
 
 	//Q
@@ -584,16 +616,17 @@ void GuiHandler::HandleInput(sf::Event input, sf::RenderWindow& window)
 
 void GuiHandler::SaveProgramSettings()
 {
-	world.Serialize(world.name);
 	std::ofstream myfile;
 	myfile.open("saves/config.txt", std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())
 	{
-		myfile << world.name + "\r\n";
+		if(program.selectedSave != "")
+			myfile << "World Name:" + program.selectedSave + "\r\n";
 		for (std::pair<sf::Event::KeyEvent, std::string> action : eventToAction)
 		{
 			myfile << action.second + ":" + KeyNames::toString(action.first) + "\r\n";
 		}
+		myfile << "Normal Robot Movement:" + handler.useNormalMovement ? " True\r\n" : " False\r\n";
 	}
 	myfile.close();
 }
@@ -605,26 +638,28 @@ bool GuiHandler::LoadProgramSettings()
 	if (!myfile.is_open())
 		return false;
 	std::string str;
-	int i = 0;
 	while (std::getline(myfile, str))
 	{
-		if (i == 0)
+		std::vector<std::string> splitLine;
+		split(&splitLine, str, ':');
+		if (splitLine.size() != 0)
 		{
-			world.name = str;
-		}
-		else if (i > 0)
-		{
-			std::vector<std::string> splitLine;
-			split(&splitLine, str, ':');
-			if (splitLine.size() != 0)
+			if (splitLine[0] == "Normal Robot Movement")
 			{
-				if (sf::Event::KeyEvent* valid = KeyNames::toEvent(splitLine[1]))
-				{
-					eventToAction.insert({ *valid, splitLine[0] });
-				}
+				if (splitLine[1] == "True")
+					handler.useNormalMovement = true;
+				else if (splitLine[1] == "False")
+					handler.useNormalMovement = false;
+			}
+			else if (splitLine[0] == "World Name")
+			{
+				program.selectedSave = splitLine[1];
+			}
+			else if (sf::Event::KeyEvent* valid = KeyNames::toEvent(splitLine[1]))
+			{
+				eventToAction.insert({ *valid, splitLine[0] });
 			}
 		}
-		i++;
 	}
 	myfile.close();
 	//world.Deserialize(world.name);

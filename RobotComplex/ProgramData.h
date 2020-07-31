@@ -52,17 +52,15 @@ public:
 
 	// Gui Elements
 	SpriteVector hotbarSprites;
-	MyMap<SmallPos, sf::RectangleShape> hotbarSlots;
+	MyMap<SmallPos, sf::RectangleShape> hotbarBacks;
 	MyMap<SmallPos, BigItem> hotbar;
 	ItemTile* selectedHotbar;
 	SmallPos  hoveringHotbar;
 	SmallPos  hotbarIndex;
 
-	SpriteVector unscaledSprites;
-	std::vector<sf::RectangleShape> unscaledBoxes;
-
 	bool showingTooltip;
 	
+	// Crafting View
 	bool								craftingViewShow;
 	bool								craftingViewUpdate;
 	std::vector<uint16_t>				foundRecipeList;
@@ -75,6 +73,7 @@ public:
 	ImVec2								craftingViewDimensions;
 	ImVec2								craftingViewPos;
 
+	// Technology View
 	bool								technologyViewShow;
 	bool								technologyViewUpdate = true;
 	SpriteVector						technologyViewSprites;
@@ -84,7 +83,10 @@ public:
 	ImVec2								technologyViewDimensions;
 	ImVec2								technologyViewPos;
 
+	// Tooltips
 	std::vector<sf::Text> textOverlay;
+	std::vector<sf::RectangleShape> textBacks;
+
 	MySet<uint64_t> elementExists;
 
 	float maxWindowWidth;
@@ -107,6 +109,7 @@ public:
 	Pos prevCameraPos = {0, 0};
 	Pos cameraPos = { 0, 0 };
 	LogicTile* selectedLogicTile;
+	bool hotbarSelectedLogicTile;
 	Pos selectedRobotPos;
 	Robot* selectedRobot;
 	int rotateBot = 0;
@@ -127,6 +130,7 @@ public:
 	std::string selectedSave = "";
 	bool running = true;
 	bool gamePaused = true;
+	bool worldLoaded = false;
 	bool acceptGameInput = true;
 	bool anyGuiHovered = false;
 	std::mutex worldMutex;

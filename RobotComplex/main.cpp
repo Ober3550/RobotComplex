@@ -72,9 +72,8 @@ int main()
 	sf::Clock deltaClock;
 	sf::Thread MapUpdate(&UpdateWorld);
 
-	// Generate the window
-	program.windowWidth = 1920;
-	program.windowHeight = 1080 - 70;	
+	program.windowWidth = 600;
+	program.windowHeight = 450;
 
 	// Load program
 	LoadPrototypes();
@@ -96,20 +95,9 @@ int main()
 	std::string font = "assets/DejaVuSans.ttf";
 	program.guiFont.loadFromFile(font);
 
-	//ImVec2 windowSize = ImGui::GetWindowSize();
-	//program.windowWidth = float(windowSize.x);
-	//program.windowHeight = float(windowSize.y);
-	program.halfWindowWidth = program.windowWidth / 2;
-	program.halfWindowHeight = program.windowHeight / 2;
-
 	program.worldView = sf::View();
-	program.worldView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
-	program.worldView.setCenter(0, 0);
-
 	program.hudView = sf::View();
-	program.hudView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
-	program.hudView.setCenter(0, 0);
-	
+
 	program.running = true;
 	MapUpdate.launch();
 
@@ -123,11 +111,23 @@ int main()
 		{
 			ImGui::SFML::ProcessEvent(event);
 			handler.HandleInput(event, window);
-			if (event.type == sf::Event::Closed)
+			if (event.type == sf::Event::Resized)
+			{
+				sf::Vector2u size = window.getSize();
+				program.windowWidth = size.x;
+				program.windowHeight = size.y;
+				program.halfWindowWidth = program.windowWidth / 2;
+				program.halfWindowHeight = program.windowHeight / 2;
+				program.worldView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
+				program.worldView.setCenter(0, 0);
+				program.hudView.setSize(sf::Vector2f(program.windowWidth, program.windowHeight));
+				program.hudView.setCenter(0, 0);
+			}
+			else if (event.type == sf::Event::Closed)
 			{
 				program.running = false;
 			}
-			if (event.type == sf::Event::KeyPressed)
+			else if (event.type == sf::Event::KeyPressed)
 			{
 				if (event.key.code == sf::Keyboard::F3)
 				{
@@ -148,10 +148,10 @@ int main()
 		window.clear();
 		clock_t beginUpdate = clock();
 		program.startUpdate = clock();
-		program.textOverlay.clear();
-		if (program.selectedSave != "")
+		if (program.worldLoaded)
 		{
 			program.worldMutex.lock();
+			program.showingTooltip = false;
 			if (!program.gamePaused)
 				program.framesSinceTick++;
 			program.DrawGameState(window);
@@ -172,6 +172,6 @@ int main()
 	//creator->SaveProgramSettings();
 	ImGui::SFML::Shutdown();
 	MapUpdate.wait();
-	handler.eventToAction.Serialize("saves/config.txt");
+	handler.SaveProgramSettings();
 	return 0;
 }

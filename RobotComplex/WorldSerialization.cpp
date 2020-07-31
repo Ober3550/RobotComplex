@@ -5,6 +5,7 @@
 #include "ProgramData.h"
 #include "FindInVector.h"
 #include "MyStrings.h"
+#include "GuiHandler.h"
 
 WorldSave::WorldSave()
 {
@@ -20,6 +21,7 @@ WorldSave::WorldSave()
 
 WorldSave::WorldSave(std::string name)
 {
+	program.worldLoaded = true;
 	noiseRef = FastNoiseSIMD::NewFastNoiseSIMD();
 	noiseRef->SetFractalOctaves(6);
 	noiseRef->SetFractalLacunarity(2);
@@ -38,10 +40,27 @@ WorldSave::WorldSave(std::string name)
 	{
 		currentTechnology = program.technologyPrototypes[0];
 	}
+	bool dowhile = true;
+	while (dowhile)
+	{
+		if (GroundTile* ground = world.GetGroundTile(program.cameraPos >> int(GC::tileShift)))
+		{
+			if (ground->groundTile != 0)
+				dowhile = false;
+			else
+			{
+				program.cameraPos.y += GC::tileSize;
+			}
+		}
+	}
 }
 
 void WorldSave::Serialize(std::string filename)
 {
+	if (world.name == "")
+		return;
+	if (filename != world.name)
+		return;
 	if (!CreateDirectory(("saves/" + filename).c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError())
 		return;
 	// Before saving the robots make sure to stop the one that the player's meant to be controlling
@@ -180,7 +199,7 @@ void WorldSave::SerializeMisc(std::string filename)
 	myfile.open(filename, std::ios::out | std::ios::trunc | std::ios::binary);
 	if (myfile.is_open())
 	{
-		myfile << "Camera Pos," + std::to_string(program.cameraPos.x) + "," + std::to_string(program.cameraPos.y);
+		myfile << "Camera Pos," + std::to_string(program.cameraPos.x) + "," + std::to_string(program.cameraPos.y) + '\n';
 	}
 }
 

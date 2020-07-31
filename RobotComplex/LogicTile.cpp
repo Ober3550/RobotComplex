@@ -245,6 +245,7 @@ void LogicTile::DoItemLogic(Pos currentPos)
 						world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
 						world.updateQueueD.insert(pushStack[i - 1].FacingPosition(this->facing).CoordToEncoded());
 					}
+					world.updateQueueD.insert(currentPos.CoordToEncoded());
 				}
 			}
 		}

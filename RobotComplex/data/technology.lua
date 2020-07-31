@@ -1,8 +1,8 @@
 technology = {
     {
         name = "Basic Metalurgy",
-        tips = "",
-        requirement = {{"coal_ore", 10}},
+        tips = "Deliver items to the hub to unlock these recipes",
+        requirement = {{"coal_ore", 100}},
         unlocks = {"iron_ingot","copper_ingot"}
     },
     {

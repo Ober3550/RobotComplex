@@ -19,9 +19,9 @@
 
 extern "C"
 {
-#include "Lua/include/lua.h";
-#include "Lua/include/lauxlib.h";
-#include "Lua/include/lualib.h";
+	#include "Lua/include/lua.h";
+	#include "Lua/include/lauxlib.h";
+	#include "Lua/include/lualib.h";
 }
 
 #ifdef _WIN32
@@ -154,7 +154,11 @@ void LoadPrototypes()
 	program.itemTooltips[program.itemsEnd + gate] = "Gate: Can stop robots movement";
 	program.itemTooltips[program.itemsEnd + counter] = "Counter: Counts up";
 	program.itemTooltips[program.itemsEnd + comparer] = "Comparer: output = 16 + input if: behind = side";
-	program.itemTooltips.insert({ program.itemsEnd + 255, "Robot" });
+	program.itemTooltips[program.itemsEnd + plusone] = "Plusone: Adds one to the signal it receives";
+	program.itemTooltips[program.itemsEnd + shover] = "Shover: Pushes items off it according to its signal strength";
+	program.itemTooltips[program.itemsEnd + belt] = "Belt: Redirects the robot and pushes items around corners";
+	program.itemTooltips[program.itemsEnd + hub] = "Hub: Deliver items to this to unlock new recipes";
+	program.itemTooltips.insert({ program.itemsEnd + 255, "Robot: Pushes items" });
 
 	// Animation prototypes
 	std::vector<std::string> animationPrototypes;

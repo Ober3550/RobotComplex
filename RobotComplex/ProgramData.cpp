@@ -252,6 +252,8 @@ void ProgramData::RecreateSprites() {
 	program.logicSprites.clear();
 	program.robotSprites.clear();
 	program.animationSprites.clear();
+	program.textBacks.clear();
+	program.textOverlay.clear();
 	int begY = int((-program.halfWindowHeight / (GC::tileSize / program.zoom)) + (cameraPos.y >> GC::tileShift)) - 4;
 	int endY = int(program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift)) + 4;
 	int begX = int((-program.halfWindowWidth / (GC::tileSize / program.zoom)) + (cameraPos.x >> GC::tileShift)) - 4;
@@ -289,27 +291,30 @@ void ProgramData::DrawUpdateCounter()
 }
 void ProgramData::DrawTooltips()
 {
-	if (!program.anyGuiHovered)
+	if (!program.showingTooltip)
 	{
-		if (LogicTile* logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
+		if (ItemTile* tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
 		{
-			program.selectedLogicTile = logic;
-		}
-		else
-		{
-			program.selectedLogicTile = nullptr;
-		}
-		if (ItemTile * tile = world.GetItemTile(program.mouseHovering.CoordToEncoded()))
-		{
-			if (tile->itemTile > 2)
+			if (tile->itemTile > 2 && !program.showingTooltip)
 			{
 				std::string quantity = std::to_string(tile->quantity);
 				CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), tile->GetTooltip() + " " + quantity, Align::centre);
+				program.showingTooltip = true;
 			}
 		}
-		else if (program.selectedLogicTile)
+	}
+	if (!program.showingTooltip)
+	{
+		if (!program.hotbarSelectedLogicTile)
 		{
-			CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.itemTooltips[program.selectedLogicTile->logicType + program.itemsEnd], Align::centre);
+			if (LogicTile* logic = world.GetLogicTile(program.mouseHovering.CoordToEncoded()))
+			{
+				program.selectedLogicTile = logic;
+				CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), program.itemTooltips[program.selectedLogicTile->logicType + program.itemsEnd], Align::centre);
+				program.showingTooltip = true;
+			}
+			else
+				program.selectedLogicTile = nullptr;
 		}
 	}
 }
@@ -394,7 +399,7 @@ void ProgramData::CreateText(float x, float y, std::string input, Align align)
 	}
 	text.setPosition(x, y);
 
-	program.unscaledBoxes.emplace_back(backPlane);
+	program.textBacks.emplace_back(backPlane);
 	program.textOverlay.emplace_back(text);
 }
 
@@ -449,47 +454,45 @@ void ProgramData::FindMovingRobot()
 }
 
 void ProgramData::DrawGameState(sf::RenderWindow& window) {
-	FindMovingRobot();
-	if (program.prevZoom != program.zoom)
-	{
-		program.redrawGround = true;
-		program.worldView.zoom(program.zoom / program.prevZoom);
-		program.prevZoom = program.zoom;
-	}
-	if (program.prevCameraPos != program.cameraPos)
-	{
-		program.redrawGround = true;
-		program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
-		program.prevCameraPos = program.cameraPos;
-		// Recalculate the possition of the mouse and what the new selection is after moving
-		program.RecalculateMousePos();
-	}
-	
-	RecreateSprites();
-	if (program.hoveringHotbar == SmallPos{ 255,255 })
-	{
-		if (program.selectedLogicTile)
+	if (program.worldLoaded) {
+		FindMovingRobot();
+		if (program.prevZoom != program.zoom)
+		{
+			program.redrawGround = true;
+			program.worldView.zoom(program.zoom / program.prevZoom);
+			program.prevZoom = program.zoom;
+		}
+		if (program.prevCameraPos != program.cameraPos)
+		{
+			program.redrawGround = true;
+			program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
+			program.prevCameraPos = program.cameraPos;
+			// Recalculate the possition of the mouse and what the new selection is after moving
+			program.RecalculateMousePos();
+		}
+		RecreateSprites();
+		program.scaledBoxes.clear();
+		if(program.selectedLogicTile)
 			DrawSelectedBox(&program.scaledBoxes, program.mouseHovering);
 		DrawAlignment();
 		DrawTooltips();
+		DrawSelectedRegion();
+		window.setView(program.worldView);
+		program.groundSprites.draw(window);
+		for (sf::RectangleShape sprite : program.mapGround)
+			window.draw(sprite);
+		program.platformSprites.draw(window);
+		program.logicSprites.draw(window);
+		program.itemSprites.draw(window);
+		program.animationSprites.draw(window);
+		program.robotSprites.draw(window);
+		for (sf::RectangleShape sprite : program.mapShapes)
+			window.draw(sprite);
+		for (sf::RectangleShape sprite : program.scaledBoxes)
+			window.draw(sprite);
+		for (sf::RectangleShape sprite : program.scaledPersistentBoxes)
+			window.draw(sprite);		
 	}
-	DrawSelectedRegion();
-	DrawHotbar();
-	window.setView(program.worldView);
-	program.groundSprites.draw(window);
-	for (sf::RectangleShape sprite : program.mapGround)
-		window.draw(sprite);
-	program.platformSprites.draw(window);
-	program.logicSprites.draw(window);
-	program.itemSprites.draw(window);
-	program.animationSprites.draw(window);
-	program.robotSprites.draw(window);
-	for (sf::RectangleShape sprite : program.mapShapes)
-		window.draw(sprite);
-	for (sf::RectangleShape sprite : program.scaledBoxes)
-		window.draw(sprite);
-	for (sf::RectangleShape sprite : program.scaledPersistentBoxes)
-		window.draw(sprite);
 }
 
 void ProgramData::MovePlatform(Pos pos, Facing toward)
@@ -732,16 +735,13 @@ void ProgramData::UpdateMap()
 
 void ProgramData::DrawAlignment()
 {
-	if (program.selectedLogicTile || program.hotbarIndex != SmallPos{ 255,255 })
+	if (program.selectedLogicTile)
 	{
 		bool drawLine = false;
 		Facing rotation = program.placeRotation;
-		if (program.selectedLogicTile)
-		{
-			if (program.selectedLogicTile->ShowAlign())
-				drawLine = true;
-			rotation = program.selectedLogicTile->facing;
-		}
+		if (program.selectedLogicTile->ShowAlign())
+			drawLine = true;
+		rotation = program.selectedLogicTile->facing;
 		if (drawLine)
 		{
 			sf::RectangleShape selectionBox;
@@ -824,30 +824,55 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 
 SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items)
 {
-	for (auto element : *slots)
+	if (!program.showingTooltip)
 	{
-		sf::RectangleShape rect = element.second;
-		sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
-		if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
+		for (auto element : *slots)
 		{
-			auto kv = items->find(element.first);
-			if (kv != items->end())
+			sf::RectangleShape rect = element.second;
+			sf::FloatRect rectBox(rect.getPosition().x, rect.getPosition().y, rect.getSize().x, rect.getSize().y);
+			if (rectBox.contains(sf::Vector2f(float(program.mousePos.x), float(program.mousePos.y))))
 			{
-				CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), kv->second.GetTooltip(), Align::centre);
-				return element.first;
+				auto kv = items->find(element.first);
+				if (kv != items->end())
+				{
+					CreateText(float(program.mousePos.x), float(program.mousePos.y - 20), kv->second.GetTooltip(), Align::centre);
+					program.showingTooltip = true;
+					return element.first;
+				}
 			}
 		}
+		return SmallPos{ 255,255 };
 	}
-	return SmallPos{ 255,255 };
 }
 
 void ProgramData::DrawHotbar()
 {
-	program.hotbarSlots.clear();
+	program.hotbarBacks.clear();
 	program.hotbarSprites.clear();
 	
-	DrawItemGrid((GC::hotbarTotalSize) * -5, program.halfWindowHeight - (GC::hotbarTotalSize) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarSlots, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
-	program.hoveringHotbar = DrawGridTooltips(&program.hotbarSlots, &program.hotbar);
+	DrawItemGrid((GC::hotbarTotalSize) * -5, program.halfWindowHeight - (GC::hotbarTotalSize) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarBacks, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
+	program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
+
+	if (program.hotbarSelectedLogicTile)
+		if (program.selectedLogicTile)
+		{
+			delete program.selectedLogicTile;
+			program.selectedLogicTile = nullptr;
+		}
+
+	if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
+	{
+		if (item->itemTile > program.itemsEnd)
+		{
+			program.selectedLogicTile = new LogicTile(item->itemTile - program.itemsEnd);
+			program.selectedLogicTile->facing = program.placeRotation;
+			program.hotbarSelectedLogicTile = true;
+		}
+		else
+			program.hotbarSelectedLogicTile = false;
+	}
+	else
+		program.hotbarSelectedLogicTile = false;
 }
 
 void ProgramData::DrawCraftingView()
@@ -864,7 +889,7 @@ void ProgramData::DrawCraftingView()
 				program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
 				program.craftingViewUpdate = false;
 			}
-			float craftingViewEndHeight = 120;
+			float craftingViewEndHeight = 150;
 			float x = program.craftingViewPos.x - program.windowWidth * 0.5f;
 			float y = program.craftingViewPos.y - program.windowHeight * 0.5f + craftingViewEndHeight;
 			float border = 20;
@@ -907,7 +932,7 @@ void ProgramData::DrawTechnologyView()
 				}
 				program.technologyViewUpdate = false;
 			}
-			float windowEndHeight = 60;
+			float windowEndHeight = 80;
 			float x = program.technologyViewPos.x - program.windowWidth * 0.5f;
 			float y = program.technologyViewPos.y - program.windowHeight * 0.5f + windowEndHeight;
 			float border = 20;

@@ -16,6 +16,7 @@ public:
 	std::string resultsTitle = "";
 	bool populateResults = true;
 	bool showDebug = false;
+	bool useNormalMovement = false;
 
 	// Window context
 	//sf::RenderWindow* window;
@@ -41,7 +42,7 @@ public:
 	void HandleInput(sf::Event event, sf::RenderWindow& window);
 	void HandleGui(sf::RenderWindow& window);
 	GuiHandler() {
-		eventToAction.Deserialize("saves/config.txt");
+		LoadProgramSettings();
 		if(eventToAction.size() == 0)
 			LoadDefaultKeyMapping();
 		for (auto kv : eventToAction)
@@ -50,6 +51,9 @@ public:
 		}
 		CreateActions();
 	}
+	void DrawCraftingViewer();
+	void DrawTechnologyViewer();
+	void DrawHotbar();
 };
 extern GuiHandler handler;
 
