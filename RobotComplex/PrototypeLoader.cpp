@@ -419,7 +419,13 @@ void LoadLogicToHotbar()
 	program.hotbar.insert({ SmallPos{1,1}, BigItem(program.itemsEnd + redirector,		8) });
 	program.hotbar.insert({ SmallPos{2,1}, BigItem(program.itemsEnd + belt,				4) });
 	program.hotbar.insert({ SmallPos{3,1}, BigItem(program.itemsEnd + hub,				1) });
-	//program.hotbar.insert({ SmallPos{0,1}, ItemTile(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{1,0}, BigItem(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{4,1}, BigItem(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{5,1}, BigItem(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{6,1}, BigItem(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{7,1}, BigItem(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{8,1}, BigItem(program.itemsEnd + robot,			godQuantity) });
+	program.hotbar.insert({ SmallPos{9,1}, BigItem(program.itemsEnd + robot,			godQuantity) });
 	//program.hotbar.insert({ SmallPos{1,1}, ItemTile(program.itemsEnd + redirector,		godQuantity) });
 	//program.hotbar.insert({ SmallPos{2,1}, ItemTile(program.itemsEnd + belt,			godQuantity) });
 	//program.hotbar.insert({ SmallPos{3,1}, ItemTile(program.itemsEnd + shover,			godQuantity) });

@@ -26,6 +26,9 @@
     <ClCompile Include="..\imgui-sfml-master\imgui-SFML.cpp" />
     <ClCompile Include="imgui_adons.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\imgui-sfml-master\imgui-SFML.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{AD1CA6A0-C559-483C-83B8-674B6295C985}</ProjectGuid>

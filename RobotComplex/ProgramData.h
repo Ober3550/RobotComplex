@@ -57,6 +57,9 @@ public:
 	ItemTile* selectedHotbar;
 	SmallPos  hoveringHotbar;
 	SmallPos  hotbarIndex;
+	bool		hotbarShow;
+	ImVec2		hotbarDimensions;
+	ImVec2		hotbarPos;
 
 	bool showingTooltip;
 	

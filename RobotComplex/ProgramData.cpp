@@ -784,9 +784,9 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 				int y = screenY + (j * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 				sf::RectangleShape gridBack;
 				if(i == highlight.x && j == highlight.y)
-					gridBack.setFillColor(sf::Color(200, 200, 200, 100));
+					gridBack.setFillColor(sf::Color(200, 200, 200, 0));
 				else
-					gridBack.setFillColor(sf::Color(50, 50, 50, 100));
+					gridBack.setFillColor(sf::Color(50, 50, 50, 0));
 				gridBack.setSize(sf::Vector2f(float(GC::hotbarSlotSize) * s, float(GC::hotbarSlotSize) * s));
 				gridBack.setPosition(sf::Vector2f(x - (float(GC::hotbarSlotSize) * s) / 2.f, y - (float(GC::hotbarSlotSize) * s) / 2.f));
 				slots->insert({ SmallPos{i,j},gridBack });
@@ -795,13 +795,14 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 	}
 	for (auto kv : *items)
 	{
+		sf::Vector2f ImguiOffset = sf::Vector2f(program.halfWindowWidth - GC::halfTileSize, program.halfWindowHeight - GC::halfTileSize);
 		BigItem item = kv.second;
 		SmallPos pos = kv.first;
 		int x = screenX + (pos.x * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 		int y = screenY + (pos.y * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 		if (item.itemTile <= program.itemsEnd)
 		{
-			item.DrawItem(sprites, x - GC::halfTileSize, y - GC::halfTileSize, s * 1.5f, 0, sf::Color(255, 255, 255, 255));
+			item.DrawItem(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s * 1.5f, 0, sf::Color(255, 255, 255, 255));
 		}
 		else if (item.itemTile < program.itemsEnd + 255)
 		{
@@ -809,13 +810,13 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 			logic.color = color;
 			logic.signal = 1;
 			logic.facing = rotation;
-			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize, y - GC::halfTileSize, s, 0);
+			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s, 0);
 		}
 		else if (item.itemTile == program.itemsEnd + 255)
 		{
 			Robot robot = Robot();
 			robot.facing = rotation;
-			robot.DrawTile(sprites, x - GC::halfTileSize, y - GC::halfTileSize, s, 0, sf::Color(250, 191, 38, 255));
+			robot.DrawTile(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y - 8, s, 0, sf::Color(250, 191, 38, 255));
 		}
 		if (item.quantity > 1)
 			CreateSmallText(sprites, std::to_string(item.quantity), x, y, 2.f, Align::right);
@@ -850,15 +851,17 @@ void ProgramData::DrawHotbar()
 	program.hotbarBacks.clear();
 	program.hotbarSprites.clear();
 	
-	DrawItemGrid((GC::hotbarTotalSize) * -5, program.halfWindowHeight - (GC::hotbarTotalSize) * 2, SmallPos{ 10,2 }, 1.0f, program.hotbarIndex, &program.hotbarBacks, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
-	program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
+	float windowEndHeight = 20;
+	float x = program.hotbarPos.x - program.windowWidth * 0.5f;
+	float y = program.hotbarPos.y - program.windowHeight * 0.5f + windowEndHeight;
+	float border = 20;
+	float viewScaleA = (program.hotbarDimensions.x - border) / (GC::hotbarTotalSize * float(10));
+	float viewScaleB = (program.hotbarDimensions.y - windowEndHeight - border) / (GC::hotbarTotalSize * float(2));
+	x += border / 2;
+	float viewScale = std::min(viewScaleA, viewScaleB);
 
-	if (program.hotbarSelectedLogicTile)
-		if (program.selectedLogicTile)
-		{
-			delete program.selectedLogicTile;
-			program.selectedLogicTile = nullptr;
-		}
+	DrawItemGrid(x, y, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarBacks, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
+	//program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
 
 	if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
 	{
@@ -892,7 +895,7 @@ void ProgramData::DrawCraftingView()
 			float craftingViewEndHeight = 150;
 			float x = program.craftingViewPos.x - program.windowWidth * 0.5f;
 			float y = program.craftingViewPos.y - program.windowHeight * 0.5f + craftingViewEndHeight;
-			float border = 20;
+			float border = 40;
 			float viewScaleA = (program.craftingViewDimensions.x - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.x));
 			float viewScaleB = (program.craftingViewDimensions.y - craftingViewEndHeight - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
 			x += border / 2;

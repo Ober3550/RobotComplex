@@ -62,20 +62,13 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 		ImGui::Begin("Save Menu");
 		static char input[40];
 		ImGui::InputText("", input, 40);
-		if (program.selectedSave != "" && populateResults)
+		if(std::string(input) == "" && populateResults)
 		{
-			size_t length = program.selectedSave.copy(input, 40);
+			size_t length = std::string(verbs[rand() % verbs.size()] + nouns[rand() % nouns.size()]).copy(input, 40);
 			input[length] = '\0';
 			for (int i = 0; i < names.size(); i++)
 				if (program.selectedSave == names[i])
 					currIndex = i;
-
-			populateResults = false;
-		}
-		else if(std::string(input) == "" && populateResults)
-		{
-			size_t length = std::string(verbs[rand() % verbs.size()] + nouns[rand() % nouns.size()]).copy(input, 40);
-			input[length] = '\0';
 			populateResults = false;
 		}
 		if (!program.worldLoaded)
@@ -200,26 +193,26 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	if (program.worldLoaded)
 	{
 		//program.DrawCrosshair(window);
-		// Crafting Viewer
-		for (auto element : program.craftingViewBacks)
-		{
-			window.draw(element.second);
-		}
-		program.craftingViewSprites.draw(window);
+		//// Crafting Viewer
+		//for (auto element : program.craftingViewBacks)
+		//{
+		//	window.draw(element.second);
+		//}
+		//program.craftingViewSprites.draw(window);
 
-		// Technology Viewer
-		for (auto element : program.technologyViewBacks)
-		{
-			window.draw(element.second);
-		}
-		program.technologyViewSprites.draw(window);
+		//// Technology Viewer
+		//for (auto element : program.technologyViewBacks)
+		//{
+		//	window.draw(element.second);
+		//}
+		//program.technologyViewSprites.draw(window);
 
-		// Hotbar
-		for (auto element : program.hotbarBacks)
-		{
-			window.draw(element.second);
-		}
-		program.hotbarSprites.draw(window);
+		//// Hotbar
+		//for (auto element : program.hotbarBacks)
+		//{
+		//	window.draw(element.second);
+		//}
+		//program.hotbarSprites.draw(window);
 
 		// Tooltips
 		for (sf::RectangleShape sprite : program.textBacks)
@@ -236,12 +229,10 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 
 void GuiHandler::DrawCraftingViewer()
 {
+	program.DrawCraftingView();
 	ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_::ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_::ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Crafting Viewer"))
-		program.craftingViewShow = true;
-	else
-		program.craftingViewShow = false;
+	program.craftingViewShow = ImGui::Begin("Crafting Viewer");
 	ImGui::TextWrapped("Arrange items on the ground in the shape of the recipe and receive the results!");
 	program.craftingViewDimensions = ImGui::GetWindowSize();
 	program.craftingViewPos = ImGui::GetWindowPos();
@@ -270,28 +261,44 @@ void GuiHandler::DrawCraftingViewer()
 		program.craftingViewUpdate = true;
 		resultsTitle = "Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size());
 	}
-
+	for (auto sprite : program.craftingViewSprites)
+	{
+		ImGui::Image(sprite, sprite.getColor());
+	}
 	ImGui::End();
-	program.DrawCraftingView();
+	
 }
 
 void GuiHandler::DrawTechnologyViewer()
 {
+	
 	ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_::ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_::ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Technology Viewer"))
-		program.technologyViewShow = true;
-	else
-		program.technologyViewShow = false;
+	program.technologyViewShow = ImGui::Begin("Technology Viewer");
+	program.DrawTechnologyView();
 	program.technologyViewDimensions = ImGui::GetWindowSize();
 	program.technologyViewPos = ImGui::GetWindowPos();
 	ImGui::TextWrapped(std::string("Next Objective: " + world.currentTechnology.name).c_str());
 	ImGui::TextWrapped(std::string("Tips: " + world.currentTechnology.tips).c_str());
+	for (auto sprite : program.technologyViewSprites)
+	{
+		ImGui::Image(sprite, sprite.getColor());
+	}
 	ImGui::End();
-	program.DrawTechnologyView();
+	
 }
 
 void GuiHandler::DrawHotbar()
 {
+	ImGui::SetNextWindowPos(ImVec2(program.halfWindowWidth - 300, program.windowHeight - 180), ImGuiCond_::ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(600, 160), ImGuiCond_::ImGuiCond_FirstUseEver);
+	program.hotbarShow = ImGui::Begin("Hotbar");
 	program.DrawHotbar();
+	program.hotbarDimensions = ImGui::GetWindowSize();
+	program.hotbarPos = ImGui::GetWindowPos();
+	for (auto sprite : program.hotbarSprites)
+	{
+		ImGui::Image(sprite, sprite.getColor());
+	}
+	ImGui::End();
 }

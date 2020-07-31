@@ -409,7 +409,7 @@ void GuiHandler::PerformActions()
 		{
 			if (std::function<void()>* func = handler.userActions.GetValue(mask[maxInd]))
 			{
-				if (mask[maxInd] == "Move North" && program.selectedRobot)
+				if (mask[maxInd] == "Move North" && program.selectedRobot && !handler.useNormalMovement)
 				{
 					if (max - 1 == 0 || max > 20)
 						(*func)();

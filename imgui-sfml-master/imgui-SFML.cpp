@@ -548,7 +548,6 @@ void SetLStickYAxis(sf::Joystick::Axis lStickYAxis, bool inverted) {
 }  // end of namespace SFML
 
 /////////////// Image Overloads
-
 void Image(const sf::Texture& texture, const sf::Color& tintColor,
            const sf::Color& borderColor) {
     Image(texture, static_cast<sf::Vector2f>(texture.getSize()), tintColor,
@@ -588,7 +587,9 @@ void Image(const sf::Texture& texture, const sf::Vector2f& size,
 void Image(const sf::Sprite& sprite, const sf::Color& tintColor,
            const sf::Color& borderColor) {
     sf::FloatRect bounds = sprite.getGlobalBounds();
-    Image(sprite, sf::Vector2f(bounds.width, bounds.height), tintColor,
+    sf::Vector2f scale = sprite.getScale();
+    ImGui::SetCursorScreenPos(ImVec2(sprite.getPosition().x, sprite.getPosition().y));
+    Image(sprite, sf::Vector2f(bounds.width * scale.x, bounds.height * scale.y), tintColor,
           borderColor);
 }
 
@@ -599,7 +600,6 @@ void Image(const sf::Sprite& sprite, const sf::Vector2f& size,
     if (!texturePtr) {
         return;
     }
-
     Image(*texturePtr, size,
           static_cast<sf::FloatRect>(sprite.getTextureRect()), tintColor,
           borderColor);
