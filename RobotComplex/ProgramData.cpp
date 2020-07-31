@@ -842,40 +842,47 @@ SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slot
 				}
 			}
 		}
-		return SmallPos{ 255,255 };
 	}
+	return SmallPos{ 255,255 };
 }
 
 void ProgramData::DrawHotbar()
 {
 	program.hotbarBacks.clear();
 	program.hotbarSprites.clear();
-	
-	float windowEndHeight = 20;
-	float x = program.hotbarPos.x - program.windowWidth * 0.5f;
-	float y = program.hotbarPos.y - program.windowHeight * 0.5f + windowEndHeight;
-	float border = 20;
-	float viewScaleA = (program.hotbarDimensions.x - border) / (GC::hotbarTotalSize * float(10));
-	float viewScaleB = (program.hotbarDimensions.y - windowEndHeight - border) / (GC::hotbarTotalSize * float(2));
-	x += border / 2;
-	float viewScale = std::min(viewScaleA, viewScaleB);
 
-	DrawItemGrid(x, y, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarBacks, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
-	//program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
-
-	if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
-	{
-		if (item->itemTile > program.itemsEnd)
+	if (program.hotbarSelectedLogicTile)
+		if (program.selectedLogicTile)
 		{
-			program.selectedLogicTile = new LogicTile(item->itemTile - program.itemsEnd);
-			program.selectedLogicTile->facing = program.placeRotation;
-			program.hotbarSelectedLogicTile = true;
-		}
-		else
+			delete program.selectedLogicTile;
+			program.selectedLogicTile = nullptr;
 			program.hotbarSelectedLogicTile = false;
+		}
+
+	if (program.hotbarShow)
+	{
+		float windowEndHeight = 20;
+		float x = program.hotbarPos.x - program.windowWidth * 0.5f;
+		float y = program.hotbarPos.y - program.windowHeight * 0.5f + windowEndHeight;
+		float border = 20;
+		float viewScaleA = (program.hotbarDimensions.x - border) / (GC::hotbarTotalSize * float(10));
+		float viewScaleB = (program.hotbarDimensions.y - windowEndHeight - border) / (GC::hotbarTotalSize * float(2));
+		x += border / 2;
+		float viewScale = std::min(viewScaleA, viewScaleB);
+
+		DrawItemGrid(x, y, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarBacks, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
+		program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
+
+		if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
+		{
+			if (item->itemTile > program.itemsEnd)
+			{
+				program.selectedLogicTile = new LogicTile(item->itemTile - program.itemsEnd);
+				program.selectedLogicTile->facing = program.placeRotation;
+				program.hotbarSelectedLogicTile = true;
+			}
+		}
 	}
-	else
-		program.hotbarSelectedLogicTile = false;
 }
 
 void ProgramData::DrawCraftingView()
