@@ -32,37 +32,43 @@ sf::Color ProgramData::HSV2RGB(sf::Color input)
 	return sf::Color(uint8_t((color[0] + m) * 256), uint8_t((color[1] + m) * 256), uint8_t((color[2] + m) * 256), input.a);
 }
 
-void ProgramData::RecreateGroundSprites(Pos tilePos, float x, float y)
+void ProgramData::RecreateGroundSprites(Pos pos, float x, float y)
 {
-	GroundTile* tile = world.GetGroundTile(tilePos);
-	sf::Sprite sprite;
-	uint8_t textureIndex = tile->groundTile;
-	if (tile->groundTile > 64)
+	/*for(int y=0;y<32;y++)
 	{
-		int index = int(textureIndex * 1.3f);
-		sprite.setTexture(*groundTexture);
-		sprite.setTextureRect(sf::IntRect((index / 32) * 32, 0, 32, 32));
-		sf::Color color = HSV2RGB(sf::Color(MyMod(64 - index, 256), 100 + MyMod(index, 32), 220, 255));
-		sprite.setColor(color);
-	}
-	else
-	{
-		switch (tile->groundTile)
-		{
-		case water:
-		{
-			sprite.setTexture(*groundTextures[0]);
-		}break;
-		case sand:
-		{
-			sprite.setTexture(*groundTextures[1]);
-		}break;
-		default: return;// Return if the tile isn't a recognised element
-		}
-	}
-	sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
-	sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
-	program.groundSprites.emplace_back(sprite);
+		for (int x = 0; x < 32; x++)  
+		{*/
+			GroundTile* tile = world.GetGroundTile(pos);
+			sf::Sprite sprite;
+			uint8_t textureIndex = tile->groundTile;
+			if (tile->groundTile > 64)
+			{
+				int index = int(textureIndex * 1.3f);
+				sprite.setTexture(*groundTexture);
+				sprite.setTextureRect(sf::IntRect((index / 32) * 32, 0, 32, 32));
+				sf::Color color = HSV2RGB(sf::Color(MyMod(64 - index, 256), 100 + MyMod(index, 32), 220, 255));
+				sprite.setColor(color);
+			}
+			else
+			{
+				switch (tile->groundTile)
+				{
+				case water:
+				{
+					sprite.setTexture(*groundTextures[0]);
+				}break;
+				case sand:
+				{
+					sprite.setTexture(*groundTextures[1]);
+				}break;
+				default: return;// Return if the tile isn't a recognised element
+				}
+			}
+			sprite.setOrigin(GC::halfTileSize, GC::halfTileSize);
+			sprite.setPosition(float(x + GC::halfTileSize), float(y + GC::halfTileSize));
+			program.groundSprites.emplace_back(sprite);
+	/*	} 
+	}*/
 }
 void ProgramData::RecreatePlatformSprites(uint64_t encodedPos, float x, float y)
 {
@@ -214,12 +220,10 @@ void ProgramData::UpdateElementExists()
 {
 	elementExists.clear();
 	elementExists.reserve(60000);
-	/*
-	for (auto elem : world.items)
+	/*for (auto elem : world.items)
 	{
 		elementExists.insert({ elem.first });
-	}
-	*/
+	}*/
 	for (auto elem : world.logicTiles)
 	{
 		elementExists.insert({ elem.first });
@@ -242,11 +246,8 @@ void ProgramData::UpdateElementExists()
 	existsUpdate = clock();
 }
 void ProgramData::RecreateSprites() {
-	if (program.redrawGround)
-	{
-		program.mapGround.clear();
+	if(program.redrawGround)
 		program.groundSprites.clear();
-	}
 	program.platformSprites.clear();
 	program.itemSprites.clear();
 	program.logicSprites.clear();
@@ -254,11 +255,35 @@ void ProgramData::RecreateSprites() {
 	program.animationSprites.clear();
 	program.textBacks.clear();
 	program.textOverlay.clear();
-	int begY = int((-program.halfWindowHeight / (GC::tileSize / program.zoom)) + (cameraPos.y >> GC::tileShift)) - 4;
-	int endY = int(program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift)) + 4;
+
 	int begX = int((-program.halfWindowWidth / (GC::tileSize / program.zoom)) + (cameraPos.x >> GC::tileShift)) - 4;
 	int endX = int(program.halfWindowWidth / (GC::tileSize / program.zoom) + (cameraPos.x >> GC::tileShift)) + 4;
+	int begY = int((-program.halfWindowHeight / (GC::tileSize / program.zoom)) + (cameraPos.y >> GC::tileShift)) - 4;
+	int endY = int(program.halfWindowHeight / (GC::tileSize / program.zoom) + (cameraPos.y >> GC::tileShift)) + 4;
+
+	/*
+	int begChunkY = begY / (GC::tileSize / program.zoom);
+	int endChunkY = endY / (GC::tileSize / program.zoom) + 1;
+	int begChunkX = begX / (GC::tileSize / program.zoom);
+	int endChunkX = endX / (GC::tileSize / program.zoom) + 1;
+
 	program.tilesRendered = (endY - begY) * (endX - begX);
+	int chunksRendered = (endChunkY - begChunkY) * (endChunkX - begChunkX);
+
+	if (program.redrawGround)
+	{
+		for (int y = begChunkY; y < endChunkY; y++)
+		{
+			for (int x = begChunkX; x < endChunkX; x++)
+			{
+				Pos screenPos = Pos{ int32_t(x * 32), int32_t(y * 32) } *(int)GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
+				Pos chunkPos = Pos{ x,y };
+				
+			}
+		}
+	}
+	*/
+
 	UpdateElementExists();
 	for (int y = begY; y < endY; y++)
 	{
@@ -267,7 +292,7 @@ void ProgramData::RecreateSprites() {
 			Pos screenPos = Pos{ x, y } * (int)GC::tileSize - Pos{ GC::halfTileSize,GC::halfTileSize };
 			Pos tilePos = Pos{ x,y };
 			uint64_t encodedPos = tilePos.CoordToEncoded();
-			if (program.redrawGround)
+			if(program.redrawGround)
 				RecreateGroundSprites(tilePos, float(screenPos.x), float(screenPos.y));
 			RecreateItemSprites(encodedPos, float(screenPos.x), float(screenPos.y));
 			if (elementExists.find(encodedPos) != elementExists.end()) {
@@ -429,7 +454,7 @@ void ProgramData::CreateSmallText(SpriteVector* appendTo, std::string text, floa
 		}break;
 		}
 		sprite.setTextureRect(program.fontMap[text[i]]);
-		sprite.setPosition(float(x + float(GC::halfTileSize - s * adjustLeft + s * i * 4)), float(y + GC::halfTileSize));
+		sprite.setPosition(float(x + float(GC::halfTileSize + s * (i * 4 - adjustLeft))), float(y + GC::halfTileSize));
 		sprite.setScale(sf::Vector2f(s, s));
 		appendTo->emplace_back(sprite);
 	}
@@ -462,16 +487,17 @@ void ProgramData::DrawGameState(sf::RenderWindow& window) {
 			program.worldView.zoom(program.zoom / program.prevZoom);
 			program.prevZoom = program.zoom;
 		}
-		if (program.prevCameraPos != program.cameraPos)
+		if (program.forceRefresh || program.prevCameraPos != program.cameraPos)
 		{
 			program.redrawGround = true;
+			program.forceRefresh = false;
 			program.worldView.move(sf::Vector2f(float(program.cameraPos.x - program.prevCameraPos.x), float(program.cameraPos.y - program.prevCameraPos.y)));
 			program.prevCameraPos = program.cameraPos;
 			// Recalculate the possition of the mouse and what the new selection is after moving
 			program.RecalculateMousePos();
 		}
-		RecreateSprites();
 		program.scaledBoxes.clear();
+		RecreateSprites();
 		if(program.selectedLogicTile)
 			DrawSelectedBox(&program.scaledBoxes, program.mouseHovering);
 		DrawAlignment();
@@ -519,12 +545,12 @@ void ProgramData::MovePlatform(Pos pos, Facing toward)
 		{
 			if (ItemTile* elem = world.GetItemTile(newPos.CoordToEncoded()))
 			{
-				world.updateQueueD.insert(pos.CoordToEncoded());
-				world.updateQueueD.insert(newPos.CoordToEncoded());
+				world.updateItemsNext.insert(pos.CoordToEncoded());
+				world.updateItemsNext.insert(newPos.CoordToEncoded());
 			}
 			else
 			{
-				world.updateQueueD.insert(newPos.CoordToEncoded());
+				world.updateItemsNext.insert(newPos.CoordToEncoded());
 				//world.items[newPos.CoordToEncoded()] = world.items[pos.CoordToEncoded()];
 				//world.items.erase(pos.CoordToEncoded());
 			}
@@ -636,8 +662,8 @@ void ProgramData::MoveItem(Pos pos, Facing toward)
 		{
 			assert(false);
 		}
-		world.ChangeItem(pos, -1, item->itemTile);
-		world.ChangeItem(newPos, 1, item->itemTile);
+		world.ChangeItem(pos, BigItem(item->itemTile,-1));
+		world.ChangeItem(newPos, BigItem(item->itemTile, 1));
 		world.itemPrevMoved.insert(newPos.CoordToEncoded());
 	}
 	world.nextItemPos.erase(pos.CoordToEncoded());
@@ -722,14 +748,14 @@ void ProgramData::UpdateMap()
 	MoveBots();
 	CheckItemsMoved();
 	SwapPlatforms();
-	for (uint64_t kv : world.updateQueueD)
+	for (uint64_t kv : world.updateItemsNext)
 	{
 		if (LogicTile* logic = world.GetLogicTile(kv))
 		{
 			logic->DoItemLogic(Pos::EncodedToCoord(kv));
 		}
 	}
-	world.updateQueueD.clear();
+	world.updateItemsNext.clear();
 	world.tick++;
 }
 
@@ -772,8 +798,9 @@ void ProgramData::RecalculateMousePos()
 	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 }
 
-void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<SmallPos,sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
+void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<uint16_t,std::string>* tooltips, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
 {
+	float extraScale = 1.5f;
 	for (uint8_t i = 0; i < size.x; i++)
 	{
 		for (uint8_t j = 0; j < size.y; j++)
@@ -782,27 +809,32 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 			{
 				int x = screenX + (i * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 				int y = screenY + (j * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
-				sf::RectangleShape gridBack;
+				sf::Sprite gridBack;
+				gridBack.setTexture(*blank);
+				
 				if(i == highlight.x && j == highlight.y)
-					gridBack.setFillColor(sf::Color(200, 200, 200, 0));
+					gridBack.setColor(sf::Color(200, 200, 200, 100));
 				else
-					gridBack.setFillColor(sf::Color(50, 50, 50, 0));
-				gridBack.setSize(sf::Vector2f(float(GC::hotbarSlotSize) * s, float(GC::hotbarSlotSize) * s));
-				gridBack.setPosition(sf::Vector2f(x - (float(GC::hotbarSlotSize) * s) / 2.f, y - (float(GC::hotbarSlotSize) * s) / 2.f));
-				slots->insert({ SmallPos{i,j},gridBack });
+					gridBack.setColor(sf::Color(50, 50, 50, 100));
+				gridBack.setOrigin(GC::halfTileSize, GC::halfTileSize);
+				gridBack.setScale(sf::Vector2f(s * extraScale, s * extraScale));
+				gridBack.setPosition(sf::Vector2f(x, y));
+				sprites->emplace_back(gridBack);
 			}
 		}
 	}
 	for (auto kv : *items)
 	{
-		sf::Vector2f ImguiOffset = sf::Vector2f(program.halfWindowWidth - GC::halfTileSize, program.halfWindowHeight - GC::halfTileSize);
+		//sf::Vector2f ImguiOffset = sf::Vector2f(program.halfWindowWidth - GC::halfTileSize, program.halfWindowHeight - GC::halfTileSize);
+		sf::Vector2f ImguiOffset = sf::Vector2f(0, 0);
 		BigItem item = kv.second;
 		SmallPos pos = kv.first;
 		int x = screenX + (pos.x * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 		int y = screenY + (pos.y * GC::hotbarTotalSize * s) + (GC::hotbarTotalSize * 0.5 * s);
 		if (item.itemTile <= program.itemsEnd)
 		{
-			item.DrawItem(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s * 1.5f, 0, sf::Color(255, 255, 255, 255));
+			item.DrawItem(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s * extraScale, 0, sf::Color(255, 255, 255, 255));
+			tooltips->insert({ sprites->size() - 1, item.GetTooltip() });
 		}
 		else if (item.itemTile < program.itemsEnd + 255)
 		{
@@ -811,15 +843,17 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 			logic.signal = 1;
 			logic.facing = rotation;
 			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s, 0);
+			tooltips->insert({ sprites->size() - 1, item.GetTooltip() });
 		}
 		else if (item.itemTile == program.itemsEnd + 255)
 		{
 			Robot robot = Robot();
 			robot.facing = rotation;
-			robot.DrawTile(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y - 8, s, 0, sf::Color(250, 191, 38, 255));
+			robot.DrawTile(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s, 0, sf::Color(250, 191, 38, 255));
+			tooltips->insert({ sprites->size() - 1, item.GetTooltip() });
 		}
 		if (item.quantity > 1)
-			CreateSmallText(sprites, std::to_string(item.quantity), x, y, 2.f, Align::right);
+			CreateSmallText(sprites, std::to_string(item.quantity), x - GC::halfTileSize + GC::halfTileSize * s * extraScale, y - GC::halfTileSize + GC::halfTileSize * s * extraScale, s * extraScale, Align::right);
 	}
 }
 
@@ -848,38 +882,39 @@ SmallPos ProgramData::DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slot
 
 void ProgramData::DrawHotbar()
 {
-	program.hotbarBacks.clear();
-	program.hotbarSprites.clear();
-
-	if (program.hotbarSelectedLogicTile)
-		if (program.selectedLogicTile)
-		{
-			delete program.selectedLogicTile;
-			program.selectedLogicTile = nullptr;
-			program.hotbarSelectedLogicTile = false;
-		}
-
-	if (program.hotbarShow)
+	if (program.hotbarUpdate)
 	{
-		float windowEndHeight = 20;
-		float x = program.hotbarPos.x - program.windowWidth * 0.5f;
-		float y = program.hotbarPos.y - program.windowHeight * 0.5f + windowEndHeight;
-		float border = 20;
-		float viewScaleA = (program.hotbarDimensions.x - border) / (GC::hotbarTotalSize * float(10));
-		float viewScaleB = (program.hotbarDimensions.y - windowEndHeight - border) / (GC::hotbarTotalSize * float(2));
-		x += border / 2;
-		float viewScale = std::min(viewScaleA, viewScaleB);
+		program.hotbarBacks.clear();
+		program.hotbarSprites.clear();
+		program.hotbarTooltips.clear();
 
-		DrawItemGrid(x, y, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarBacks, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
-		program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
-
-		if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
-		{
-			if (item->itemTile > program.itemsEnd)
+		if (program.hotbarSelectedLogicTile)
+			if (program.selectedLogicTile)
 			{
-				program.selectedLogicTile = new LogicTile(item->itemTile - program.itemsEnd);
-				program.selectedLogicTile->facing = program.placeRotation;
-				program.hotbarSelectedLogicTile = true;
+				delete program.selectedLogicTile;
+				program.selectedLogicTile = nullptr;
+				program.hotbarSelectedLogicTile = false;
+			}
+
+		if (program.hotbarShow)
+		{
+			float windowEndHeight = 15;
+			float border = 10;
+			float viewScaleA = (program.hotbarDimensions.x - 2 * border) / (GC::hotbarTotalSize * float(10));
+			float viewScaleB = (program.hotbarDimensions.y - 2 * border - windowEndHeight) / (GC::hotbarTotalSize * float(2));
+			float viewScale = std::min(viewScaleA, viewScaleB);
+
+			DrawItemGrid(border, windowEndHeight + border, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarTooltips, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
+			program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
+
+			if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
+			{
+				if (item->itemTile > program.itemsEnd)
+				{
+					program.selectedLogicTile = new LogicTile(item->itemTile - program.itemsEnd);
+					program.selectedLogicTile->facing = program.placeRotation;
+					program.hotbarSelectedLogicTile = true;
+				}
 			}
 		}
 	}
@@ -887,71 +922,71 @@ void ProgramData::DrawHotbar()
 
 void ProgramData::DrawCraftingView()
 {
-	program.craftingViewBacks.clear();
-	program.craftingViewSprites.clear();
-	if (program.craftingViewShow)
+	if (program.craftingViewUpdate)
 	{
-		if (foundRecipeList.size() > 0)
+		program.craftingViewBacks.clear();
+		program.craftingViewSprites.clear();
+		program.craftingViewTooltips.clear();
+
+		if (program.craftingViewShow)
 		{
-			if (program.craftingViewUpdate)
+			if (foundRecipeList.size() > 0)
 			{
 				program.craftingViewUnlocked = program.craftingRecipes[program.foundRecipeList[program.craftingViewIndex]].unlocked;
 				program.craftingRecipes[(int)program.foundRecipeList[program.craftingViewIndex]].ShowRecipeAsGrid();
-				program.craftingViewUpdate = false;
+
+				ImVec2 lastElement = ImGui::GetCursorPos();
+				float windowEndHeight = 15;
+				float border = 10;
+				float viewScaleA = (program.craftingViewDimensions.x - 2 * border) / (GC::hotbarTotalSize * float(program.craftingViewSize.x));
+				float viewScaleB = (program.craftingViewDimensions.y - 2 * border - windowEndHeight - lastElement.y) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
+				float viewScale = std::min(viewScaleA, viewScaleB);
+
+				DrawItemGrid(border, lastElement.y + border, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewTooltips, &program.craftingView, &program.craftingViewSprites, south, red, false);
+				DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
 			}
-			float craftingViewEndHeight = 150;
-			float x = program.craftingViewPos.x - program.windowWidth * 0.5f;
-			float y = program.craftingViewPos.y - program.windowHeight * 0.5f + craftingViewEndHeight;
-			float border = 40;
-			float viewScaleA = (program.craftingViewDimensions.x - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.x));
-			float viewScaleB = (program.craftingViewDimensions.y - craftingViewEndHeight - border) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
-			x += border / 2;
-			float viewScale = std::min(viewScaleA, viewScaleB);
-			DrawItemGrid(x, y, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewBacks, &program.craftingView, &program.craftingViewSprites, south, red, false);
-			DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
 		}
+		program.craftingViewUpdate = false;
 	}
 }
 
 void ProgramData::DrawTechnologyView()
 {
-	if (world.currentTechnology.name != "")
+	if (program.technologyViewUpdate)
 	{
 		program.technologyViewBacks.clear();
 		program.technologyViewSprites.clear();
+		program.technologyViewTooltips.clear();
+
 		if (program.technologyViewShow)
 		{
-			if (program.technologyViewUpdate)
+			for (auto& tech : program.technologyPrototypes)
 			{
-				for (auto& tech : program.technologyPrototypes)
+				if (tech.name == world.currentTechnology.name)
 				{
-					if (tech.name == world.currentTechnology.name)
+					tech.ShowRequirementsAsGrid();
+					if (world.techCompleted)
 					{
-						tech.ShowRequirementsAsGrid();
-						if (world.techCompleted)
-						{
-							world.techCompleted = false;
-							tech.Unlock();
-							program.technologyView.clear();
-							world.unlockedTechnologies.emplace_back(tech.name);
-							world.FindNextTechnology();
-						}
-						else
-							break;
+						world.techCompleted = false;
+						tech.Unlock();
+						program.technologyView.clear();
+						world.unlockedTechnologies.emplace_back(tech.name);
+						world.FindNextTechnology();
 					}
+					else
+						break;
 				}
-				program.technologyViewUpdate = false;
 			}
-			float windowEndHeight = 80;
-			float x = program.technologyViewPos.x - program.windowWidth * 0.5f;
-			float y = program.technologyViewPos.y - program.windowHeight * 0.5f + windowEndHeight;
-			float border = 20;
-			float viewScaleA = (program.technologyViewDimensions.x - border) / (GC::hotbarTotalSize * float(program.technologyViewSize.x));
-			float viewScaleB = (program.technologyViewDimensions.y - windowEndHeight - border) / (GC::hotbarTotalSize * float(program.technologyViewSize.y));
-			x += border / 2;
+			ImVec2 lastElement = ImGui::GetCursorPos();
+			float windowEndHeight = 15;
+			float border = 10;
+			float viewScaleA = (program.technologyViewDimensions.x - 2 * border) / (GC::hotbarTotalSize * float(technologyViewSize.x));
+			float viewScaleB = (program.technologyViewDimensions.y - 2 * border - windowEndHeight - lastElement.y) / (GC::hotbarTotalSize * float(technologyViewSize.y));
 			float viewScale = std::min(viewScaleA, viewScaleB);
-			DrawItemGrid(x, y, program.technologyViewSize, viewScale, SmallPos{ 255,255 }, &program.technologyViewBacks, &program.technologyView, &program.technologyViewSprites, south, red, false);
+			
+			DrawItemGrid(border, lastElement.y + border, program.technologyViewSize, viewScale, SmallPos{ 255,255 }, &program.technologyViewTooltips, &program.technologyView, &program.technologyViewSprites, south, red, false);
 			DrawGridTooltips(&program.technologyViewBacks, &program.technologyView);
 		}
+		program.technologyViewUpdate = false;
 	}
 }

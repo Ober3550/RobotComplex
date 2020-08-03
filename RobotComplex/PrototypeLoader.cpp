@@ -419,6 +419,7 @@ void LoadLogicToHotbar()
 	program.hotbar.insert({ SmallPos{1,1}, BigItem(program.itemsEnd + redirector,		8) });
 	program.hotbar.insert({ SmallPos{2,1}, BigItem(program.itemsEnd + belt,				4) });
 	program.hotbar.insert({ SmallPos{3,1}, BigItem(program.itemsEnd + hub,				1) });
+	//program.hotbar.insert({ SmallPos{0,0}, BigItem(3,									1) });
 	//program.hotbar.insert({ SmallPos{1,1}, ItemTile(program.itemsEnd + redirector,		godQuantity) });
 	//program.hotbar.insert({ SmallPos{2,1}, ItemTile(program.itemsEnd + belt,			godQuantity) });
 	//program.hotbar.insert({ SmallPos{3,1}, ItemTile(program.itemsEnd + shover,			godQuantity) });

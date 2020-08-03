@@ -26,6 +26,7 @@ std::unordered_map<uint8_t, sf::Texture*> logicTextures;
 std::vector<sf::Texture*> animationTextures;
 sf::Texture* robotTexture = LoadTexture("robotNew.png");
 sf::Texture* font = LoadTexture("font.png");
+sf::Texture* blank = LoadTexture("blank.png");
 
 sf::Image icon;
 

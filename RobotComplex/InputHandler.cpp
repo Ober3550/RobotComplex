@@ -263,7 +263,10 @@ void GuiHandler::CreateActions()
 	for (int i = 1; i < 21; i++)
 	{
 		userActionOrder.push_back("Hotbar " + std::to_string(i));
-		userActions.insert({ "Hotbar " + std::to_string(i),[i] {program.hotbarIndex = {(uint8_t)MyMod(i - 1,10),(uint8_t)(i < 11)}; } });
+		userActions.insert({ "Hotbar " + std::to_string(i),[i] {
+			program.hotbarIndex = {(uint8_t)MyMod(i - 1,10),(uint8_t)(i < 11)}; 			
+			program.hotbarUpdate = true;
+			}});
 	}
 
 	// Start Selection
@@ -281,57 +284,25 @@ void GuiHandler::CreateActions()
 
 	// Place Element
 	userActions.insert({ "Place Element", [&] {
-		if (program.hoveringHotbar != SmallPos{255,255})
+		auto placeItem = program.hotbar.find(program.hotbarIndex);
+		if (placeItem != program.hotbar.end())
 		{
-			program.hotbarIndex = program.hoveringHotbar;
-		}
-		else
-		{
-			if (GroundTile* withinMap = world.GetGroundTile(program.mouseHovering))
+			if (auto element = world.ChangeElement(program.mouseHovering, BigItem(placeItem->second.itemTile, 1)))
 			{
-				if (program.hotbarIndex == SmallPos{ 255,255 })
-				{
-					if (program.selectedRobot)
-						program.selectedRobot->stopped = true;
-					program.selectedRobot = nullptr;
-				}
-				else
-				{
-					auto kv = program.hotbar.find(program.hotbarIndex);
-					if (kv != program.hotbar.end())
-					{
-						if (world.PlaceElement(program.mouseHovering, kv->second.itemTile))
-						{
-							// Item may be removed because of hub
-							if(ItemTile* item = world.GetItemTile(program.mouseHovering))
-								CraftingClass::TryCrafting(item->itemTile, program.mouseHovering);
-							kv->second.quantity--;
-							if (kv->second.quantity == 0)
-							{
-								program.hotbar.erase(kv->first);
-							}
-						}
-					}
-				}
+				element.quantity *= -1;
+				world.ChangeInventory(SmallPos(), element);
 			}
 		}
 	} });
 
 	// Remove Element
 	userActions.insert({ "Remove Element", [&] {
-		bool elementFound = false;
-		uint16_t element = 0;
-		if (!elementFound)
-			if (element = world.ChangeRobot(program.mouseHovering, -1))
-				elementFound = true;
-		if (!elementFound)
-			if (element = world.ChangeItem(program.mouseHovering, -1, 0))
-				elementFound = true;
-		if (!elementFound)
-			if (element = world.ChangeLogic(program.mouseHovering, -1, 0))
-				elementFound = true;
-		if (element)
-			world.ChangeInventory(element, 1);
+		if (auto element = world.ChangeElement(program.mouseHovering, BigItem(0,-1)))
+		{
+			element.quantity *= -1;
+			world.ChangeInventory(SmallPos(), element);
+		}
+			
 	} });
 
 	// Every tick
@@ -497,11 +468,12 @@ void GuiHandler::FinishedSelection(Pos start, Pos end)
 				{
 					uint16_t element = 0;
 					if (program.cut)
-						element = world.ChangeLogic(Pos{ i,j }, -1, 0);
-					if (element)
-					{
-						world.ChangeInventory(element, 1);
-					}
+						if (auto element = world.ChangeLogic(Pos{ i,j }, BigItem(0, -1)))
+						{
+							element.quantity *= -1;
+							world.ChangeInventory(SmallPos(), element);
+						}
+							
 				}
 			}
 		}

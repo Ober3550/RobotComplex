@@ -61,7 +61,10 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 	{
 		ImGui::Begin("Save Menu");
 		static char input[40];
-		ImGui::InputText("", input, 40);
+		if (!program.worldLoaded)
+		{
+			ImGui::InputText("", input, 40);
+		}
 		if(std::string(input) == "" && populateResults)
 		{
 			size_t length = std::string(verbs[rand() % verbs.size()] + nouns[rand() % nouns.size()]).copy(input, 40);
@@ -229,13 +232,10 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 
 void GuiHandler::DrawCraftingViewer()
 {
-	program.DrawCraftingView();
 	ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_::ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_::ImGuiCond_FirstUseEver);
 	program.craftingViewShow = ImGui::Begin("Crafting Viewer");
 	ImGui::TextWrapped("Arrange items on the ground in the shape of the recipe and receive the results!");
-	program.craftingViewDimensions = ImGui::GetWindowSize();
-	program.craftingViewPos = ImGui::GetWindowPos();
 	ImGui::Text("Find:");
 	ImGui::SameLine();
 	static char input[20];
@@ -261,9 +261,21 @@ void GuiHandler::DrawCraftingViewer()
 		program.craftingViewUpdate = true;
 		resultsTitle = "Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size());
 	}
-	for (auto sprite : program.craftingViewSprites)
+
+	ImVec2 prevDimensions = program.craftingViewDimensions;
+	program.craftingViewDimensions = ImGui::GetWindowSize();
+	if (program.craftingViewDimensions.x != prevDimensions.x && program.craftingViewDimensions.y != prevDimensions.y)
+		program.craftingViewUpdate = true;
+	program.DrawCraftingView();
+	for (int i = 0; i < program.craftingViewSprites.size(); i++)
 	{
+		auto sprite = program.craftingViewSprites[i];
 		ImGui::Image(sprite, sprite.getColor());
+
+		auto tooltip = program.craftingViewTooltips.find(i);
+		if (tooltip != program.craftingViewTooltips.end())
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip(tooltip->second.c_str());
 	}
 	ImGui::End();
 	
@@ -275,14 +287,23 @@ void GuiHandler::DrawTechnologyViewer()
 	ImGui::SetNextWindowPos(ImVec2(20, 440), ImGuiCond_::ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_::ImGuiCond_FirstUseEver);
 	program.technologyViewShow = ImGui::Begin("Technology Viewer");
-	program.DrawTechnologyView();
-	program.technologyViewDimensions = ImGui::GetWindowSize();
-	program.technologyViewPos = ImGui::GetWindowPos();
 	ImGui::TextWrapped(std::string("Next Objective: " + world.currentTechnology.name).c_str());
 	ImGui::TextWrapped(std::string("Tips: " + world.currentTechnology.tips).c_str());
-	for (auto sprite : program.technologyViewSprites)
+
+	ImVec2 prevDimensions = program.technologyViewDimensions;
+	program.technologyViewDimensions = ImGui::GetWindowSize();
+	if (program.technologyViewDimensions.x != prevDimensions.x && program.technologyViewDimensions.y != prevDimensions.y)
+		program.technologyViewUpdate = true;
+	program.DrawTechnologyView();
+	for (int i=0;i<program.technologyViewSprites.size();i++)
 	{
+		auto sprite = program.technologyViewSprites[i];
 		ImGui::Image(sprite, sprite.getColor());
+
+		auto tooltip = program.technologyViewTooltips.find(i);
+		if (tooltip != program.technologyViewTooltips.end())
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip(tooltip->second.c_str());
 	}
 	ImGui::End();
 	
@@ -293,12 +314,20 @@ void GuiHandler::DrawHotbar()
 	ImGui::SetNextWindowPos(ImVec2(program.halfWindowWidth - 300, program.windowHeight - 180), ImGuiCond_::ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(600, 160), ImGuiCond_::ImGuiCond_FirstUseEver);
 	program.hotbarShow = ImGui::Begin("Hotbar");
-	program.DrawHotbar();
+	ImVec2 prevDimensions = program.hotbarDimensions;
 	program.hotbarDimensions = ImGui::GetWindowSize();
-	program.hotbarPos = ImGui::GetWindowPos();
-	for (auto sprite : program.hotbarSprites)
+	if(program.hotbarDimensions.x != prevDimensions.x && program.hotbarDimensions.y != prevDimensions.y)
+		program.hotbarUpdate = true;
+	program.DrawHotbar();
+	for (int i = 0; i < program.hotbarSprites.size(); i++)
 	{
+		auto sprite = program.hotbarSprites[i];
 		ImGui::Image(sprite, sprite.getColor());
+
+		auto tooltip = program.hotbarTooltips.find(i);
+		if (tooltip != program.hotbarTooltips.end())
+			if (ImGui::IsItemHovered())
+				ImGui::SetTooltip(tooltip->second.c_str());
 	}
 	ImGui::End();
 }

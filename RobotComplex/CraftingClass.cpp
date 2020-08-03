@@ -50,13 +50,17 @@ int CraftingClass::CheckCrafting(Pos pos)
 							{
 								if (logic->quantity + recipeComp.resultState > UINT8_MAX)
 									return failed;
+								if (logic->logicType != recipeComp.itemTile - program.itemsEnd)
+									return failed;
 							}
+							if (ItemTile* item = world.GetItemTile(checkPos.CoordToEncoded()))
+								return failed;
 						}
 						else if(recipeComp.resultState < 0)
 						{
 							if (LogicTile* logic = world.GetLogicTile(checkPos.CoordToEncoded()))
 							{
-								if (logic->quantity + recipeComp.resultState < 0)
+								if (int(logic->quantity) + recipeComp.resultState < 0)
 									return failed;
 							}
 							else
@@ -93,19 +97,22 @@ int CraftingClass::CheckCrafting(Pos pos)
 bool CraftingClass::DoCrafting(Pos pos)
 {
 	auto tile = world.GetItemTile(pos);
-	for (int j = 0; j < (int)recipe.size() / width; j++)
+	if (tile)
 	{
-		int row = j * width;
-		for (int i = 0; i < width; i++)
+		for (int j = 0; j < (int)recipe.size() / width; j++)
 		{
-			// Find point of reference within recipe to start searching from. 
-			if (recipe[i + row].itemTile == tile->itemTile)
+			int row = j * width;
+			for (int i = 0; i < width; i++)
 			{
-				if (CheckCrafting(pos.RelativePosition(-i, -j)))
+				// Find point of reference within recipe to start searching from. 
+				if (recipe[i + row].itemTile == tile->itemTile)
 				{
-					CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks, craftTicks, this->animationReference };
-					world.craftingQueue.insert({ pos.RelativePosition(-i,-j).CoordToEncoded(),addProcess });
-					return true;
+					if (CheckCrafting(pos.RelativePosition(-i, -j)))
+					{
+						CraftingProcess addProcess = { pos.RelativePosition(-i,-j), this->recipeIndex, craftTicks, craftTicks, this->animationReference };
+						world.craftingQueue.insert({ pos.RelativePosition(-i,-j).CoordToEncoded(),addProcess });
+						return true;
+					}
 				}
 			}
 		}
@@ -138,7 +145,7 @@ void CraftingClass::SuccessfulCraft(Pos pos)
 				if (recipeComp.resultState != 0)
 				{
 					Pos alterPos = pos.RelativePosition(k, l);
-					world.ChangeElement(alterPos, recipeComp.resultState, recipeComp.itemTile);
+					world.ChangeElement(alterPos, BigItem(recipeComp.itemTile, recipeComp.resultState));
 					if (recipeComp.resultState > 0)	// If an item is populated at a tile
 					{
 						// Try to queue a different recipe according to that item type.

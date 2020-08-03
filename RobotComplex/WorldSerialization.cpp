@@ -6,6 +6,7 @@
 #include "FindInVector.h"
 #include "MyStrings.h"
 #include "GuiHandler.h"
+#include "PrototypeLoader.h"
 
 WorldSave::WorldSave()
 {
@@ -53,6 +54,12 @@ WorldSave::WorldSave(std::string name)
 			}
 		}
 	}
+	LoadLogicToHotbar();
+	program.redrawGround = true;
+	program.technologyViewUpdate = true;
+	program.craftingViewUpdate = true;
+	program.hotbarUpdate = true;
+	program.forceRefresh = true;
 }
 
 void WorldSave::Serialize(std::string filename)
@@ -69,13 +76,13 @@ void WorldSave::Serialize(std::string filename)
 	worldChunks.Serialize("saves/" + filename + "/chunks.bin");
 	//platforms.Serialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Serialize("saves/" + filename + "/platformsNext.bin");
-	//items.Serialize("saves/" + filename + "/items.bin");
+	items.Serialize("saves/" + filename + "/items.bin");
 	nextItemPos.Serialize("saves/" + filename + "/itemsNext.bin");
 	robots.Serialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Serialize("saves/" + filename + "/robotsNext.bin");
 	logicTiles.Serialize("saves/" + filename + "/logic.bin");
 	updateNext.Serialize("saves/" + filename + "/updateWire.bin");
-	updateQueueD.Serialize("saves/" + filename + "/updateQueueD.bin");
+	updateItemsNext.Serialize("saves/" + filename + "/updateQueueD.bin");
 	craftingQueue.Serialize("saves/" + filename + "/craftingQueue.bin");
 	SerializeItemNames("saves/" + filename + "/itemNames.txt");
 	SerializeMisc("saves/" + filename + "/misc.txt");
@@ -98,13 +105,13 @@ void WorldSave::Deserialize(std::string filename)
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
 	//platforms.Deserialize("saves/" + filename + "/platforms.bin");
 	nextPlatforms.Deserialize("saves/" + filename + "/platformsNext.bin");
-	//items.Deserialize("saves/" + filename + "/items.bin", world.oldItemNewItem);
+	items.Deserialize("saves/" + filename + "/items.bin", world.oldItemNewItem);
 	nextItemPos.Deserialize("saves/" + filename + "/itemsNext.bin");
 	robots.Deserialize("saves/" + filename + "/robots.bin");
 	nextRobotPos.Deserialize("saves/" + filename + "/robotsNext.bin");
 	logicTiles.Deserialize("saves/" + filename + "/logic.bin");
 	updateNext.Deserialize("saves/" + filename + "/updateWire.bin");
-	updateQueueD.Deserialize("saves/" + filename + "/updateItem.bin");
+	updateItemsNext.Deserialize("saves/" + filename + "/updateItem.bin");
 	craftingQueue.Deserialize("saves/" + filename + "/craftingQueue.bin");
 	DeserializeMisc("saves/" + filename + "/misc.txt");
 	program.hotbar.Deserialize("saves/" + filename + "/inventory.bin", world.oldItemNewItem);
@@ -133,13 +140,14 @@ void WorldSave::Deserialize(std::string filename)
 
 	program.selectedSave = filename;
 	program.gamePaused = false;
+	program.forceRefresh = true;
 }
 
 void WorldSave::clear()
 {
 	platforms.clear();
 	nextPlatforms.clear();
-	//items.clear();
+	items.clear();
 	nextItemPos.clear();
 	itemPrevMoved.clear();
 	robots.clear();
@@ -150,9 +158,9 @@ void WorldSave::clear()
 	updateCurr.clear();
 	updateProp.clear();
 	updateNext.clear();
-	updateQueueD.clear();
+	updateItemsNext.clear();
 	program.hotbar.clear();
-	name = "New World";
+	name = "";
 	tick = 0;
 	seed = 0;
 }

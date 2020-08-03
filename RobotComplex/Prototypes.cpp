@@ -61,14 +61,18 @@ BigItemProto::operator BigItem() const {
 	return item;
 }
 
-std::string BigItem::GetTooltip() { return ItemTile(*this).GetTooltip(); }
-void BigItem::DrawItem(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color) { ItemTile(*this).DrawItem(appendTo, x, y, s, flags, color); }
+std::string BigItem::GetTooltip() { return ItemTile(this->itemTile, this->quantity).GetTooltip(); }
+void BigItem::DrawItem(SpriteVector* appendTo, float x, float y, float s, uint8_t flags, sf::Color color) { ItemTile(this->itemTile, this->quantity).DrawItem(appendTo, x, y, s, flags, color); }
 
 BigItem::operator ItemTile() const {
 	ItemTile item;
 	item.itemTile = this->itemTile;
 	item.quantity = uint8_t(this->quantity);
 	return item;
+}
+
+BigItem::operator bool() const {
+	return itemTile > 0 || quantity > 0;
 }
 
 void TechProto::ShowRequirementsAsGrid()

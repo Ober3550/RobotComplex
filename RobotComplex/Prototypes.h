@@ -40,7 +40,8 @@ public:
 	uint16_t	itemTile;
 	int			quantity;
 	operator ItemTile() const;
-	BigItem() { this->itemTile = 0; this->quantity = 1; }
+	operator bool() const;
+	BigItem() { this->itemTile = 0; this->quantity = 0; }
 	BigItem(uint16_t itemTile, int quantity) { this->itemTile = itemTile; this->quantity = quantity; }
 	BigItem(ItemTile item) { this->itemTile = item.itemTile; this->quantity = item.quantity; }
 	BigItem(uint16_t item) { this->itemTile = item; this->quantity = 1; }

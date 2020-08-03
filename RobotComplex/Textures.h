@@ -13,3 +13,4 @@ extern std::vector<sf::Texture*> animationTextures;
 extern std::unordered_map<uint8_t, sf::Texture*> logicTextures;
 extern sf::Texture* robotTexture;
 extern sf::Texture* font;
+extern sf::Texture* blank;

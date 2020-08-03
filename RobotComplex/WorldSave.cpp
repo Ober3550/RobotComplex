@@ -87,7 +87,7 @@ void WorldSave::GenerateOre(Pos pos)
 								{
 									newItem.quantity = quantity * 7;
 									Pos newPos = Pos{ x, y };
-									world.ChangeItem(newPos, newItem.quantity, newItem.itemTile);
+									world.ChangeItem(newPos, BigItem(newItem));
 								}
 							}
 						}
@@ -150,68 +150,7 @@ CraftingProcess* WorldSave::GetCrafting(uint64_t encodedPos)
 {
 	return world.craftingQueue.GetValue(encodedPos);
 }
-uint16_t WorldSave::ChangeItem(Pos pos, int quantity, uint16_t item)
-{
-	uint64_t itemPos = pos.CoordToEncoded();
-	if (ItemTile* currentItem = world.GetItemTile(itemPos))
-	{
-		if (item != 0 && currentItem->itemTile != item && currentItem->itemTile != 0)
-			return false;
-		else
-		{
-			if(quantity > 0)
-				currentItem->itemTile = item;
-			if (currentItem->quantity < quantity && quantity < 0 || int(currentItem->quantity) + quantity > int(UINT8_MAX))
-				return false;
-			else
-				currentItem->quantity += quantity;
-		}
-		if (currentItem->quantity == 0)
-		{
-			world.items.erase(pos.CoordToEncoded());
-			/*if (WorldChunk* chunk = world.worldChunks.GetValue(pos.ChunkPosition()))
-			{
-				for (auto item = chunk->items.begin(); item < chunk->items.end(); item++)
-				{
-					if (item->pos == pos)
-					{
-						chunk->items.erase(item);
-						break;
-					}
-				}
-			}*/
-		}
-		if (!world.updateQueueD.contains(pos.CoordToEncoded()))
-		{
-			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
-			{
-				logicTile->DoItemLogic(Pos::EncodedToCoord(itemPos));
-			}
-		}
-		return currentItem->itemTile;
-	}
-	else
-	{
-		if (quantity <= 0)
-			return false;
-		ItemTile* newItem = new ItemTile();
-		newItem->itemTile = item;
-		newItem->quantity = quantity;
-		world.items.insert({ pos,*newItem });
-		/*if (WorldChunk* chunk = world.worldChunks.GetValue(pos.ChunkPosition()))
-		{
-			chunk->items.emplace_back(PosItem{ pos,*newItem });
-		}*/
-		if (!world.updateQueueD.contains(pos.CoordToEncoded()))
-		{
-			if (LogicTile* logicTile = world.GetLogicTile(itemPos))
-			{
-				logicTile->DoItemLogic(Pos::EncodedToCoord(itemPos));
-			}
-		}
-		return true;
-	}
-}
+
 bool WorldSave::PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft)
 {
 	Pos prevPos = itemsMoving->back();
@@ -335,248 +274,21 @@ void WorldSave::MovePlatform(Pos pos, Facing toward)
 	}
 }
 
-uint16_t WorldSave::ChangeLogic(Pos pos, int quantity, uint8_t logicType)
-{
-	if (LogicTile* logic = world.GetLogicTile(pos))
-	{
-		if (logicType != 0 && logic->logicType != logicType)
-			return false;
-		if (logic->quantity + quantity < 0 || logic->quantity + quantity > UINT8_MAX)
-			return false;
-		else
-		{
-			if (logic->color != program.placeColor 
-			&& logic->logicType == wire
-			&& quantity > 0)
-			{
-				logic->logicType = wirebridge;
-				logic->color2 = program.placeColor;
-				for (int i = 0; i < 4; i++)
-				{
-					Pos neighbourPosition = pos.FacingPosition((Facing)i);
-					if (LogicTile* neighbour = world.GetLogicTile(neighbourPosition))
-					{
-						if (neighbour->color == logic->color)
-						{
-							logic->facing = (Facing)i;
-							break;
-						}
-					}
-				}
-				world.updateNext.insert({ pos.CoordToEncoded(),1 });
-			}
-			
-			logic->quantity += quantity;
-			if (logic->quantity == 1 
-				&& logic->logicType == wirebridge)
-			{
-				logic->logicType = wire;
-				logic->color2 = logic->color;
-				world.updateNext.insert({ pos.CoordToEncoded(),1 });
-			}
-			world.updateQueueD.insert({ pos.CoordToEncoded() });
-		}
-		if (logic->quantity == 0)
-		{
-			if (program.selectedLogicTile == logic)
-				program.selectedLogicTile = nullptr;
-			world.logicTiles.erase(pos.CoordToEncoded());
-			for (int i = 0; i < 4; i++)
-			{
-				world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
-			}
-		}
-		return logic->logicType + program.itemsEnd;
-	}
-	else
-	{
-		if (quantity < 0)
-			return false;
-		if (quantity > 0)
-		{
-			auto ground = world.GetGroundTile(pos);
-			if (ground->groundTile > GC::collideGround)
-			{
-				LogicTile logicPlace = LogicTile(logicType);
-				logicPlace.color = program.placeColor;
-				logicPlace.color2 = program.placeColor;
-				logicPlace.facing = program.placeRotation;
-				logicPlace.quantity = quantity;
-				world.logicTiles.insert({ pos.CoordToEncoded(),logicPlace });
-				world.updateNext.insert({ pos.CoordToEncoded(),1 });
-				for (int i = 0; i < 4; i++)
-				{
-					world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
-				}
-				world.updateQueueD.insert({ pos.CoordToEncoded() });
-				return logicPlace.logicType + program.itemsEnd;
-			}
-			else return false;
-		}
-	}
-	return false;
-}
-
-uint16_t WorldSave::ChangeRobot(Pos pos, int quantity)
-{
-	if (Robot* robot = world.GetRobot(pos))
-	{
-		if (quantity > 0)
-			return false;
-		if(robot == program.selectedRobot)
-			program.selectedRobot = nullptr;
-		world.robots.erase(pos.CoordToEncoded());
-		return program.itemsEnd + GC::MAXLOGIC;
-	}
-	else
-	{
-		auto ground = world.GetGroundTile(pos);
-		if (ground->groundTile > GC::collideGround)
-		{
-			if (quantity > 0)
-			{
-				Robot newRobot;
-				newRobot.stopped = true;
-				world.robots.insert({ pos.CoordToEncoded(),newRobot });
-				return program.itemsEnd + GC::MAXLOGIC;
-			}
-		}
-		else return false;
-	}
-	return false;
-}
-
-bool WorldSave::PlaceElement(Pos pos, uint16_t item)
-{
-	if (item <= program.itemsEnd)
-	{
-		if(world.ChangeItem(pos, 1, item))
-			return true;
-		return false;
-	}
-	else if (item < program.itemsEnd + GC::MAXLOGIC)
-	{
-		if (world.ChangeLogic(pos, 1, item - program.itemsEnd))
-			return true;
-		return false;
-	}
-	else if(item == program.itemsEnd + GC::MAXLOGIC)
-	{
-		if (world.ChangeRobot(pos, 1))
-			return true;
-		return false;
-	}
-}
-
-uint16_t WorldSave::ChangeElement(Pos pos, int quantity, uint16_t item)
-{
-	if (quantity > 0)
-	{
-		return PlaceElement(pos, item);
-	}
-	else if (quantity < 0)
-	{
-		uint16_t element;
-		if (item <= program.itemsEnd)
-		{
-			return world.ChangeItem(pos, quantity, item);
-		}
-		else if (item < program.itemsEnd + GC::MAXLOGIC)
-		{
-			return world.ChangeLogic(pos, quantity, item);
-		}
-		else if(item == program.itemsEnd + GC::MAXLOGIC)
-		{
-			return world.ChangeRobot(pos, quantity);
-		}
-	}
-	return true;
-}
-
-int WorldSave::ChangeInventory(uint16_t item, int quantity)
-{
-	if (quantity > 0)
-	{
-		for (auto& kv : program.hotbar)
-		{
-			if (kv.second.itemTile == item)
-			{
-				int subQuantity = quantity;
-				if (kv.second.quantity + subQuantity > 255)
-					subQuantity = 255 - kv.second.quantity;
-				kv.second.quantity += subQuantity;
-				quantity -= subQuantity;
-			}
-			if (quantity <= 0)
-				break;
-		}
-		if (quantity > 0)
-		{
-			for (int j = 1; j >= 0; j--)
-			{
-				for (int i = 0; i < 10; i++)
-				{
-					auto kv = program.hotbar.find(SmallPos{ (uint8_t)i,(uint8_t)j });
-					if (kv == program.hotbar.end())
-					{
-						ItemTile newItem = ItemTile(item);
-						int subQuantity = quantity;
-						if (subQuantity > 255)
-							subQuantity = 255;
-						newItem.quantity = subQuantity;
-						quantity -= subQuantity;
-						program.hotbar.insert({ SmallPos{(uint8_t)i,(uint8_t)j},newItem });
-					}
-					if (quantity == 0)
-						break;
-				}
-				if (quantity == 0)
-					break;
-			}
-		}
-	}
-	else if (quantity < 0)
-	{
-		std::vector<SmallPos> removeList;
-		for (auto kv : program.hotbar)
-		{
-			if (kv.second.itemTile == item)
-			{
-				auto element = program.hotbar.find(kv.first);
-				if (element != program.hotbar.end())
-				{
-					int subQuantity = quantity;
-					if ((int)element->second.quantity + subQuantity < 0)
-						subQuantity = -(int)element->second.quantity;
-					element->second.quantity += subQuantity;
-					if (element->second.quantity == 0)
-						removeList.emplace_back(element->first);
-					quantity -= subQuantity;
-					if (quantity == 0)
-						break;
-				}
-			}
-		}
-		for (auto k : removeList)
-		{
-			program.hotbar.erase(k);
-		}
-	}
-	return quantity;
-}
-
 void WorldSave::PasteSelection()
 {
 	for (auto kv : program.copyMap)
 	{
-		uint16_t element = world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, 1, kv.second.logicType);
-		if (element > 1)
-			if (world.ChangeInventory(element, -1) != 0)
+		if (auto element = world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, BigItem(kv.second.logicType + program.itemsEnd, 1)))
+		{
+			element.quantity *= -1;
+			auto element2 = world.ChangeInventory(SmallPos(), element);
+			if (element2.quantity != 0)
 			{
 				// Remove the just placed element if there are no more items of that sort in the inventory
-				world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, -1, kv.second.logicType);
+				world.ChangeLogic(Pos::EncodedToCoord(kv.first) + program.mouseHovering, BigItem(kv.second.logicType + program.itemsEnd, -1));
 				break;
 			}
+		}
 	}
 	program.paste = false;
 }
@@ -597,3 +309,269 @@ void WorldSave::DrawChunk(Pos pos, sf::Vector2f startPos)
 {
 	
 }
+
+BigItem WorldSave::ChangeItem(Pos pos, BigItem item)
+{
+	if (ItemTile* currentItem = world.GetItemTile(pos))
+	{
+		if (item.itemTile == 0)
+			item.itemTile = currentItem->itemTile;
+		if (item.itemTile != currentItem->itemTile)
+			return BigItem();
+		if (item.quantity > 0)
+		{
+			if (currentItem->quantity + item.quantity > 255)
+			{
+				item.quantity = 255 - currentItem->quantity;
+				currentItem->quantity = 255;
+			}
+			else
+			{
+				currentItem->quantity += item.quantity;
+			}
+		}
+		else
+		{
+			if (int(currentItem->quantity) + item.quantity < 0)
+			{
+				item.quantity = currentItem->quantity;
+				currentItem->quantity = 0;
+			}
+			else
+			{
+				currentItem->quantity += item.quantity;
+			}
+		}
+		if (currentItem->quantity == 0)
+			world.items.erase(pos);
+		world.updateItemsNext.insert(pos.CoordToEncoded());
+		CraftingClass::TryCrafting(currentItem->itemTile, pos);
+		return item;
+	}
+	else
+	{
+		if (item.quantity <= 0)
+			return BigItem();
+		ItemTile* newItem = new ItemTile();
+		newItem->itemTile = item.itemTile;
+		newItem->quantity = item.quantity;
+		world.items.insert({ pos,*newItem });
+		world.updateItemsNext.insert(pos.CoordToEncoded());
+		CraftingClass::TryCrafting(newItem->itemTile, pos);
+		return BigItem{ item.itemTile, item.quantity };
+	}
+}
+
+BigItem WorldSave::ChangeLogic(Pos pos, BigItem item)
+{
+	if(item.itemTile != 0)
+		item.itemTile -= program.itemsEnd;
+	if (LogicTile* logic = world.GetLogicTile(pos))
+	{
+		if (item.itemTile != 0 && logic->logicType != item.itemTile)
+			return BigItem();
+		else
+		{
+			if (logic->color != program.placeColor
+				&& logic->logicType == wire
+				&& item.quantity > 0)
+			{
+				logic->logicType = wirebridge;
+				logic->color2 = program.placeColor;
+				for (int i = 0; i < 4; i++)
+				{
+					Pos neighbourPosition = pos.FacingPosition((Facing)i);
+					if (LogicTile* neighbour = world.GetLogicTile(neighbourPosition))
+					{
+						if (neighbour->color == logic->color)
+						{
+							logic->facing = (Facing)i;
+							break;
+						}
+					}
+				}
+				world.updateNext.insert({ pos.CoordToEncoded(),1 });
+			}
+
+			logic->quantity += item.quantity;
+			if (logic->quantity == 1
+				&& logic->logicType == wirebridge)
+			{
+				logic->logicType = wire;
+				logic->color2 = logic->color;
+				world.updateNext.insert({ pos.CoordToEncoded(),1 });
+			}
+			world.updateItemsNext.insert({ pos.CoordToEncoded() });
+		}
+		if (logic->quantity == 0)
+		{
+			if (program.selectedLogicTile == logic)
+				program.selectedLogicTile = nullptr;
+			world.logicTiles.erase(pos.CoordToEncoded());
+			for (int i = 0; i < 4; i++)
+			{
+				world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+			}
+		}
+		item.itemTile = logic->logicType + program.itemsEnd;
+		return item;
+	}
+	else
+	{
+		if (item.quantity < 0)
+			return BigItem();
+		else
+		{
+			auto ground = world.GetGroundTile(pos);
+			if (ground->groundTile > GC::collideGround)
+			{
+				LogicTile logicPlace = LogicTile(item.itemTile);
+				logicPlace.color = program.placeColor;
+				logicPlace.color2 = program.placeColor;
+				logicPlace.facing = program.placeRotation;
+				logicPlace.quantity = item.quantity;
+				world.logicTiles.insert({ pos.CoordToEncoded(),logicPlace });
+				world.updateNext.insert({ pos.CoordToEncoded(),1 });
+				for (int i = 0; i < 4; i++)
+				{
+					world.updateNext.insert({ pos.FacingPosition(Facing(i)).CoordToEncoded(),1 });
+				}
+				world.updateItemsNext.insert({ pos.CoordToEncoded() });
+				item.itemTile = logicPlace.logicType + program.itemsEnd;
+				return item;
+			}
+			else return BigItem();
+		}
+	}
+	return BigItem();
+}
+
+BigItem WorldSave::ChangeRobot(Pos pos, BigItem item)
+{
+	if (Robot* robot = world.GetRobot(pos))
+	{
+		if (item.quantity > 0)
+			return false;
+		if (robot == program.selectedRobot)
+			program.selectedRobot = nullptr;
+		world.robots.erase(pos.CoordToEncoded());
+		return BigItem(program.itemsEnd + GC::MAXLOGIC, -1);
+	}
+	else
+	{
+		auto ground = world.GetGroundTile(pos);
+		if (ground->groundTile > GC::collideGround)
+		{
+			if (item.quantity > 0)
+			{
+				Robot newRobot;
+				newRobot.stopped = true;
+				world.robots.insert({ pos.CoordToEncoded(),newRobot });
+				return BigItem(program.itemsEnd + GC::MAXLOGIC, 1);
+			}
+		}
+	}
+	return BigItem();
+}
+
+BigItem WorldSave::ChangeInventory(SmallPos pos, BigItem item)
+{
+	if (item.quantity > 0)
+	{
+		for (auto& kv : program.hotbar)
+		{
+			if (kv.second.itemTile == item.itemTile)
+			{
+				int subQuantity = item.quantity;
+				if (kv.second.quantity + subQuantity > 255)
+					subQuantity = 255 - kv.second.quantity;
+				kv.second.quantity += subQuantity;
+				item.quantity -= subQuantity;
+			}
+			if (item.quantity <= 0)
+				break;
+		}
+		if (item.quantity > 0)
+		{
+			for (int j = 1; j >= 0; j--)
+			{
+				for (int i = 0; i < 10; i++)
+				{
+					auto kv = program.hotbar.find(SmallPos{ (uint8_t)i,(uint8_t)j });
+					if (kv == program.hotbar.end())
+					{
+						ItemTile newItem = ItemTile(item.itemTile, item.quantity);
+						int subQuantity = item.quantity;
+						if (subQuantity > 255)
+							subQuantity = 255;
+						newItem.quantity = subQuantity;
+						item.quantity -= subQuantity;
+						program.hotbar.insert({ SmallPos{(uint8_t)i,(uint8_t)j},newItem });
+					}
+					if (item.quantity == 0)
+						break;
+				}
+				if (item.quantity == 0)
+					break;
+			}
+		}
+	}
+	else if (item.quantity < 0)
+	{
+		std::vector<SmallPos> removeList;
+		for (auto kv : program.hotbar)
+		{
+			if (kv.second.itemTile == item.itemTile)
+			{
+				auto element = program.hotbar.find(kv.first);
+				if (element != program.hotbar.end())
+				{
+					int subQuantity = item.quantity;
+					if ((int)element->second.quantity + subQuantity < 0)
+						subQuantity = -(int)element->second.quantity;
+					element->second.quantity += subQuantity;
+					if (element->second.quantity == 0)
+						removeList.emplace_back(element->first);
+					item.quantity -= subQuantity;
+					if (item.quantity == 0)
+						break;
+				}
+			}
+		}
+		for (auto k : removeList)
+		{
+			program.hotbar.erase(k);
+		}
+	}
+	return item;
+}
+
+BigItem WorldSave::ChangeElement(Pos pos, BigItem item)
+{
+	if (item.itemTile == 0 && item.quantity < 0)
+	{
+		if (auto element = world.ChangeItem(pos, item))
+			return element;
+		if (auto element = world.ChangeLogic(pos, item))
+			return element;
+		if (auto element = world.ChangeRobot(pos, item))
+			return element;
+	}
+	else
+	{
+		if (item.itemTile <= program.itemsEnd)
+		{
+			return world.ChangeItem(pos, item);
+		}
+		else if (item.itemTile < program.itemsEnd + GC::MAXLOGIC)
+		{
+			return world.ChangeLogic(pos, item);
+		}
+		else if (item.itemTile == program.itemsEnd + GC::MAXLOGIC)
+		{
+			return world.ChangeRobot(pos, item);
+		}
+	}
+	return BigItem();
+}
+

@@ -35,7 +35,7 @@ public:
 	MySet<uint64_t> updateCurr;	// Processing queue for update from Queue B
 	MySet<uint64_t> updateProp;	// Queue for current updates
 	MyMap<uint64_t,int> updateNext;	// Queue for updates next ticks
-	MySet<uint64_t> updateQueueD;	// Queue for item updates next tick
+	MySet<uint64_t> updateItemsNext;	// Queue for item updates next tick
 	bool moving = false;
 	std::string name;
 	uint64_t tick;
@@ -65,9 +65,11 @@ public:
 	bool CheckMovePlatform(Pos pos, Facing toward);
 	void MovePlatform(Pos pos, Facing toward);
 	bool PushItems(std::vector<Pos>* itemsMoving, Facing toward, int pushesLeft); // bool is for whether the robot should move after a failed operation
-	uint16_t ChangeItem(Pos pos, int quantity, uint16_t item);
-	uint16_t ChangeRobot(Pos pos, int quantity);
-	uint16_t ChangeLogic(Pos pos, int quantity, uint8_t logicType);
+	BigItem ChangeItem     (Pos pos,	  BigItem item);
+	BigItem ChangeRobot    (Pos pos,      BigItem item);
+	BigItem ChangeLogic    (Pos pos,      BigItem item);
+	BigItem ChangeElement  (Pos pos,	  BigItem item);
+	BigItem ChangeInventory(SmallPos pos, BigItem item);
 	void GenerateChunk(Pos pos);
 	void DrawChunk(Pos pos, sf::Vector2f startPos);
 	void GenerateOre(Pos pos);
@@ -75,9 +77,6 @@ public:
 	void Serialize() { if(name != "") Serialize(name); }
 	void SerializeItemNames(std::string filename);
 	void SerializeMisc(std::string filename);
-	bool PlaceElement(Pos pos, uint16_t item);
-	uint16_t ChangeElement(Pos pos, int quantity, uint16_t item);
-	int ChangeInventory(uint16_t item, int quantity);
 	void Deserialize(std::string filename);
 	void DeserializeItemNames(std::string filename);
 	void DeserializeMisc(std::string filename);

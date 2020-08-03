@@ -37,7 +37,7 @@ public:
 
 struct SmallPos {
 public:
-	uint8_t x, y = 0;
+	uint8_t x, y = 255;
 	template <typename H>
 	friend H AbslHashValue(H h, const SmallPos& p) {
 		return H::combine(std::move(h), p.x, p.y);

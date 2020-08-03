@@ -586,9 +586,9 @@ void Image(const sf::Texture& texture, const sf::Vector2f& size,
 
 void Image(const sf::Sprite& sprite, const sf::Color& tintColor,
            const sf::Color& borderColor) {
-    sf::FloatRect bounds = sprite.getGlobalBounds();
+    sf::FloatRect bounds = sprite.getLocalBounds();
     sf::Vector2f scale = sprite.getScale();
-    ImGui::SetCursorScreenPos(ImVec2(sprite.getPosition().x, sprite.getPosition().y));
+    ImGui::SetCursorPos(ImVec2(sprite.getPosition().x - sprite.getOrigin().x * sprite.getScale().x, sprite.getPosition().y - sprite.getOrigin().y * sprite.getScale().y));
     Image(sprite, sf::Vector2f(bounds.width * scale.x, bounds.height * scale.y), tintColor,
           borderColor);
 }

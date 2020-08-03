@@ -243,9 +243,9 @@ void LogicTile::DoItemLogic(Pos currentPos)
 					for (uint16_t i = 1; i < pushStack.size(); i++)
 					{
 						world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
-						world.updateQueueD.insert(pushStack[i - 1].FacingPosition(this->facing).CoordToEncoded());
+						world.updateItemsNext.insert(pushStack[i - 1].FacingPosition(this->facing).CoordToEncoded());
 					}
-					world.updateQueueD.insert(currentPos.CoordToEncoded());
+					world.updateItemsNext.insert(currentPos.CoordToEncoded());
 				}
 			}
 		}
@@ -261,18 +261,18 @@ void LogicTile::DoItemLogic(Pos currentPos)
 				for (uint16_t i = 1; i < pushStack.size(); i++)
 				{
 					world.nextItemPos.insert({ pushStack[i - 1].CoordToEncoded(),this->facing });
-					world.updateQueueD.insert(pushStack[i - 1].FacingPosition(this->facing).CoordToEncoded());
+					world.updateItemsNext.insert(pushStack[i - 1].FacingPosition(this->facing).CoordToEncoded());
 				}
+				world.updateItemsNext.insert(currentPos.CoordToEncoded());
 			}
 		}
 	}break;
 	case hub:
 	{
-		if (ItemTile* item = world.GetItemTile(currentPos))
+		if (auto item = world.ChangeItem(currentPos, BigItem(0,-255)))
 		{
-			world.resourcesDelivered[item->itemTile] += item->quantity;
+			world.resourcesDelivered[item] += item.quantity;
 			program.technologyViewUpdate = true;
-			world.ChangeItem(currentPos, -255, item->itemTile);
 		}
 	}break;
 	default:
