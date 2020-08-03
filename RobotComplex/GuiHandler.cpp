@@ -93,15 +93,27 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 		if (program.worldLoaded)
 		{
 			if (ImGui::Button("Save Game"))
-				world.Serialize(names[currIndex]);
+			{
+				if (names.size() > 0)
+				{
+					world.Serialize(names[currIndex]);
+				}
+				else
+				{
+					world.Serialize();
+				}
+			}
 		}
-		if (ImGui::Button("Load Game"))
+		if (names.size() > 0)
 		{
-			world.Serialize();
-			world.clear();
-			world.Deserialize(names[currIndex]);
-			program.worldLoaded = true;
-			currentMenu = noMenu;
+			if (ImGui::Button("Load Game"))
+			{
+				world.Serialize();
+				world.clear();
+				world.Deserialize(names[currIndex]);
+				program.worldLoaded = true;
+				currentMenu = noMenu;
+			}
 		}
 		static bool openDeletePopup = false;
 		openDeletePopup |= ImGui::Button("Delete Save");
