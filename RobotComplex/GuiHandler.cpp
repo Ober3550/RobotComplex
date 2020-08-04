@@ -22,6 +22,8 @@ void GuiHandler::HandleGui(sf::RenderWindow& window)
 
 	program.anyGuiHovered = ImGui::IsAnyWindowHovered();
 	program.acceptGameInput = !ImGui::IsAnyWindowFocused();
+	program.acceptKeyBoardInput = program.acceptGameInput;
+
 	const int windowWidth = 300;
 	const int windowHeight = 300;
 	ImGui::SetNextWindowPos(ImVec2((program.windowWidth - windowWidth) * 0.5f, (program.windowHeight - windowHeight) * 0.5f), ImGuiCond_::ImGuiCond_FirstUseEver);
@@ -248,12 +250,37 @@ void GuiHandler::DrawCraftingViewer()
 	ImGui::SetNextWindowSize(ImVec2(300, 400), ImGuiCond_::ImGuiCond_FirstUseEver);
 	program.craftingViewShow = ImGui::Begin("Crafting Viewer");
 	ImGui::TextWrapped("Arrange items on the ground in the shape of the recipe and receive the results!");
-	ImGui::Text("Find:");
+	ImGui::Text("Find recipe:");
 	ImGui::SameLine();
-	static char input[20];
-	if (ImGui::InputText("", input, 20))
+	const int bufferSize = 40;
+	static char recipe[bufferSize];
+	
+	ImGui::PushID(std::hash<std::string>{}("recipes"));
+	if (ImGui::InputText("", recipe, bufferSize))
 	{
-		FindRecipes(std::string(input));
+		FindRecipes(std::string(recipe));
+	}
+	ImGui::PopID();
+	if (ImGui::Button("Clear Recipe"))
+	{
+		size_t length = std::string("").copy(recipe, bufferSize);
+		recipe[length] = '\0';
+		FindRecipes(std::string(recipe));
+	}
+	ImGui::Text("Find uses:  ");
+	ImGui::SameLine();
+	static char uses[bufferSize];
+	ImGui::PushID(std::hash<std::string>{}("uses"));
+	if (ImGui::InputText("", uses, bufferSize))
+	{
+		FindUses(std::string(uses));
+	}
+	ImGui::PopID();
+	if (ImGui::Button("Clear Uses"))
+	{
+		size_t length = std::string("").copy(uses, bufferSize);
+		uses[length] = '\0';
+		FindUses(std::string(uses));
 	}
 	ImGui::Text(resultsTitle.c_str());
 	if (program.craftingViewUnlocked)
@@ -267,7 +294,7 @@ void GuiHandler::DrawCraftingViewer()
 		resultsTitle = "Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size());
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Next") && program.craftingViewIndex < program.foundRecipeList.size() - 1)
+	if (ImGui::Button("Next") && program.foundRecipeList.size() > 0 && program.craftingViewIndex < program.foundRecipeList.size() - 1)
 	{
 		program.craftingViewIndex++;
 		program.craftingViewUpdate = true;
@@ -279,15 +306,41 @@ void GuiHandler::DrawCraftingViewer()
 	if (program.craftingViewDimensions.x != prevDimensions.x && program.craftingViewDimensions.y != prevDimensions.y)
 		program.craftingViewUpdate = true;
 	program.DrawCraftingView();
-	for (int i = 0; i < program.craftingViewSprites.size(); i++)
+	for (auto back : program.craftingViewBacks)
 	{
-		auto sprite = program.craftingViewSprites[i];
-		ImGui::Image(sprite, sprite.getColor());
-
-		auto tooltip = program.craftingViewTooltips.find(i);
+		auto tooltip = program.craftingViewTooltips.find(back.first);
+		ImGui::PushID(int(std::hash<std::string>{}('c' + std::to_string(back.first.x) + ',' + std::to_string(back.first.y))));
+		if (ImGui::ImageButton(back.second))
+		{
+			if (tooltip != program.craftingViewTooltips.end())
+			{
+				if (back.first.x < program.craftingViewSize.x / 2)
+				{
+					size_t length = std::string(tooltip->second).copy(recipe, bufferSize);
+					recipe[length] = '\0';
+					length = std::string("").copy(uses, bufferSize);
+					uses[length] = '\0';
+					FindRecipes(std::string(recipe));
+				}
+				else
+				{
+					size_t length = std::string("").copy(recipe, bufferSize);
+					recipe[length] = '\0';
+					length = std::string(tooltip->second).copy(uses, bufferSize);
+					uses[length] = '\0';
+					FindUses(std::string(uses));
+				}
+			}
+		}
+		ImGui::PopID();
 		if (tooltip != program.craftingViewTooltips.end())
 			if (ImGui::IsItemHovered())
 				ImGui::SetTooltip(tooltip->second.c_str());
+	}
+	for (int i = 0; i < program.craftingViewSprites.size(); i++)
+	{
+		auto sprite = program.craftingViewSprites[i];
+		ImGui::Image(sprite);
 	}
 	ImGui::End();
 	
@@ -307,15 +360,23 @@ void GuiHandler::DrawTechnologyViewer()
 	if (program.technologyViewDimensions.x != prevDimensions.x && program.technologyViewDimensions.y != prevDimensions.y)
 		program.technologyViewUpdate = true;
 	program.DrawTechnologyView();
-	for (int i=0;i<program.technologyViewSprites.size();i++)
+	for (auto back : program.technologyViewBacks)
 	{
-		auto sprite = program.technologyViewSprites[i];
-		ImGui::Image(sprite, sprite.getColor());
-
-		auto tooltip = program.technologyViewTooltips.find(i);
+		auto tooltip = program.technologyViewTooltips.find(back.first);
+		ImGui::PushID(int(std::hash<std::string>{}('t' + std::to_string(back.first.x) + ',' + std::to_string(back.first.y))));
+		if (ImGui::ImageButton(back.second))
+		{
+			
+		}
+		ImGui::PopID();
 		if (tooltip != program.technologyViewTooltips.end())
 			if (ImGui::IsItemHovered())
 				ImGui::SetTooltip(tooltip->second.c_str());
+	}
+	for (int i=0;i<program.technologyViewSprites.size();i++)
+	{
+		auto sprite = program.technologyViewSprites[i];
+		ImGui::Image(sprite);
 	}
 	ImGui::End();
 	
@@ -326,20 +387,31 @@ void GuiHandler::DrawHotbar()
 	ImGui::SetNextWindowPos(ImVec2(program.halfWindowWidth - 300, program.windowHeight - 180), ImGuiCond_::ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(600, 160), ImGuiCond_::ImGuiCond_FirstUseEver);
 	program.hotbarShow = ImGui::Begin("Hotbar");
+	if (ImGui::IsWindowFocused())
+		program.acceptKeyBoardInput = true;
 	ImVec2 prevDimensions = program.hotbarDimensions;
 	program.hotbarDimensions = ImGui::GetWindowSize();
 	if(program.hotbarDimensions.x != prevDimensions.x && program.hotbarDimensions.y != prevDimensions.y)
 		program.hotbarUpdate = true;
 	program.DrawHotbar();
-	for (int i = 0; i < program.hotbarSprites.size(); i++)
+	for (auto back : program.hotbarBacks)
 	{
-		auto sprite = program.hotbarSprites[i];
-		ImGui::Image(sprite, sprite.getColor());
-
-		auto tooltip = program.hotbarTooltips.find(i);
+		auto tooltip = program.hotbarTooltips.find(back.first);
+		ImGui::PushID(int(std::hash<std::string>{}('h'+std::to_string(back.first.x)+','+std::to_string(back.first.y))));
+		if (ImGui::ImageButton(back.second))
+		{
+			world.MoveInventory(program.hotbarIndex, back.first);
+			program.hotbarIndex = back.first;
+		}
+		ImGui::PopID();
 		if (tooltip != program.hotbarTooltips.end())
 			if (ImGui::IsItemHovered())
 				ImGui::SetTooltip(tooltip->second.c_str());
+	}
+	for (int i = 0; i < program.hotbarSprites.size(); i++)
+	{
+		auto sprite = program.hotbarSprites[i];
+		ImGui::Image(sprite);
 	}
 	ImGui::End();
 }

@@ -31,6 +31,7 @@ public:
 	std::string actionBindWaiting = "";
 	
 	void FindRecipes(std::string name);
+	void FindUses(std::string name);
 	void LoadDefaultKeyMapping();
 	void CreateActions();
 	void SaveProgramSettings();

@@ -46,7 +46,7 @@ void UpdateWorld()
 		{
 			clock_t beginUpdate = clock();
 			program.worldMutex.lock();
-			if(program.acceptGameInput)
+			if(program.acceptGameInput || program.acceptKeyBoardInput)
 				handler.PerformActions();
 			if (!program.gamePaused)
 			{

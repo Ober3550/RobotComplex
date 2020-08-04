@@ -575,3 +575,17 @@ BigItem WorldSave::ChangeElement(Pos pos, BigItem item)
 	return BigItem();
 }
 
+void WorldSave::MoveInventory(SmallPos posA, SmallPos posB)
+{
+	auto destination = program.hotbar.find(posB);
+	if (destination == program.hotbar.end())
+	{
+		auto beginning = program.hotbar.find(posA);
+		if (beginning != program.hotbar.end())
+		{
+			program.hotbar.insert({ posB, beginning->second });
+			program.hotbar.erase(posA);
+		}
+	}
+}
+

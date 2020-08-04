@@ -798,7 +798,7 @@ void ProgramData::RecalculateMousePos()
 	program.mouseHovering = ((program.mousePos * program.zoom) + program.cameraPos) / float(GC::tileSize);
 }
 
-void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<uint16_t,std::string>* tooltips, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid)
+void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s, SmallPos highlight, MyMap<SmallPos,std::string>* tooltips, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid, MyMap<SmallPos, sf::Sprite>* backs)
 {
 	float extraScale = 1.5f;
 	for (uint8_t i = 0; i < size.x; i++)
@@ -819,7 +819,7 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 				gridBack.setOrigin(GC::halfTileSize, GC::halfTileSize);
 				gridBack.setScale(sf::Vector2f(s * extraScale, s * extraScale));
 				gridBack.setPosition(sf::Vector2f(x, y));
-				sprites->emplace_back(gridBack);
+				backs->insert({ SmallPos{i,j},gridBack });
 			}
 		}
 	}
@@ -834,7 +834,7 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 		if (item.itemTile <= program.itemsEnd)
 		{
 			item.DrawItem(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s * extraScale, 0, sf::Color(255, 255, 255, 255));
-			tooltips->insert({ sprites->size() - 1, item.GetTooltip() });
+			tooltips->insert({ kv.first, item.GetTooltip() });
 		}
 		else if (item.itemTile < program.itemsEnd + 255)
 		{
@@ -843,14 +843,14 @@ void ProgramData::DrawItemGrid(int screenX, int screenY, SmallPos size, float s,
 			logic.signal = 1;
 			logic.facing = rotation;
 			logic.DrawLogic(Pos{ MAXINT32,MAXINT32 }, sprites, &world.logicTiles, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s, 0);
-			tooltips->insert({ sprites->size() - 1, item.GetTooltip() });
+			tooltips->insert({ kv.first, item.GetTooltip() });
 		}
 		else if (item.itemTile == program.itemsEnd + 255)
 		{
 			Robot robot = Robot();
 			robot.facing = rotation;
 			robot.DrawTile(sprites, x - GC::halfTileSize + ImguiOffset.x, y - GC::halfTileSize + ImguiOffset.y, s, 0, sf::Color(250, 191, 38, 255));
-			tooltips->insert({ sprites->size() - 1, item.GetTooltip() });
+			tooltips->insert({ kv.first, item.GetTooltip() });
 		}
 		if (item.quantity > 1)
 			CreateSmallText(sprites, std::to_string(item.quantity), x - GC::halfTileSize + GC::halfTileSize * s * extraScale, y - GC::halfTileSize + GC::halfTileSize * s * extraScale, s * extraScale, Align::right);
@@ -904,8 +904,7 @@ void ProgramData::DrawHotbar()
 			float viewScaleB = (program.hotbarDimensions.y - 2 * border - windowEndHeight) / (GC::hotbarTotalSize * float(2));
 			float viewScale = std::min(viewScaleA, viewScaleB);
 
-			DrawItemGrid(border, windowEndHeight + border, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarTooltips, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true);
-			program.hoveringHotbar = DrawGridTooltips(&program.hotbarBacks, &program.hotbar);
+			DrawItemGrid(border, windowEndHeight + border, SmallPos{ 10,2 }, viewScale, program.hotbarIndex, &program.hotbarTooltips, &program.hotbar, &program.hotbarSprites, program.placeRotation, program.placeColor, true, &program.hotbarBacks);
 
 			if (BigItem* item = program.hotbar.GetValue(program.hotbarIndex))
 			{
@@ -942,8 +941,7 @@ void ProgramData::DrawCraftingView()
 				float viewScaleB = (program.craftingViewDimensions.y - 2 * border - windowEndHeight - lastElement.y) / (GC::hotbarTotalSize * float(program.craftingViewSize.y));
 				float viewScale = std::min(viewScaleA, viewScaleB);
 
-				DrawItemGrid(border, lastElement.y + border, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewTooltips, &program.craftingView, &program.craftingViewSprites, south, red, false);
-				DrawGridTooltips(&program.craftingViewBacks, &program.craftingView);
+				DrawItemGrid(border, lastElement.y + border, program.craftingViewSize, viewScale, SmallPos{ 255,255 }, &program.craftingViewTooltips, &program.craftingView, &program.craftingViewSprites, south, red, false, &program.craftingViewBacks);
 			}
 		}
 		program.craftingViewUpdate = false;
@@ -984,8 +982,7 @@ void ProgramData::DrawTechnologyView()
 			float viewScaleB = (program.technologyViewDimensions.y - 2 * border - windowEndHeight - lastElement.y) / (GC::hotbarTotalSize * float(technologyViewSize.y));
 			float viewScale = std::min(viewScaleA, viewScaleB);
 			
-			DrawItemGrid(border, lastElement.y + border, program.technologyViewSize, viewScale, SmallPos{ 255,255 }, &program.technologyViewTooltips, &program.technologyView, &program.technologyViewSprites, south, red, false);
-			DrawGridTooltips(&program.technologyViewBacks, &program.technologyView);
+			DrawItemGrid(border, lastElement.y + border, program.technologyViewSize, viewScale, SmallPos{ 255,255 }, &program.technologyViewTooltips, &program.technologyView, &program.technologyViewSprites, south, red, false, &program.technologyViewBacks);
 		}
 		program.technologyViewUpdate = false;
 	}

@@ -70,6 +70,7 @@ public:
 	BigItem ChangeLogic    (Pos pos,      BigItem item);
 	BigItem ChangeElement  (Pos pos,	  BigItem item);
 	BigItem ChangeInventory(SmallPos pos, BigItem item);
+	void MoveInventory(SmallPos posA, SmallPos posB);
 	void GenerateChunk(Pos pos);
 	void DrawChunk(Pos pos, sf::Vector2f startPos);
 	void GenerateOre(Pos pos);

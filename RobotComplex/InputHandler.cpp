@@ -284,6 +284,8 @@ void GuiHandler::CreateActions()
 
 	// Place Element
 	userActions.insert({ "Place Element", [&] {
+		if (program.acceptGameInput)
+		{
 		auto placeItem = program.hotbar.find(program.hotbarIndex);
 		if (placeItem != program.hotbar.end())
 		{
@@ -292,6 +294,7 @@ void GuiHandler::CreateActions()
 				element.quantity *= -1;
 				world.ChangeInventory(SmallPos(), element);
 			}
+		}
 		}
 	} });
 
@@ -530,6 +533,21 @@ void GuiHandler::HandleInput(sf::Event input, sf::RenderWindow& window)
 			heldTick[*action] = 0;
 		}
 	}
+	else if (input.type == sf::Event::MouseWheelScrolled)
+	{
+		if (!program.gamePaused)
+		{
+			if (input.mouseWheelScroll.delta != 0)
+			{
+				program.zoom -= input.mouseWheelScroll.delta * GC::ZOOM_VELOCITY;
+				if (program.zoom < GC::MIN_ZOOM)
+					program.zoom = GC::MIN_ZOOM;
+				if (program.zoom > GC::MAX_ZOOM)
+					program.zoom = GC::MAX_ZOOM;
+				program.RecalculateMousePos();
+			}
+		}
+	}
 	else if (input.type == sf::Event::MouseMoved)
 	{
 		program.prevMouseHovering = program.mouseHovering;
@@ -566,21 +584,6 @@ void GuiHandler::HandleInput(sf::Event input, sf::RenderWindow& window)
 			if (program.startedSelection)
 			{
 				FinishedSelection(program.startSelection, program.mouseHovering);
-			}
-		}
-	}
-	else if (input.type == sf::Event::MouseWheelScrolled)
-	{
-		if (!program.gamePaused)
-		{
-			if (input.mouseWheelScroll.delta != 0)
-			{
-				program.zoom -= input.mouseWheelScroll.delta * GC::ZOOM_VELOCITY;
-				if (program.zoom < GC::MIN_ZOOM)
-					program.zoom = GC::MIN_ZOOM;
-				if (program.zoom > GC::MAX_ZOOM)
-					program.zoom = GC::MAX_ZOOM;
-				program.RecalculateMousePos();
 			}
 		}
 	}
@@ -670,6 +673,51 @@ void GuiHandler::FindRecipes(std::string name)
 	if (program.foundRecipeList.size() > 0)
 	{
 		resultsTitle = "Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size());
+	}
+	else
+	{
+		resultsTitle = "Results: 0/0";
+	}
+	program.craftingViewUpdate = true;
+}
+
+
+void GuiHandler::FindUses(std::string name)
+{
+	program.foundRecipeList.clear();
+	name = lowercase(swapChar(name, ' ', '_'));
+	if (name != "")
+	{
+		std::vector<uint16_t> foundNames = findSubstrings(&program.itemPrototypes, name);
+		for (uint16_t element : foundNames)
+		{
+			if (auto recipeList = program.itemRecipeList.GetValue(element))
+			{
+				for (uint16_t recipe : *recipeList)
+				{
+					program.foundRecipeList.emplace_back(recipe);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (auto recipes : program.itemResultList)
+		{
+			for (uint16_t recipe : recipes.second)
+			{
+				program.foundRecipeList.emplace_back(recipe);
+			}
+		}
+	}
+	program.craftingViewIndex = 0;
+	if (program.foundRecipeList.size() > 0)
+	{
+		resultsTitle = "Results: " + std::to_string(program.craftingViewIndex + 1) + "/" + std::to_string(program.foundRecipeList.size());
+	}
+	else
+	{
+		resultsTitle = "Results: 0/0";
 	}
 	program.craftingViewUpdate = true;
 }

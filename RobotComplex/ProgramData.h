@@ -52,8 +52,8 @@ public:
 
 	// Gui Elements
 	SpriteVector hotbarSprites;
-	MyMap<uint16_t, std::string>		hotbarTooltips;
-	MyMap<SmallPos, sf::RectangleShape> hotbarBacks;
+	MyMap<SmallPos, std::string>		hotbarTooltips;
+	MyMap<SmallPos, sf::Sprite>			hotbarBacks;
 	MyMap<SmallPos, BigItem> hotbar;
 	ItemTile* selectedHotbar;
 	SmallPos  hoveringHotbar;
@@ -72,8 +72,8 @@ public:
 	bool								craftingViewUnlocked;
 	uint16_t							craftingViewIndex;
 	SpriteVector						craftingViewSprites;
-	MyMap<uint16_t, std::string>		craftingViewTooltips;
-	MyMap<SmallPos,sf::RectangleShape>	craftingViewBacks;
+	MyMap<SmallPos, std::string>		craftingViewTooltips;
+	MyMap<SmallPos, sf::Sprite>			craftingViewBacks;
 	MyMap<SmallPos, BigItem>			craftingView;
 	SmallPos							craftingViewSize;
 	ImVec2								craftingViewDimensions;
@@ -83,8 +83,8 @@ public:
 	bool								technologyViewShow;
 	bool								technologyViewUpdate = true;
 	SpriteVector						technologyViewSprites;
-	MyMap<uint16_t, std::string>		technologyViewTooltips;
-	MyMap<SmallPos, sf::RectangleShape>	technologyViewBacks;
+	MyMap<SmallPos, std::string>		technologyViewTooltips;
+	MyMap<SmallPos, sf::Sprite>			technologyViewBacks;
 	MyMap<SmallPos, BigItem>			technologyView;
 	SmallPos							technologyViewSize;
 	ImVec2								technologyViewDimensions;
@@ -139,6 +139,7 @@ public:
 	bool gamePaused = true;
 	bool worldLoaded = false;
 	bool acceptGameInput = true;
+	bool acceptKeyBoardInput = true;
 	bool anyGuiHovered = false;
 	bool forceRefresh = false;
 	std::mutex worldMutex;
@@ -187,6 +188,6 @@ public:
 	void UpdateMap();
 	void RecalculateMousePos();
 	SmallPos DrawGridTooltips(MyMap<SmallPos, sf::RectangleShape>* slots, MyMap<SmallPos, BigItem>* items);
-	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<uint16_t, std::string>* tooltips, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid);
+	void DrawItemGrid(int screenX, int screenY, SmallPos size, float scale, SmallPos highlight, MyMap<SmallPos, std::string>* tooltips, MyMap<SmallPos, BigItem>* items, SpriteVector* sprites, Facing rotation, uint8_t color, bool drawMid, MyMap<SmallPos, sf::Sprite>* backs);
 };
 extern ProgramData program;
