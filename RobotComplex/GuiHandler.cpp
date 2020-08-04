@@ -261,11 +261,10 @@ void GuiHandler::DrawCraftingViewer()
 		FindRecipes(std::string(recipe));
 	}
 	ImGui::PopID();
-	if (ImGui::Button("Clear Recipe"))
+	if (ImGui::IsItemHovered() && ImGui::GetIO().MouseClicked[1])
 	{
-		size_t length = std::string("").copy(recipe, bufferSize);
-		recipe[length] = '\0';
-		FindRecipes(std::string(recipe));
+		recipe[0] = '\0';
+		FindUses(std::string(recipe));
 	}
 	ImGui::Text("Find uses:  ");
 	ImGui::SameLine();
@@ -276,10 +275,9 @@ void GuiHandler::DrawCraftingViewer()
 		FindUses(std::string(uses));
 	}
 	ImGui::PopID();
-	if (ImGui::Button("Clear Uses"))
+	if (ImGui::IsItemHovered() && ImGui::GetIO().MouseClicked[1])
 	{
-		size_t length = std::string("").copy(uses, bufferSize);
-		uses[length] = '\0';
+		uses[0] = '\0';
 		FindUses(std::string(uses));
 	}
 	ImGui::Text(resultsTitle.c_str());
@@ -316,18 +314,34 @@ void GuiHandler::DrawCraftingViewer()
 			{
 				if (back.first.x < program.craftingViewSize.x / 2)
 				{
-					size_t length = std::string(tooltip->second).copy(recipe, bufferSize);
-					recipe[length] = '\0';
-					length = std::string("").copy(uses, bufferSize);
+					size_t length = std::min(int(tooltip->second.length()), bufferSize);
+					for (int i = 0; i < length; i++)
+					{
+						if (tooltip->second[i] == ':')
+						{
+							length = i;
+							break;
+						}
+						recipe[i] = tooltip->second[i];
+					}
 					uses[length] = '\0';
+					uses[0] = '\0';
 					FindRecipes(std::string(recipe));
 				}
 				else
 				{
-					size_t length = std::string("").copy(recipe, bufferSize);
-					recipe[length] = '\0';
-					length = std::string(tooltip->second).copy(uses, bufferSize);
+					size_t length = std::min(int(tooltip->second.length()), bufferSize);
+					for (int i = 0; i < length; i++)
+					{
+						if (tooltip->second[i] == ':')
+						{
+							length = i;
+							break;
+						}
+						uses[i] = tooltip->second[i];
+					}
 					uses[length] = '\0';
+					recipe[0] = '\0';
 					FindUses(std::string(uses));
 				}
 			}
