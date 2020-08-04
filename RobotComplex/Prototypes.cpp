@@ -42,8 +42,8 @@ RecipeCompProto::operator RecipeComponent() const {
 	else
 	{
 		OutputDebugStringA(std::string("Error: " + this->itemName + " is not a valid item name").c_str());
-		return recipe;
 	}
+	return recipe;
 }
 
 BigItemProto::operator BigItem() const {

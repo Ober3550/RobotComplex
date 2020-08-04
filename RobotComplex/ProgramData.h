@@ -122,6 +122,7 @@ public:
 	int rotateBot = 0;
 	bool moveBot = false;
 	Facing placeRotation;
+	Facing tempFacing;
 	uint8_t placeColor = 1;
 	bool showSignalStrength = true;
 	bool showDebugInfo = false;

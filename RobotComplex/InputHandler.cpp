@@ -171,6 +171,10 @@ void GuiHandler::CreateActions()
 		else
 		{
 			program.placeRotation = Pos::RelativeFacing(program.placeRotation,1);
+			if (LogicTile* logic = world.GetLogicTile(program.mouseHovering))
+			{
+				logic->facing = program.placeRotation;
+			}
 		}
 	} });
 
@@ -289,6 +293,7 @@ void GuiHandler::CreateActions()
 		auto placeItem = program.hotbar.find(program.hotbarIndex);
 		if (placeItem != program.hotbar.end())
 		{
+			program.tempFacing = program.placeRotation;
 			if (auto element = world.ChangeElement(program.mouseHovering, BigItem(placeItem->second.itemTile, 1)))
 			{
 				element.quantity *= -1;

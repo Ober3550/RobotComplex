@@ -271,7 +271,7 @@ void LogicTile::DoItemLogic(Pos currentPos)
 	{
 		if (auto item = world.ChangeItem(currentPos, BigItem(0,-255)))
 		{
-			world.resourcesDelivered[item] += item.quantity;
+			world.resourcesDelivered[item.itemTile] += item.quantity;
 			program.technologyViewUpdate = true;
 		}
 	}break;

@@ -428,7 +428,8 @@ BigItem WorldSave::ChangeLogic(Pos pos, BigItem item)
 				LogicTile logicPlace = LogicTile(item.itemTile);
 				logicPlace.color = program.placeColor;
 				logicPlace.color2 = program.placeColor;
-				logicPlace.facing = program.placeRotation;
+				logicPlace.facing = program.tempFacing;
+				program.tempFacing = north;
 				logicPlace.quantity = item.quantity;
 				world.logicTiles.insert({ pos.CoordToEncoded(),logicPlace });
 				world.updateNext.insert({ pos.CoordToEncoded(),1 });
@@ -466,6 +467,8 @@ BigItem WorldSave::ChangeRobot(Pos pos, BigItem item)
 			{
 				Robot newRobot;
 				newRobot.stopped = true;
+				newRobot.facing = program.tempFacing;
+				program.tempFacing = north;
 				world.robots.insert({ pos.CoordToEncoded(),newRobot });
 				return BigItem(program.itemsEnd + GC::MAXLOGIC, 1);
 			}
