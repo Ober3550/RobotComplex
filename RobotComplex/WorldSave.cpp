@@ -344,6 +344,11 @@ BigItem WorldSave::ChangeItem(Pos pos, BigItem item)
 		}
 		if (currentItem->quantity == 0)
 			world.items.erase(pos);
+		if (LogicTile* logic = world.GetLogicTile(pos))
+		{
+			if(!world.updateItemsNext.contains(pos.CoordToEncoded()))
+				logic->DoItemLogic(pos);
+		}
 		world.updateItemsNext.insert(pos.CoordToEncoded());
 		CraftingClass::TryCrafting(currentItem->itemTile, pos);
 		return item;
@@ -356,6 +361,11 @@ BigItem WorldSave::ChangeItem(Pos pos, BigItem item)
 		newItem->itemTile = item.itemTile;
 		newItem->quantity = item.quantity;
 		world.items.insert({ pos,*newItem });
+		if (LogicTile* logic = world.GetLogicTile(pos))
+		{
+			if (!world.updateItemsNext.contains(pos.CoordToEncoded()))
+				logic->DoItemLogic(pos);
+		}
 		world.updateItemsNext.insert(pos.CoordToEncoded());
 		CraftingClass::TryCrafting(newItem->itemTile, pos);
 		return BigItem{ item.itemTile, item.quantity };

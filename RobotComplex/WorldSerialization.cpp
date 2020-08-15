@@ -96,10 +96,6 @@ void WorldSave::Serialize(std::string filename)
 void WorldSave::Deserialize(std::string filename)
 {
 	this->clear();
-	for (auto tech : program.technologyPrototypes)
-	{
-		tech.Lock();
-	}
 	world.name = filename;
 	worldChunks.Deserialize("saves/" + filename + "/chunks.bin");
 	DeserializeItemNames("saves/" + filename + "/itemNames.txt");
@@ -160,6 +156,9 @@ void WorldSave::clear()
 	updateNext.clear();
 	updateItemsNext.clear();
 	program.hotbar.clear();
+	unlockedTechnologies.clear();
+	for (auto tech : program.technologyPrototypes)
+		tech.Lock();
 	name = "";
 	tick = 0;
 	seed = 0;

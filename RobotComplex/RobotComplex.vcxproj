@@ -191,6 +191,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Agui\Agui\include;$(SolutionDir)SFML-2.5.1\include;$(SolutionDir);$(SolutionDir)FastNoise;$(SolutionDir)Abseil\abseil\abseil-cpp-master;$(SolutionName)/SFML-2.5.1/include;$(SolutionDir)imgui-master;$(SolutionDir)imgui-sfml-master;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING;_CRT_SECURE_NO_WARNINGS;NOMINMAX;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

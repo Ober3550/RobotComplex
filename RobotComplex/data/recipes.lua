@@ -42,10 +42,9 @@ recipes =
         animation = "",
     },
     {
-        components = {{"iron_ingot",-1},{"iron_rod",1},
-                      {"iron_ingot",-1},{"iron_ingot",-1},
-                      {"iron_ingot",-1},{"iron_rod",1}},
-        width = 2,
+        components = {{"iron_rod",1},{"iron_ingot",-1},{"iron_rod",1},
+                      {"iron_ingot",-1},{"iron_ingot",-1},{"iron_ingot",-1}},
+        width = 3,
         craft_time = 5,
         animation = "",
     },
@@ -136,6 +135,13 @@ recipes =
     belt = {
 		components = {{ "motor",-1 },		 { "belt",1 },
 					  { "iron_plate",-1 }, { "iron_gear",-1 }},
+		width = 2, 
+		craft_time = 5, 
+		animation = "",
+	},
+    pressureplate = {
+		components = {{ "iron_plate",-1 },	{ "pressureplate",1 },
+					  { "copper_wire",-1 }, { "copper_wire",-1 }},
 		width = 2, 
 		craft_time = 5, 
 		animation = "",

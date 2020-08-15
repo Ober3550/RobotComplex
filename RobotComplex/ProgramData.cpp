@@ -687,8 +687,8 @@ void ProgramData::CheckItemsMoved()
 	}
 	for (uint64_t wasMoving : world.itemPrevMoved)
 	{
-		if(ItemTile* item = world.GetItemTile(wasMoving))
-		CraftingClass::TryCrafting(item->itemTile, Pos::EncodedToCoord(wasMoving));
+		if (ItemTile* item = world.GetItemTile(wasMoving))
+			CraftingClass::TryCrafting(item->itemTile, Pos::EncodedToCoord(wasMoving));
 	}
 }
 

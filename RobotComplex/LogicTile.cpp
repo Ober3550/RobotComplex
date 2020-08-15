@@ -24,7 +24,12 @@ void LogicTile::SignalEval(std::array<uint8_t, 4> neighbourSigs)
 		case toggle:
 		{
 			if (neighbourSigs[2] && this->signal2 == 0)
-				this->signal = neighbourSigs[2];
+			{
+				if (this->signal)
+					this->signal = 0;
+				else
+					this->signal = neighbourSigs[2];
+			}
 			this->signal2 = neighbourSigs[2];
 			if (neighbourSigs[1] || neighbourSigs[3])
 				this->signal = 0;
@@ -102,6 +107,12 @@ uint8_t LogicTile::GetSignal(LogicTile querier)
 		if (this->color2 == querier.color)
 			return this->signal2;
 	}
+	else if (this->logicType & UNI_DIR)
+	{
+		if (this->signal && !(querier.logicType & UNI_DIR))
+			return this->signal + 1;
+		else return this->signal;
+	}
 	else
 		return this->signal;
 }
@@ -154,15 +165,9 @@ void LogicTile::DoWireLogic(Pos currentPosition)
 			neighbours[i] = neighbour->second;
 			if (this->GetConnected(currentPosition, neighbourPosition, neighbours[i]))
 			{
-				if (neighbours[i].logicType & UNI_DIR)
-					neighbourSigs[i] = neighbours[i].GetSignal(*this) + 1;
-				else
-				{
-					neighbourSigs[i] = neighbours[i].GetSignal(*this);
-					if (neighbourSigs[i] == 0)
-						zeroNeighbour = true;
-				}
-					
+				neighbourSigs[i] = neighbours[i].GetSignal(*this);
+				if (neighbourSigs[i] == 0)
+					zeroNeighbour = true;					
 			}
 		}
 	}
